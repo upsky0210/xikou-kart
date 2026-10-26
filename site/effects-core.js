@@ -1,5 +1,5 @@
-import { DRIVE } from './drive-config.js?build=20261026-lab1';
-import { BOOST_PADS } from './effects-config.js?build=20261026-lab1';
+import { DRIVE } from './drive-config.js?build=20261026-courtyard6';
+import { BOOST_PADS } from './effects-config.js?build=20261026-courtyard6';
 export function effectState(){return{drifting:false,driftCharge:0,driftSide:0,boostRemaining:0,boostSource:'',boostCount:0,driftBoosts:0,padBoosts:0,padCooldown:0,padInside:[]};}
 export function triggerBoost(s,source,cfg=DRIVE){
   s.boostRemaining=Math.max(s.boostRemaining,cfg.boostDuration);s.boostSource=source;s.boostCount++;

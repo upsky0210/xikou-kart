@@ -1,6 +1,7 @@
-const KART_CAMPUS=new URLSearchParams(location.search).get('drive')==='1'&&new URLSearchParams(location.search).get('track')==='campus';
+const KART_CAMPUS=new URLSearchParams(location.search).get('drive')==='1'&&['campus','courtyard'].includes(new URLSearchParams(location.search).get('track'));
+const KART_COURTYARD=new URLSearchParams(location.search).get('drive')==='1'&&new URLSearchParams(location.search).get('track')==='courtyard';
 import * as THREE from 'three';
-import { Batch, mat, SPOTS } from './blocks.js?build=20261026-lab1';
+import { Batch, mat, SPOTS } from './blocks.js?build=20261026-courtyard6';
 
 /* =========================================================
  * 操場一帶（依 2026-10-12 使用者照片）
@@ -104,11 +105,13 @@ export function buildField(group, cx, cz, A, B) {
   })(), transparent: true, side: THREE.DoubleSide, depthWrite: false }));
   for (const s of [-1, 1]) {
     const x = cx + s * (Ls + 1.4), half = Ri - 1.0, h = 3.2;
-    for (let z = -half; z <= half + 0.01; z += half / 4) b.box(steel, 0.09, h, 0.09, x, h / 2, cz + z);
-    b.box(steel, 0.07, 0.07, half * 2, x, h, cz);
-    const net = new THREE.Mesh(new THREE.PlaneGeometry(half * 2, h), netMat);
-    net.rotation.y = Math.PI / 2; net.position.set(x, h / 2, cz);
-    group.add(net);
+    // A visible passage in the kart copy connects the south ramp to the field.
+    // Preserve the remaining fence, its matching collision posts and the other end.
+    const gap=KART_COURTYARD&&s<0?[(1440-700)/18,(1590-700)/18]:null;
+    for (let z = -half; z <= half + 0.01; z += half / 4)if(!gap||cz+z<gap[0]||cz+z>gap[1])b.box(steel,0.09,h,0.09,x,h/2,cz+z);
+    const spans=gap?[[cz-half,gap[0]],[gap[1],cz+half]]:[[cz-half,cz+half]];
+    if(gap)for(const z of gap)b.box(steel,.09,h,.09,x,h/2,z);
+    for(const[a,z]of spans){if(z<=a)continue;b.box(steel,.07,.07,z-a,x,h,(a+z)/2);const net=new THREE.Mesh(new THREE.PlaneGeometry(z-a,h),netMat);net.rotation.y=Math.PI/2;net.position.set(x,h/2,(a+z)/2);group.add(net);}
   }
   // 西端草地上的小足球門
   {
@@ -716,7 +719,7 @@ export function buildFrontYard(group, { gx, gz1, gz2, hall, guard, base, fieldZ,
   b.plain(mosaicKidsMat(), 0.02, 2.2, wz2 - wz1 - 0.2, gx + 0.42, 1.15, (wz1 + wz2) / 2);
   b.box(mat('wool', '#4a5a6a'), 0.5, 0.15, wz2 - wz1, gx + 0.22, 2.45, (wz1 + wz2) / 2);
   // 機車停車棚：綠色屋頂、木頭天花板、紅白藍條紋柱子、不鏽鋼信箱櫃
-  const sx1 = gx + (KART_CAMPUS?.6:2.0), sx2 = sx1 + 4.2, sz1 = wz1 + 2.0, sz2 = wz2 - 1.0, H = 2.7;
+  const sx1 = gx + (KART_COURTYARD ? .3 : KART_CAMPUS ? .6 : 2.0), sx2 = sx1 + 4.2, sz1 = wz1 + 2.0, sz2 = wz2 - 1.0, H = 2.7;
   b.box(mat('wool', '#3f6b52'), sx2 - sx1 + 0.8, 0.35, sz2 - sz1 + 0.8, (sx1 + sx2) / 2, H + 0.18, (sz1 + sz2) / 2);
   b.box(mat('wool', '#2f3437'), sx2 - sx1 + 0.85, 0.12, sz2 - sz1 + 0.85, (sx1 + sx2) / 2, H + 0.42, (sz1 + sz2) / 2);
   b.box(mat('planks', '#b5773f'), sx2 - sx1 + 0.6, 0.04, sz2 - sz1 + 0.6, (sx1 + sx2) / 2, H - 0.02, (sz1 + sz2) / 2);
@@ -737,11 +740,12 @@ export function buildFrontYard(group, { gx, gz1, gz2, hall, guard, base, fieldZ,
   }
   // 走到底：拱門通往操場
   const az = fieldZ - 2.4, ax1 = gx + 0.3, ax2 = gx + 10.2, halfArch=KART_CAMPUS?1.9:1.3;
-  b.box(mat('wool', '#d9cfbd'), (ax2 - ax1) / 2 - halfArch, 2.6, 0.4, ax1 + ((ax2 - ax1) / 2 - halfArch) / 2, 1.3, az);
-  b.box(mat('wool', '#d9cfbd'), (ax2 - ax1) / 2 - halfArch, 2.6, 0.4, ax2 - ((ax2 - ax1) / 2 - halfArch) / 2, 1.3, az);
+  const archLift=KART_COURTYARD ? .4 : 0;
+  b.box(mat('wool', '#d9cfbd'), (ax2 - ax1) / 2 - halfArch, 2.6+archLift, 0.4, ax1 + ((ax2 - ax1) / 2 - halfArch) / 2, (2.6+archLift)/2, az);
+  b.box(mat('wool', '#d9cfbd'), (ax2 - ax1) / 2 - halfArch, 2.6+archLift, 0.4, ax2 - ((ax2 - ax1) / 2 - halfArch) / 2, (2.6+archLift)/2, az);
   const ac = (ax1 + ax2) / 2;
-  for (let i = 0; i <= 10; i++) { const a = Math.PI * i / 10; b.box(mat('wool', '#d9cfbd'), 0.3, 0.3, 0.4, ac - Math.cos(a) * halfArch, 2.1 + Math.sin(a) * 0.6, az); }
-  b.box(mat('wool', '#d9cfbd'), halfArch*2, 0.3, 0.4, ac, 2.75, az);
+  for (let i = 0; i <= 10; i++) { const a = Math.PI * i / 10; b.box(mat('wool', '#d9cfbd'), 0.3, 0.3, 0.4, ac - Math.cos(a) * halfArch, 2.1 + archLift + Math.sin(a) * 0.6, az); }
+  b.box(mat('wool', '#d9cfbd'), halfArch*2, 0.3, 0.4, ac, 2.75+archLift, az);
   b.build(group);
   return raised;
 }

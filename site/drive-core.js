@@ -1,5 +1,5 @@
-import { DRIVE } from './drive-config.js?build=20261026-lab1';
-import { effectState, updateEffects, cancelDrift } from './effects-core.js?build=20261026-lab1';
+import { DRIVE } from './drive-config.js?build=20261026-courtyard6';
+import { effectState, updateEffects, cancelDrift } from './effects-core.js?build=20261026-courtyard6';
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const toward=(v,target,step)=>v<target?Math.min(target,v+step):Math.max(target,v-step);
@@ -42,7 +42,7 @@ export function contacts(state,grid,cfg=DRIVE){
   const out=[];
   for(const sign of[-1,1]){
     const x=state.x+Math.sin(state.yaw)*cfg.collisionOffset*sign,z=state.z+Math.cos(state.yaw)*cfg.collisionOffset*sign;
-    for(const obstacle of grid.nearby(x,z,cfg.collisionRadius+.2)){
+    for(const obstacle of grid.nearby(x,z,cfg.collisionRadius+.2,state)){
       const c=circleContact(x,z,cfg.collisionRadius,obstacle);if(c)out.push({...c,obstacle});
     }
   }
@@ -107,7 +107,7 @@ export class FixedSimulation {
     const planned=Math.min(this.cfg.maxSteps,Math.floor((this.accumulator+1e-10)/this.cfg.fixedStep));
     while(this.accumulator>=this.cfg.fixedStep&&steps<this.cfg.maxSteps){
       const from=onStep?{x:this.state.x,z:this.state.z}:null;
-      step(this.state,typeof input==='function'?input(this.state):input,this.cfg.fixedStep,this.grid,this.bounds,this.cfg);this.accumulator-=this.cfg.fixedStep;steps++;
+      step(this.state,typeof input==='function'?input(this.state):input,this.cfg.fixedStep,this.grid,this.bounds,this.cfg.atState?.(this.state)??this.cfg);this.accumulator-=this.cfg.fixedStep;steps++;
       if(onStep&&onStep(from,this.state,(steps-1)/planned,steps/planned)===false){this.accumulator=0;break;}
     }
     if(steps>=this.cfg.maxSteps)this.accumulator=0;return steps;

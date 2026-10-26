@@ -1,9 +1,9 @@
-import { cleanName } from './race-core.js?build=20261026-lab1';
-import { TRACK_ID, LEGACY_TRACK_ID } from './game-version.js?build=20261026-lab1';
+import { cleanName } from './race-core.js?build=20261026-courtyard6';
+import { TRACK_ID, LEGACY_TRACK_ID } from './game-version.js?build=20261026-courtyard6';
 export const LEADERBOARD_KEY='xikou-kart.leaderboard.v1';
 export const CURRENT_LEADERBOARD_KEY='xikou-kart.leaderboard.v2';
 export function validRecord(value){
-  if(!value||typeof value!=='object'||typeof value.id!=='string'||value.id.length>120||!value.id||!['field-v221-v2','field-v221-v1','field-v221-v2-laps1','campus-v221-v2-laps1','campus-v221-v2-laps2','campus-stadium-v3-laps1','campus-stadium-v3-laps2','field-friendly-v1-laps1','field-friendly-v1-laps2','campus-friendly-v1-laps1','campus-friendly-v1-laps2'].includes(value.track))return null;
+  if(!value||typeof value!=='object'||typeof value.id!=='string'||value.id.length>120||!value.id||!['courtyard-elevation-v1-laps1','courtyard-elevation-v1-laps2','field-v221-v2','field-v221-v1','field-v221-v2-laps1','campus-v221-v2-laps1','campus-v221-v2-laps2','campus-stadium-v3-laps1','campus-stadium-v3-laps2','field-friendly-v1-laps1','field-friendly-v1-laps2','campus-friendly-v1-laps1','campus-friendly-v1-laps2'].includes(value.track))return null;
   if(!Number.isInteger(value.totalMs)||value.totalMs<=0||value.totalMs>86400000||!Array.isArray(value.lapMs)||value.lapMs.length<1||value.lapMs.length>9||value.lapMs.some(v=>!Number.isInteger(v)||v<=0))return null;
   if(!Number.isInteger(value.bestLapMs)||value.bestLapMs<=0||Math.abs(Math.min(...value.lapMs)-value.bestLapMs)>1||value.lapMs.reduce((a,b)=>a+b,0)>value.totalMs+2||typeof value.date!=='string'||!Number.isFinite(Date.parse(value.date)))return null;
   return{id:value.id.slice(0,120),name:cleanName(value.name),totalMs:value.totalMs,lapMs:[...value.lapMs],bestLapMs:value.bestLapMs,date:new Date(value.date).toISOString(),track:value.track};

@@ -1,6 +1,6 @@
-import { ACTIVE_ROUTE } from './session-config.js?build=20261026-lab1';
-import { BOOST_PADS } from './effects-config.js?build=20261026-lab1';
-import { ROUTES, world, pointAt, distanceRect, distanceSegment } from './track-config.js?build=20261026-lab1';
+import { ACTIVE_ROUTE } from './session-config.js?build=20261026-courtyard6';
+import { BOOST_PADS } from './effects-config.js?build=20261026-courtyard6';
+import { ROUTES, world, pointAt, distanceRect, distanceSegment } from './track-config.js?build=20261026-courtyard6';
 export function buildRaceDecor(T,scene,obstacles,walls,cameraBoxes){
   const group=new T.Group();scene.add(group);
   const arrow=new T.BufferGeometry();arrow.setAttribute('position',new T.Float32BufferAttribute([0,0,.6,-.4,0,-.3,.4,0,-.3],3));arrow.computeVertexNormals();
@@ -11,6 +11,7 @@ export function buildRaceDecor(T,scene,obstacles,walls,cameraBoxes){
   const poleMat=new T.MeshLambertMaterial({color:'#f4edda'}),flagMat=new T.MeshBasicMaterial({color:'#14918d',side:T.DoubleSide});
   for(let i=0;i<18;i++){
     const p=pointAt(ACTIVE_ROUTE.points,(i+.3)/18),q=pointAt(ACTIVE_ROUTE.points,(i+.3)/18+.001),[px,pz]=world(p),l=Math.hypot(q[0]-p[0],q[1]-p[1]);
+    if(ACTIVE_ROUTE.id==='courtyard'&&p[1]<1500)continue;
     const x=px+(q[1]-p[1])/l*2.8,z=pz-(q[0]-p[0])/l*2.8;
     if(obstacles.some(b=>distanceRect(x,z,b)<.5)||walls.some(w=>distanceSegment(x,z,w)<.65))continue;
     const pole=new T.Mesh(new T.CylinderGeometry(.045,.045,1.8,5),poleMat);pole.position.set(x,.9,z);group.add(pole);

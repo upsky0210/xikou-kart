@@ -1,4 +1,5 @@
 // Coordinates use the original campus plan pixels. 18 px = 1 metre.
+import { COURTYARD_ROUTE, courtyardWidthAt } from './courtyard-route.js?build=20261026-courtyard6';
 export const SCALE = 18;
 export const ORIGIN = [1100, 700];
 export const world = ([x, z]) => [(x - ORIGIN[0]) / SCALE, (z - ORIGIN[1]) / SCALE];
@@ -31,6 +32,7 @@ function campusLoop(){
   return Array.from({length:481},(_,i)=>i===480?[...controls[0]]:pointAt(dense,i/480));
 }
 export const ROUTES = {
+  courtyard:COURTYARD_ROUTE,
   field: {
     id: 'field', label: 'A · 操場環線', short: '操場環線', status: '建議先做',
     color: '#00bfc0', width: 4, points: stadium(), closed: true,
@@ -59,6 +61,7 @@ export function lengthMetres(points) {
   return points.slice(1).reduce((n, p, i) => n + Math.hypot(p[0] - points[i][0], p[1] - points[i][1]) / SCALE, 0);
 }
 export function roadWidthAt(route,p){
+  if(route.id==='courtyard')return courtyardWidthAt((p[0]-1100)/18,(p[1]-700)/18);
   // Existing entrance flags and parking canopy leave a short 1.8 m chicane.
   return route.id==='campus'&&p[0]<460&&p[1]>900&&p[1]<1300?1.8:route.width;
 }

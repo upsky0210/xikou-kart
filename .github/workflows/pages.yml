@@ -23,6 +23,8 @@ jobs:
         run: python3 tools/verify-site.py
       - name: Check face and corridor prototype
         run: node tools/verify-lab.mjs
+      - name: Check real campus corridor race and ghost
+        run: node tools/verify-courtyard.mjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload game

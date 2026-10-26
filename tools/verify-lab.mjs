@@ -13,7 +13,9 @@ check('two sample heads have a continuous sculpted skull and shallow conforming 
     assert.equal(eyeCount,2);assert.ok(skin.geometry.attributes.position.count>3000);
     skin.geometry.computeBoundingBox();assert.ok(skin.geometry.boundingBox.max.z>.37/.36,'skull has an actual sculpted nose/muzzle transition');
   }
-  assert.equal(buildKart(T,'cat').head.userData.faceStyle,undefined,'formal game keeps existing approved faces');
+  assert.equal(buildKart(T,'cat').head.userData.faceStyle,'sculpted-v1','approved cat face is used by the formal game');
+  assert.equal(buildKart(T,'beagle').head.userData.faceStyle,'sculpted-v1','approved beagle face is used by the formal game');
+  assert.equal(buildKart(T,'hamster').head.userData.faceStyle,undefined,'other six racers keep their existing faces');
 });
 check('loop is continuous, its 1.2 m ramps are at most 11.1 percent, and its spawn/reset poses clear rails',()=>{
   assert.ok(LENGTH>50&&LENGTH<65);assert.equal(heightAt((705-1100)/18),1.2);assert.equal(heightAt((900-1100)/18),0);

@@ -1,4 +1,4 @@
-import { ROUTES, ISSUES, SCALE, lengthMetres } from './track-config.js?build=20261026-lab1';
+import { ROUTES, ISSUES, SCALE, lengthMetres } from './track-config.js?build=20261026-courtyard6';
 const $ = s=>document.querySelector(s);
 const frame=$('#campus'), D=window.CAMPUS;
 let selected='field', mapMode=false, overlay=true, touring=false, audit=null, metrics=null, ready=false;

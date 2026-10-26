@@ -1,6 +1,6 @@
-import { makeAnimalFace } from './animal-face.js?build=20261026-lab1';
-import { getRacer } from './racer-catalog.js?build=20261026-lab1';
-import { addSculptedFace } from './sculpted-face.js?build=20261026-lab1';
+import { makeAnimalFace } from './animal-face.js?build=20261026-courtyard6';
+import { getRacer } from './racer-catalog.js?build=20261026-courtyard6';
+import { addSculptedFace } from './sculpted-face.js?build=20261026-courtyard6';
 export function buildAnimal(T,id,options={}){
   const p=getRacer(id),driver=new T.Group(),head=new T.Group();driver.name=`racer-${p.id}`;head.name='animal-head';head.position.set(0,1.49,-.12);driver.add(head);driver.userData.racer=p.id;
   const mat=c=>new T.MeshStandardMaterial({color:c,roughness:.7});
@@ -10,7 +10,7 @@ export function buildAnimal(T,id,options={}){
   function ear(x,y,z,sx,sy,sz,m=fur){return ell(x,y,z,sx,sy,sz,m);}
   ell(0,.96,-.14,.25,.30,.20,suit,driver);ell(0,1.02,.048,.115,.20,.026,light,driver);
   for(const side of[-1,1]){rod([side*.15,.74,-.12],[side*.16,.68,.33],.085,suit);ell(side*.16,.66,.39,.11,.075,.17,accent,driver);rod([side*.20,1.12,-.07],[side*.31,.96,.13],.076,suit);rod([side*.31,.96,.13],[side*.16,1.0,.31],.069,suit);ell(side*.16,1,.31,.083,.075,.078,white,driver);}
-  const sculpted=options.faceStyle==='sculpted'&&['cat','beagle'].includes(p.id);
+  const sculpted=(options.faceStyle??'sculpted')==='sculpted'&&['cat','beagle'].includes(p.id);
   const faceMaterial=new T.MeshStandardMaterial({map:makeAnimalFace(T,p,sculpted),roughness:.85});
   const surface=ell(0,0,0,p.id==='horse'?.35:.43,p.id==='horse'?.46:.40,.36,faceMaterial);surface.name='animal-face';
   if(sculpted){surface.geometry.dispose();surface.geometry=new T.SphereGeometry(1,64,48);addSculptedFace(T,head,p,surface);}
