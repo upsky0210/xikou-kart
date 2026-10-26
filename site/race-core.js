@@ -1,12 +1,12 @@
-import { ACTIVE_ROUTE } from './session-config.js?build=20261026-soft-faces';
-import { ROUTES, world } from './track-config.js?build=20261026-soft-faces';
-import { TRACK_ID } from './game-version.js?build=20261026-soft-faces';
+import { ACTIVE_ROUTE } from './session-config.js?build=20261026-friendly3';
+import { ROUTES, world } from './track-config.js?build=20261026-friendly3';
+import { TRACK_ID } from './game-version.js?build=20261026-friendly3';
 
 export function makeGates(route=ACTIVE_ROUTE){
   return route.checkpoints.map((index,i)=>{
     const p=route.points[index],before=route.points[index?index-1:route.points.length-2],after=route.points[(index+1)%(route.points.length-1)];
     const [x,z]=world(p),len=Math.hypot(after[0]-before[0],after[1]-before[1]);
-    return{id:i,x,z,fx:(after[0]-before[0])/len,fz:(after[1]-before[1])/len,halfWidth:route.width/2+.45};
+    return{id:i,x,z,fx:(after[0]-before[0])/len,fz:(after[1]-before[1])/len,halfWidth:Math.max(3.6,route.width/2+1.8)};
   });
 }
 export function crossedGate(from,to,gate,forward=true){

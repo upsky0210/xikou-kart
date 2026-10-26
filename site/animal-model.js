@@ -1,5 +1,5 @@
-import { makeAnimalFace } from './animal-face.js?build=20261026-soft-faces';
-import { getRacer } from './racer-catalog.js?build=20261026-soft-faces';
+import { makeAnimalFace } from './animal-face.js?build=20261026-friendly3';
+import { getRacer } from './racer-catalog.js?build=20261026-friendly3';
 export function buildAnimal(T,id){
   const p=getRacer(id),driver=new T.Group(),head=new T.Group();driver.name=`racer-${p.id}`;head.name='animal-head';head.position.set(0,1.49,-.12);driver.add(head);driver.userData.racer=p.id;
   const mat=c=>new T.MeshStandardMaterial({color:c,roughness:.7});

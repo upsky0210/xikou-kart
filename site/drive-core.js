@@ -1,5 +1,5 @@
-import { DRIVE } from './drive-config.js?build=20261026-soft-faces';
-import { effectState, updateEffects, cancelDrift } from './effects-core.js?build=20261026-soft-faces';
+import { DRIVE } from './drive-config.js?build=20261026-friendly3';
+import { effectState, updateEffects, cancelDrift } from './effects-core.js?build=20261026-friendly3';
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const toward=(v,target,step)=>v<target?Math.min(target,v+step):Math.max(target,v-step);
@@ -68,10 +68,13 @@ export function step(s,input,dt,grid,bounds,cfg=DRIVE){
   if(input.handbrake)s.speed=toward(s.speed,0,(s.drifting?cfg.driftDrag:cfg.handbrake)*dt);
   const speedCap=boosting?cfg.maxSpeed*cfg.boostMultiplier:Math.max(cfg.maxSpeed,previousSpeed-cfg.boostDecay*dt);
   s.speed=clamp(s.speed,-cfg.reverseSpeed,speedCap);
-  const steerFactor=clamp(Math.abs(s.speed)/cfg.maxSpeed,0,1),maxSteer=cfg.steeringLow+(cfg.steeringHigh-cfg.steeringLow)*steerFactor;
+  const steerFactor=clamp(Math.abs(s.speed)/cfg.maxSpeed,0,1),maxSteer=cfg.steeringLow+(cfg.steeringHigh-cfg.steeringLow)*steerFactor*steerFactor;
   const direction=(input.left?1:0)-(input.right?1:0);
-  s.steering=toward(s.steering,direction*maxSteer*(s.drifting?cfg.driftSteeringMultiplier:1),cfg.steeringRate*dt);
-  s.yaw+=s.speed/cfg.wheelbase*Math.tan(s.steering)*dt;
+  const steerRate=direction===0?cfg.steeringReturnRate:direction*s.steering<0?cfg.counterSteeringRate:cfg.steeringRate;
+  s.steering=toward(s.steering,direction*maxSteer*(s.drifting?cfg.driftSteeringMultiplier:1),steerRate*dt);
+  if(direction&&!s.drifting&&s.speed>cfg.turnSpeed)s.speed=toward(s.speed,cfg.turnSpeed,cfg.turnDeceleration*dt);
+  const yawLimit=cfg.yawRateLow+(cfg.yawRateHigh-cfg.yawRateLow)*steerFactor;
+  s.yaw+=clamp(s.speed/cfg.wheelbase*Math.tan(s.steering),-yawLimit,yawLimit)*dt;
   const travelYaw=s.yaw-(s.drifting?s.driftSide*cfg.driftSlipAngle:0);
   s.x+=Math.sin(travelYaw)*s.speed*dt;s.z+=Math.cos(travelYaw)*s.speed*dt;
   let collision=false,maxImpact=0;

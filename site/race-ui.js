@@ -1,13 +1,14 @@
-import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=20261026-soft-faces';
-import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE } from './session-config.js?build=20261026-soft-faces';
-import { InputState, KEY_ACTION } from './drive-core.js?build=20261026-soft-faces';
-import { DRIVE } from './drive-config.js?build=20261026-soft-faces';
-import { cleanName, formatTime, makeGates } from './race-core.js?build=20261026-soft-faces';
-import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=20261026-soft-faces';
-import { drawMap } from './minimap.js?build=20261026-soft-faces';
-import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=20261026-soft-faces';
-import { GameSound } from './sound.js?build=20261026-soft-faces';
-import { RULES_LABEL } from './game-version.js?build=20261026-soft-faces';
+import { installControlMode } from './control-mode.js?build=20261026-friendly3';
+import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=20261026-friendly3';
+import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE, PREVIOUS_SESSION_SCOPE } from './session-config.js?build=20261026-friendly3';
+import { InputState, KEY_ACTION } from './drive-core.js?build=20261026-friendly3';
+import { DRIVE } from './drive-config.js?build=20261026-friendly3';
+import { cleanName, formatTime, makeGates } from './race-core.js?build=20261026-friendly3';
+import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=20261026-friendly3';
+import { drawMap } from './minimap.js?build=20261026-friendly3';
+import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=20261026-friendly3';
+import { GameSound } from './sound.js?build=20261026-friendly3';
+import { RULES_LABEL } from './game-version.js?build=20261026-friendly3';
 
 const $=s=>document.querySelector(s),frame=$('#world'),inputs=new InputState(),gates=makeGates();
 const QA=new URLSearchParams(location.search).get('qa')==='1';
@@ -59,7 +60,7 @@ function renderList(element,rows,currentId=''){
     element.append(li);
   });
 }
-function renderBoards(){const edition=$('#boardEdition').value,legacy=edition==='legacy',oldCampus=edition==='campus-old',menuBoard=legacy?readLeaderboard(storage,legacyBoardKey):oldCampus?readLeaderboard(storage,CURRENT_LEADERBOARD_KEY+`.campus.laps${LAPS}`+(QA?'.qa':'')):board;renderList($('#menuLeaderboard'),menuBoard.rows);renderList($('#resultLeaderboard'),board.rows,result?.id);$('#boardStatus').textContent=oldCampus?'舊全校外圈路線紀錄，與新串聯路線分開。':legacy?'保留的 M2 舊版成績，與加速版分開比較。':QA?'自動驗證專用排行榜，與正式紀錄分開。':board.available?'只存在目前瀏覽器，清除網站資料後會消失。':'目前瀏覽器無法使用本機儲存；遊戲仍可進行。';}
+function renderBoards(){const edition=$('#boardEdition').value,legacy=edition==='legacy',oldCampus=edition==='campus-old',previous=edition==='previous',menuBoard=previous?readLeaderboard(storage,CURRENT_LEADERBOARD_KEY+PREVIOUS_SESSION_SCOPE+(QA?'.qa':'')):legacy?readLeaderboard(storage,legacyBoardKey):oldCampus?readLeaderboard(storage,CURRENT_LEADERBOARD_KEY+`.campus.laps${LAPS}`+(QA?'.qa':'')):board;renderList($('#menuLeaderboard'),menuBoard.rows);renderList($('#resultLeaderboard'),board.rows,result?.id);$('#boardStatus').textContent=previous?'調整前的操控與檢查點紀錄，另存保留。':oldCampus?'舊全校外圈路線紀錄，與新串聯路線分開。':legacy?'保留的 M2 舊版成績，與加速版分開比較。':QA?'自動驗證專用排行榜，與正式紀錄分開。':board.available?'只存在目前瀏覽器，清除網站資料後會消失。':'目前瀏覽器無法使用本機儲存；遊戲仍可進行。';}
 function getPersonalGhost(name=cleanName($('#playerName').value)){return ghostMemory.get(name)||readGhost(storage,name,QA);}
 function ghostSummary(){const ghost=getPersonalGhost();$('#ghostSummary').textContent=ghost?`你的最佳 ${formatTime(ghost.totalMs/1000)} · 下一場挑戰幽靈車`:'完成本賽道與圈數的第一場，建立個人最佳幽靈車。';}
 function updateSettings(){sound.setMuted(muted);$('#mute').textContent=muted?'🔇':'🔊';$('#mute').setAttribute('aria-label',muted?'開啟音效':'靜音');$('#muteSetting').checked=muted;$('#ghostSetting').checked=ghostEnabled;}
@@ -110,7 +111,7 @@ $('#boardEdition').onchange=renderBoards;
 $('#start').onclick=()=>start();$('#resume').onclick=()=>setPause(false);$('#pause').onclick=()=>setPause(!paused);
 $('#raceAgain').onclick=()=>start('race');$('#resultMenu').onclick=menu;$('#backMenu').onclick=menu;
 $('#restart').onclick=()=>start(activeMode);$('#reset').onclick=()=>{flush();send('reset');};
-$('#touchToggle').onclick=()=>{const on=document.body.classList.toggle('touch-preview');$('#touchToggle').setAttribute('aria-pressed',String(on));$('#touchToggle').setAttribute('aria-label',on?'隱藏觸控按鈕':'顯示觸控按鈕');flush();};
+installControlMode({storage,onChange:flush});
 $('#help').onclick=()=>{helpOpen=true;if(started&&!finished){paused=true;flush();send('pause',{paused:true});}setMenu();};$('#closeHelp').onclick=()=>{helpOpen=false;setMenu();};
 $('#openBoard').onclick=()=>{const stored=readLeaderboard(storage,boardKey);board={rows:stored.available?stored.rows:board.rows,available:stored.available};boardOpen=true;renderBoards();setMenu();};$('#closeBoard').onclick=()=>{boardOpen=false;setMenu();};
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));

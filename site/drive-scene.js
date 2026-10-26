@@ -1,13 +1,13 @@
-import { ACTIVE_ROUTE, LAPS, ROUTE_ID } from './session-config.js?build=20261026-soft-faces';
-import { buildKart } from './kart-model.js?build=20261026-soft-faces';
-import { prepareStaticScene } from './scene-utils.js?build=20261026-soft-faces';
-import { DRIVE, SPAWNS } from './drive-config.js?build=20261026-soft-faces';
-import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=20261026-soft-faces';
-import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=20261026-soft-faces';
-import { RaceSession, makeGates } from './race-core.js?build=20261026-soft-faces';
-import { buildRaceDecor } from './race-decor.js?build=20261026-soft-faces';
-import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=20261026-soft-faces';
-import { cancelDrift } from './effects-core.js?build=20261026-soft-faces';
+import { ACTIVE_ROUTE, LAPS, ROUTE_ID } from './session-config.js?build=20261026-friendly3';
+import { buildKart } from './kart-model.js?build=20261026-friendly3';
+import { prepareStaticScene } from './scene-utils.js?build=20261026-friendly3';
+import { DRIVE, SPAWNS } from './drive-config.js?build=20261026-friendly3';
+import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=20261026-friendly3';
+import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=20261026-friendly3';
+import { RaceSession, makeGates } from './race-core.js?build=20261026-friendly3';
+import { buildRaceDecor } from './race-decor.js?build=20261026-friendly3';
+import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=20261026-friendly3';
+import { cancelDrift } from './effects-core.js?build=20261026-friendly3';
 
 export function initScene(api){
   const {THREE:T,scene,renderer,camera,orbit,floors,rooms}=api;
@@ -70,8 +70,13 @@ export function initScene(api){
   let mode='practice',race=null,finishSent=false,qaDriver=null,sessionName='訪客';
   let recorder=null,bestGhost=null,showGhost=true,previewOrbit=false,garage=false,garageStart=0;
   const gates=makeGates(),gateMarkers=gates.map(g=>{
-    const mesh=new T.Mesh(new T.PlaneGeometry(g.halfWidth*2,2.5),new T.MeshBasicMaterial({color:'#f7d478',transparent:true,opacity:.20,side:T.DoubleSide,depthWrite:false}));
-    mesh.rotation.y=Math.atan2(g.fx,g.fz);mesh.position.set(g.x,1.3,g.z);mesh.visible=false;scene.add(mesh);return mesh;
+    const mesh=new T.Group(),material=new T.MeshBasicMaterial({color:'#8ae4c4',transparent:true,opacity:.14,side:T.DoubleSide,depthWrite:false});
+    const sheet=new T.Mesh(new T.PlaneGeometry(g.halfWidth*2,3.8),material);sheet.position.y=1.9;mesh.add(sheet);
+    const frameMaterial=new T.MeshBasicMaterial({color:'#fff0a8'});
+    for(const x of [-g.halfWidth,g.halfWidth]){const post=new T.Mesh(new T.BoxGeometry(.10,3.8,.10),frameMaterial);post.position.set(x,1.9,0);mesh.add(post);}
+    const top=new T.Mesh(new T.BoxGeometry(g.halfWidth*2,.10,.10),frameMaterial);top.position.y=3.8;mesh.add(top);
+    const floor=new T.Mesh(new T.BoxGeometry(g.halfWidth*2,.025,1.4),new T.MeshBasicMaterial({color:'#b8efda',transparent:true,opacity:.28,depthWrite:false}));floor.position.y=.13;mesh.add(floor);
+    mesh.rotation.y=Math.atan2(g.fx,g.fz);mesh.position.set(g.x,0,g.z);mesh.visible=false;scene.add(mesh);return mesh;
   });
   const state=createState(spawns.field),simulation=new FixedSimulation(state,grid,bounds),local=new InputState();let remote={};
   let {car,body,wheels,steeringWheel,driver,head,profile}=buildKart(T);scene.add(car);
@@ -119,7 +124,7 @@ export function initScene(api){
       race=new RaceSession({laps:LAPS,gates,name:sessionName,id}).begin();
       recorder=new GhostRecorder();
       state.x=gates[0].x-gates[0].fx*3;state.z=gates[0].z-gates[0].fz*3;state.yaw=Math.atan2(gates[0].fx,gates[0].fz);
-      if(qa){const module=await import('./qa-driver.js?build=20261026-soft-faces');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
+      if(qa){const module=await import('./qa-driver.js?build=20261026-friendly3');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
     }
     playing=true;cameraSnap=true;setPause(false);send('started',{mode});
   }

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Batch, mat, SPOTS } from './blocks.js?build=20261026-soft-faces';
+import { Batch, mat, SPOTS } from './blocks.js?build=20261026-friendly3';
 
 /* =========================================================
  * 戶外特別場景（依使用者提供的照片）

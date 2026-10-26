@@ -1,5 +1,5 @@
-import { ROUTES, ISSUES, world, pointAt, auditRoute } from './track-config.js?build=20261026-soft-faces';
-import { mergeGeometries } from './campus/vendor/three/examples/jsm/utils/BufferGeometryUtils.js?build=20261026-soft-faces';
+import { ROUTES, ISSUES, world, pointAt, auditRoute } from './track-config.js?build=20261026-friendly3';
+import { mergeGeometries } from './campus/vendor/three/examples/jsm/utils/BufferGeometryUtils.js?build=20261026-friendly3';
 
 export function initScene(api) {
   const { THREE: T, scene, camera, renderer, orbit, floors, rooms, raised } = api;
