@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<script>window.KART_M0 = true;</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>溪口卡丁車 M0 校園副本</title>
+<meta name="description" content="臺北市文山區溪口國民小學 3D 互動校園地圖：找教室、帶路、逛校園">
+<link href="fonts/noto-sans-tc.css?build=20261025-animals2" rel="stylesheet">   <!-- 思源黑體放在自己網站裡（不靠 Google Fonts，學校網路擋掉也能用） -->
+<style>
+@layer base {
+  :root {
+    --ink: #1d2733; --panel: rgba(255, 255, 255, .94); --line: #e3e6ea;
+    --accent: #ff6b35; --accent2: #1d4ed8; --yellow: #ffd400;
+    --shadow: 0 6px 24px rgba(20, 40, 60, .18);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #bfe3ff; color: var(--ink);
+    font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif; -webkit-user-select: none; user-select: none; }
+  #scene { position: fixed; inset: 0; touch-action: none; }
+  button { font: inherit; cursor: pointer; border: 0; border-radius: 10px; }
+  [hidden] { display: none !important; }
+
+  /* 上方列 */
+  #top { position: fixed; top: 12px; left: 12px; right: 12px; display: flex; gap: 10px; align-items: flex-start; pointer-events: none; }
+  #top > * { pointer-events: auto; }
+  .brand { background: var(--panel); border-radius: 14px; padding: 8px 14px; box-shadow: var(--shadow); line-height: 1.2; }
+  .brand b { font-size: 18px; font-weight: 900; }
+  .brand small { display: block; font-size: 12px; color: #607080; }
+  .brand #floorName { color: var(--accent); font-weight: 700; }
+  .seg { display: flex; background: var(--panel); border-radius: 12px; padding: 4px; box-shadow: var(--shadow); gap: 2px; }
+  .seg button { background: none; padding: 7px 11px; font-size: 14px; color: #3b4856; white-space: nowrap; }
+  .seg button.on { background: var(--ink); color: #fff; }
+  .spacer { flex: 1; }
+  .iconbtn { background: var(--panel); box-shadow: var(--shadow); padding: 9px 14px; font-weight: 700; border-radius: 12px; white-space: nowrap; }
+  .iconbtn.primary { background: var(--accent); color: #fff; }
+
+  /* 樓層 */
+  #floors { position: fixed; right: 12px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 6px; }
+  #floors button { width: 46px; height: 40px; background: var(--panel); box-shadow: var(--shadow); font-weight: 700; font-size: 14px; }
+  #floors button.on { background: var(--accent2); color: #fff; }
+  body.walking #floors button { opacity: .75; }
+  body.walking #floors button.on { opacity: 1; background: var(--accent); }
+
+  /* 搜尋面板 */
+  #search { position: fixed; top: 70px; right: 70px; width: min(380px, calc(100vw - 24px)); max-height: calc(100vh - 100px);
+    background: #fff; border-radius: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; z-index: 5; }
+  #search header { display: flex; gap: 8px; padding: 12px; border-bottom: 1px solid var(--line); }
+  #search .opt { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 1px solid var(--line); font-size: 14px; cursor: pointer; }
+  #search .opt input { width: 18px; height: 18px; margin: 0; }
+  #q { flex: 1; font: inherit; font-size: 16px; padding: 9px 12px; border: 2px solid var(--line); border-radius: 10px; outline: none; -webkit-user-select: text; user-select: text; }
+  #q:focus { border-color: var(--accent2); }
+  #closeSearch { background: #eef1f4; padding: 0 12px; }
+  #results { list-style: none; margin: 0; padding: 6px; overflow: auto; }
+  #results li { display: grid; grid-template-columns: 12px 1fr auto; grid-template-rows: auto auto; column-gap: 10px; align-items: center;
+    padding: 8px 10px; border-radius: 10px; cursor: pointer; }
+  #results li:hover { background: #f3f6fa; }
+  #results .dot { width: 12px; height: 12px; border-radius: 4px; grid-row: span 2; border: 1px solid rgba(0,0,0,.15); }
+  #results .n { font-weight: 700; }
+  #results .s { font-size: 12px; color: #6b7785; grid-column: 2; }
+  #results button { grid-row: 1 / span 2; grid-column: 3; background: var(--yellow); padding: 6px 10px; font-weight: 700; font-size: 13px; }
+  #results .empty { display: block; color: #6b7785; cursor: default; }
+
+  /* 資訊卡 */
+  #info { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); width: min(440px, calc(100vw - 24px));
+    background: #fff; border-radius: 18px; box-shadow: var(--shadow); padding: 16px 18px; z-index: 4; }
+  #info .title { font-size: 24px; font-weight: 900; }
+  #info .meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 12px; }
+  #info .meta span { background: #f0f3f7; border-radius: 8px; padding: 3px 8px; font-size: 13px; }
+  #info .acts { display: flex; gap: 8px; }
+  #info .acts button { flex: 1; padding: 10px 0; font-weight: 700; background: #eef1f4; }
+  #info .acts [data-act=go] { background: var(--yellow); flex: 1.4; }
+  #info .x { position: absolute; top: 10px; right: 10px; background: none; font-size: 18px; color: #8a96a3; }
+
+  /* 導航列 */
+  #navbar { position: fixed; top: 74px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff;
+    border-radius: 14px; padding: 9px 10px 9px 16px; display: flex; gap: 12px; align-items: center; box-shadow: var(--shadow); z-index: 3; max-width: calc(100vw - 24px); }
+  #navbar b { color: var(--yellow); }
+  #navbar button { background: rgba(255,255,255,.15); color: #fff; padding: 6px 10px; font-size: 13px; white-space: nowrap; }
+
+  /* 樓梯面板 */
+  #stairPanel { position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%); background: #fff; border-radius: 16px;
+    padding: 10px; box-shadow: var(--shadow); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; max-width: calc(100vw - 24px); }
+  #stairPanel .t { font-weight: 900; padding: 0 6px; color: #d9730d; }
+  #stairPanel button { background: #ff9f1c; color: #fff; font-weight: 700; padding: 10px 14px; }
+  #stairPanel button:disabled { background: #ccd3da; }
+  #stairPanel .hint { width: 100%; text-align: center; font-size: 12px; color: #777; }
+  kbd { background: rgba(0,0,0,.18); border-radius: 4px; padding: 0 5px; font-size: 12px; margin-left: 4px; }
+
+  /* 搖桿（只在手機、走路模式顯示） */
+  #joy { position: fixed; left: 24px; bottom: 24px; width: 120px; height: 120px; border-radius: 50%;
+    background: rgba(255,255,255,.35); border: 2px solid rgba(255,255,255,.7); display: none; touch-action: none; }
+  #joy .knob { position: absolute; left: 35px; top: 35px; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,.9); box-shadow: var(--shadow); }
+  @media (pointer: coarse) { body.walking #joy { display: block; } }
+
+  #toast { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(.9); background: rgba(29,39,51,.88); color: #fff;
+    padding: 12px 22px; border-radius: 14px; font-size: 18px; font-weight: 700; opacity: 0; transition: .25s; pointer-events: none; z-index: 9; }
+  #toast.on { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  #fade { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity .18s; z-index: 8; }
+  #fade.on { opacity: .85; }
+
+  /* 說明 */
+  #help { position: fixed; inset: 0; background: rgba(10,20,30,.45); display: grid; place-items: center; z-index: 10; padding: 16px; }
+  #help .card { background: #fff; border-radius: 18px; padding: 20px 22px; width: min(520px, 100%); max-height: 90vh; overflow: auto; position: relative; }
+  #help h2 { margin: 0 0 8px; }
+  #help h3 { margin: 16px 0 6px; font-size: 15px; color: var(--accent2); }
+  #help table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  #help td { padding: 4px 6px; border-bottom: 1px solid var(--line); }
+  /* 中英文切換按鈕 */
+  .langBtn { font-weight: 800; letter-spacing: .5px; min-width: 44px; }
+  #cover .coverLang { position: absolute; top: 14px; right: 14px; z-index: 3; background: #fbf6ea; border: 3px solid #2b2b2b; border-radius: 10px; padding: 6px 12px; font-size: 14px; color: #2b2b2b; cursor: pointer; }
+  /* 溪口校園護照 */
+  #passport { position: fixed; inset: 0; background: rgba(10,20,30,.45); display: grid; place-items: center; z-index: 10; padding: 16px; }
+  #passport .card { background: #fbf6ea; border: 3px solid #2b2b2b; border-radius: 18px; padding: 20px 22px; width: min(620px, 100%); max-height: 90vh; overflow: auto; position: relative; color: #2b2b2b; }
+  #passport .close { position: absolute; top: 10px; right: 12px; }
+  #passport h2 { margin: 0 0 2px; } #passport .sub { margin: 0 0 10px; font-size: 13px; color: #666; }
+  #passport section { margin: 14px 0; }
+  #passport h3 { display: flex; justify-content: space-between; margin: 0 0 6px; font-size: 15px; color: #c0392b; }
+  #passport h3 span { color: #2b2b2b; font-variant-numeric: tabular-nums; }
+  #passport .pbar { height: 8px; background: #e7dfcc; border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
+  #passport .pbar i { display: block; height: 100%; background: #c0392b; border-radius: 6px; }
+  #passport .pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 6px; }
+  #passport .pcell { border: 2px dashed #c9bfa8; border-radius: 10px; padding: 6px 8px; display: flex; flex-direction: column; gap: 2px; min-width: 0; color: #9a917e; }
+  #passport .pcell b { font-size: 14px; overflow-wrap: anywhere; } #passport .pcell small { font-size: 11px; }
+  #passport .pcell.got { border: 2px solid #c0392b; background: #fff; color: #2b2b2b; position: relative; padding-right: 20px; }
+  #passport .pcell.got::after { content: '✔'; position: absolute; top: 4px; right: 6px; color: #c0392b; font-weight: 900; transform: rotate(-12deg); }
+  #passport .plist { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  #passport .plist li { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 8px; padding: 5px 8px; border-radius: 8px; background: #f1ead9; color: #9a917e; }
+  #passport .plist li b { font-size: 14px; } #passport .plist li small { grid-column: 1; font-size: 11px; }
+  #passport .plist li span { grid-column: 2; grid-row: 1 / 3; align-self: center; font-size: 13px; font-weight: 700; }
+  #passport .plist li.got { background: #fff; color: #2b2b2b; } #passport .plist li.got span { color: #c0392b; }
+  #passport .note { font-size: 12px; color: #666; margin: 4px 0; }
+  #passport .clear { margin-top: 6px; font-size: 12px; background: #e5e1ee; color: #333; padding: 4px 12px; border-radius: 10px; }
+  #passBtn.stamp { animation: passStamp .7s ease; }
+  @keyframes passStamp { 0% { transform: scale(1); } 30% { transform: scale(1.25) rotate(-8deg); background: #c0392b; color: #fff; } 100% { transform: scale(1); } }
+  @media (max-width: 1180px) { #passBtn span { display: none; } }
+  /* 時間：按鈕下面展開清晨／中午／傍晚／晚上 */
+  .timeWrap { position: relative; }
+  #timeBtn i { font-style: normal; }
+  .timeMenu { position: absolute; top: calc(100% + 6px); left: 0; flex-direction: column; z-index: 5; }
+  .timeMenu[hidden] { display: none; }
+  .timeMenu button { text-align: left; }
+  @media (max-width: 1180px) { #timeBtn span { display: none; } }
+  #help td:first-child { white-space: nowrap; font-weight: 700; width: 1%; }
+  #help .close { position: absolute; top: 12px; right: 12px; background: #eef1f4; padding: 6px 10px; }
+  #help label { display: flex; align-items: center; gap: 10px; margin: 6px 0; font-size: 14px; }
+  #help input[type=range] { flex: 1; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; border: 1px solid rgba(0,0,0,.15); }
+
+  /* 靠近環景點的提示 */
+  #panoPrompt { position: fixed; left: 50%; bottom: 190px; transform: translateX(-50%); background: #7b2cbf; color: #fff;
+    border-radius: 14px; padding: 10px 14px; box-shadow: var(--shadow); cursor: pointer; white-space: nowrap; font-size: 15px; z-index: 3; }
+  #panoPrompt .go { background: rgba(255,255,255,.2); border-radius: 8px; padding: 3px 8px; margin-left: 6px; }
+  /* 設施互動（投籃、溜滑梯）：靠近時出現的按鈕＋投籃力道條 */
+  #actPrompt { position: fixed; left: 50%; bottom: 245px; transform: translateX(-50%); background: #e85d04; color: #fff; border: 0;
+    border-radius: 14px; padding: 10px 16px; box-shadow: var(--shadow); cursor: pointer; white-space: nowrap; font-size: 16px; font-weight: 700; z-index: 3; }
+  #quitGame { position: fixed; z-index: 3; background: #fbf6ea; color: #2b2b2b; border: 2px solid #2b2b2b; border-radius: 10px; padding: 7px 12px;
+    font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: var(--shadow); }
+  #power { position: fixed; left: 50%; bottom: 300px; transform: translateX(-50%); width: 240px; height: 22px; background: rgba(0,0,0,.55);
+    border: 2px solid #fff; border-radius: 12px; overflow: hidden; z-index: 3; }
+  #power .sweet { position: absolute; top: 0; bottom: 0; background: rgba(80,220,120,.75); }
+  #power .bar { position: absolute; top: 2px; bottom: 2px; width: 6px; margin-left: -3px; background: #ffd400; border-radius: 3px; box-shadow: 0 0 6px #ffd400; }
+  #power .lbl { position: absolute; left: 0; right: 0; top: -26px; text-align: center; color: #fff; font-weight: 700; text-shadow: 0 1px 3px #000; font-size: 14px; }
+
+  /* 實景導覽清單 */
+  #gallery { position: fixed; inset: 0; background: rgba(10,20,30,.5); z-index: 6; display: grid; place-items: center; padding: 16px; }
+  #gallery .card-wrap { background: #fff; border-radius: 18px; width: min(820px, 100%); max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; }
+  #gallery header { display: flex; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  #gallery header b { font-size: 20px; flex: 1; }
+  #gallery .close { background: #eef1f4; padding: 6px 12px; }
+  #gallery .list { flex: 1; min-height: 0; overflow: auto; padding: 4px 16px 18px; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); grid-auto-rows: max-content; gap: 12px; }
+  #gallery h3 { grid-column: 1 / -1; margin: 12px 0 0; font-size: 15px; color: #7b2cbf; }
+  #gallery .card { background: #f6f3fa; padding: 0; text-align: left; overflow: hidden; border-radius: 12px; display: flex; flex-direction: column; transition: transform .15s; }
+  #gallery .card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  #gallery .card img { width: 100%; aspect-ratio: 2 / 1; object-fit: cover; display: block; background: #ddd; flex-shrink: 0; }
+  #gallery .card span { padding: 8px 10px; display: flex; flex-direction: column; }
+  #gallery .card small { color: #6b7785; font-size: 12px; }
+
+  #results li.pano { grid-template-columns: 64px 1fr auto; }
+  #results li.pano img { width: 64px; height: 32px; object-fit: cover; border-radius: 6px; grid-row: span 2; }
+  #results li.pano button { background: #9d4edd; color: #fff; }
+
+  /* 360° 檢視器 */
+  #pano { position: fixed; inset: 0; z-index: 12; background: #000; color: #fff; }
+  #pano .canvas { position: absolute; inset: 0; touch-action: none; transition: opacity .25s; }
+  #pano.switching .canvas { opacity: .25; }
+  #pano .bar { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; gap: 10px; align-items: flex-start; pointer-events: none; }
+  #pano .bar > * { pointer-events: auto; }
+  #pano button { background: rgba(0,0,0,.55); color: #fff; padding: 9px 14px; font-weight: 700; backdrop-filter: blur(6px); }
+  #pano button:hover { background: rgba(0,0,0,.75); }
+  #pano .title { background: rgba(0,0,0,.55); border-radius: 12px; padding: 7px 14px; backdrop-filter: blur(6px); }
+  #pano .title b { font-size: 18px; display: block; }
+  #pano .title small { color: #d6c8ff; font-size: 12px; }
+  #pano .tabs { display: flex; gap: 4px; }
+  #pano .tabs button { padding: 9px 13px; }
+  #pano .tabs button.on { background: #9d4edd; }
+  #pano .spacer { flex: 1; }
+  #pano .info { position: absolute; left: 12px; bottom: 12px; width: min(560px, calc(100vw - 24px)); background: rgba(0,0,0,.6);
+    border-radius: 16px; padding: 12px 14px; backdrop-filter: blur(8px); }
+  #pano .text { font-size: 17px; line-height: 1.65; max-height: 4.9em; overflow: hidden; position: relative; }
+  #pano.expanded .text { max-height: 45vh; overflow: auto; }
+  #pano .ctrl { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  #pano .ctrl .audio { background: #ffd400; color: #1d2733; }
+  #pano .nav { position: absolute; right: 12px; bottom: 12px; display: flex; gap: 6px; align-items: center; }
+  #pano .count { font-size: 13px; color: #ccc; padding: 0 6px; }
+  #pano .hint { position: absolute; top: 74px; left: 50%; transform: translateX(-50%); font-size: 13px; color: rgba(255,255,255,.75);
+    background: rgba(0,0,0,.35); padding: 4px 12px; border-radius: 999px; white-space: nowrap; pointer-events: none; }
+  #pano .loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,.6); padding: 8px 16px; border-radius: 999px; pointer-events: none; }
+  #pano .loading.failed { pointer-events: auto; cursor: pointer; background: rgba(170,40,40,.85); }
+  #pano .notice { position: absolute; top: 50%; left: 50%; transform: translate(-50%, calc(-50% + 44px)); background: rgba(170,40,40,.85); padding: 8px 16px; border-radius: 999px; pointer-events: none; text-align: center; max-width: calc(100vw - 32px); }
+  @media (max-width: 640px) {
+    #pano .bar { flex-wrap: wrap; }
+    #pano .title b { font-size: 15px; }
+    #pano .info { bottom: 64px; }
+    #pano .text { max-height: 3.3em; font-size: 15px; }
+    #pano .hint { display: none; }
+    #panoPrompt { bottom: 160px; font-size: 13px; }
+    #actPrompt { bottom: 205px; font-size: 14px; }
+    #power { bottom: 255px; }
+  }
+
+  /* 目前位置、小地圖 */
+  /* 紙條風格（參考 DSLab）：米白紙、黑框、左邊色條、膠帶、錯位影子 */
+  #where { position: fixed; top: 78px; left: 12px; background: #fbf6ea; color: #2b2b2b; border: 3px solid #2b2b2b; border-left: 10px solid #c0392b;
+    border-radius: 0; padding: 5px 14px 5px 10px; box-shadow: 6px 6px 0 rgba(0,0,0,.25); transform: rotate(-1deg);
+    font-weight: 900; font-size: 14px; display: none; gap: 6px; align-items: center; pointer-events: none; max-width: calc(100vw - 90px); white-space: nowrap; }
+  #where::before { content: ''; position: absolute; top: -10px; left: 50%; width: 56px; height: 16px; margin-left: -28px; background: rgba(226,138,138,.85); transform: rotate(3deg); }
+  #where span { overflow: hidden; text-overflow: ellipsis; }
+  #where i { font-style: normal; }
+  body.walking #where { display: flex; }
+  #minimap { position: fixed; left: 12px; bottom: 12px; width: 160px; height: 160px; border-radius: 0; overflow: hidden; border: 3px solid #2b2b2b;
+    box-shadow: 6px 6px 0 rgba(0,0,0,.25); display: none; background: #8cc56a; }
+  body.walking #minimap { display: block; }
+  #minimap canvas { width: 100%; height: 100%; display: block; cursor: pointer; }
+  #minimap b { position: absolute; font-size: 12px; pointer-events: none; }
+  #minimap .n { top: 4px; left: 6px; background: #e53935; color: #fff; border-radius: 50%; width: 20px; height: 20px; display: grid; place-items: center; }
+  #minimap .fl { bottom: 4px; right: 6px; background: rgba(0,0,0,.6); color: #fff; border-radius: 6px; padding: 1px 6px; }
+  @media (pointer: coarse) { #minimap { left: auto; right: 12px; width: 120px; height: 120px; } }
+  #chooser .keys { margin: 4px 0 10px; font-size: 13px; color: #445; line-height: 1.8; }
+  #chooser .keys kbd { background: #eef1f4; border: 1px solid #c9d0d6; border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; font-family: inherit; font-size: 12px; }
+  #chooser .bird { background: none; border: 2px solid #c9d0d6; border-radius: 10px; padding: 6px 14px; font-weight: 700; cursor: pointer; margin-bottom: 6px; }
+
+  /* 選角色 */
+  #chooser { position: fixed; inset: 0; z-index: 15; background: rgba(10,20,30,.55); display: grid; place-items: center; padding: 16px; }
+  #chooser .card-wrap { position: relative; background: #fbf6ea; border: 3px solid #2b2b2b; border-radius: 0; padding: 0 22px 18px; width: min(540px, 100%); text-align: center;
+    box-shadow: 10px 10px 0 rgba(0,0,0,.28); }
+  #chooser .card-wrap::before { content: ''; position: absolute; top: -12px; left: 50%; width: 110px; height: 22px; margin-left: -55px; background: rgba(226,138,138,.85); transform: rotate(-2deg); }
+  #chooser .guide { margin: 0 -22px 14px; background: #c0392b; color: #fff; text-align: left; padding: 8px 16px; font-weight: 700; font-size: 13px; letter-spacing: 3px; }
+  #chooser .guide b { letter-spacing: 1px; font-size: 13px; opacity: .85; margin-left: 6px; }
+  #chooser h2 { margin: 0 0 4px; font-size: 26px; }
+  #chooser p { margin: 0 0 16px; color: #556; }
+  #chooser small { color: #889; }
+  #chooser .choices { display: flex; gap: 14px; margin-bottom: 12px; }
+  #chooser .outfits { display: flex; justify-content: center; gap: 8px; margin: -6px 0 12px; flex-wrap: wrap; }
+  #chooser .outfits button { border: 2px solid #c9d0d6; background: #fff; border-radius: 999px; padding: 5px 14px; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; color: #334; }
+  #chooser .outfits button.on { border-color: #d32f2f; background: #d32f2f; color: #fff; }
+  #chooser .outfits.bbgirl { margin-top: -4px; align-items: center; font-size: 13px; color: #556; }
+  #chooser .outfits.bbgirl[hidden] { display: none; }
+  #chooser .outfits.bbgirl button { padding: 3px 10px; font-size: 13px; }
+  body.mc #chooser .outfits button { border-radius: 0; border-color: #111; }
+  body.mc #chooser .outfits button.on { border-color: #111; }
+  #chooser .choices button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px 14px;
+    background: linear-gradient(#cfe8ff, #eaf5ff); border-radius: 14px; font-size: 18px; transition: transform .15s; }
+  #chooser .choices button:hover { transform: translateY(-3px); }
+  #chooser .choices button.on { outline: 4px solid #d32f2f; }
+  #chooser .choices img { width: 100%; max-width: 200px; aspect-ratio: 4 / 5; object-fit: contain; }
+  .style-pick { display: flex; gap: 8px; margin-top: 6px; }
+  .style-pick button { flex: 1; padding: 8px; background: #eef1f4; }
+  .style-pick button.on { outline: 3px solid #4f8a2b; }
+  #loading { position: fixed; inset: 0; display: grid; place-items: center; z-index: 20; color: #fff; font-size: 22px;
+    font-family: "Cubic 11", "Noto Sans TC", sans-serif; text-shadow: 2px 2px 0 #222;
+    background-color: #6b4a2f;
+    background-image: linear-gradient(45deg, rgba(0,0,0,.12) 25%, transparent 25%, transparent 75%, rgba(0,0,0,.12) 75%),
+                      linear-gradient(45deg, rgba(0,0,0,.12) 25%, transparent 25%, transparent 75%, rgba(0,0,0,.12) 75%);
+    background-size: 32px 32px; background-position: 0 0, 16px 16px; image-rendering: pixelated; }
+}
+
+  /* ================= 方塊風介面（不在 layer 裡，所以一定蓋過上面的基本樣式） ================= */
+  @font-face { font-family: "Cubic 11"; src: url("fonts/Cubic_11.woff2") format("woff2"); font-display: swap; }
+  body.mc { --mc-panel: #c6c6c6; --mc-ink: #3f3f3f; }
+  /* 像素字只用在標題，內文用平滑字型比較好讀 */
+  body.mc .brand b, body.mc #gallery header b, body.mc #help h2, body.mc #info .title { font-family: "Cubic 11", "Noto Sans TC", sans-serif; font-weight: 400; }
+  /* 按鈕：灰色石頭按鈕、立體邊框 */
+  body.mc button {
+    background: #7d7d7d; color: #fff; border: 2px solid #111; border-radius: 0;
+    box-shadow: inset 2px 2px 0 #b8b8b8, inset -2px -2px 0 #4c4c4c; text-shadow: 2px 2px 0 #3a3a3a;
+    font-family: inherit; font-weight: 700;
+  }
+  body.mc button:hover { filter: brightness(1.12); }
+  body.mc button:disabled { background: #555; color: #999; text-shadow: none; filter: none; }
+  /* 小遊戲視窗的按鈕是淺色底、深色字：不要石頭按鈕的字陰影（不然字會疊出殘影） */
+  body.mc #quiz button, body.mc #paint button, body.mc #rps button, body.mc #ooxx button, body.mc #bj button, body.mc #cm button, body.mc #zy button, body.mc #listen button, body.mc #flute button, body.mc #swim button, body.mc #food button, body.mc #bb button { text-shadow: none; }
+  body.mc .seg, body.mc #floors { background: none; box-shadow: none; padding: 0; gap: 4px; }
+  body.mc .timeMenu { background: rgba(0,0,0,.45); padding: 4px; }
+  body.mc .seg button.on, body.mc #floors button.on, body.mc #pano .tabs button.on { background: #4f8a2b; box-shadow: inset 2px 2px 0 #7fc04f, inset -2px -2px 0 #2f5a17; }
+  body.mc .iconbtn.primary, body.mc #info .acts [data-act=go], body.mc #results button, body.mc #pano .ctrl .audio {
+    background: #d9a31a; color: #fff; box-shadow: inset 2px 2px 0 #ffd65c, inset -2px -2px 0 #8a6408; }
+  body.mc #openGallery, body.mc #results li.pano button { background: #7b2cbf !important; box-shadow: inset 2px 2px 0 #b07ae0, inset -2px -2px 0 #4a1677 !important; }
+  /* 面板：淺灰色物品欄風格 */
+  /* 英文單字小測驗（Ashley 老師） */
+  #quiz { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(400px, calc(100vw - 24px)); z-index: 6;
+    background: #fff; border-radius: 16px; box-shadow: var(--shadow); padding: 16px 18px; text-align: center; }
+  #quiz .top { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #666; }
+  #quiz .cat { background: #6a3fc0; color: #fff; border-radius: 999px; padding: 2px 10px; font-weight: 700; }
+  #quiz .q { font-size: 30px; font-weight: 900; margin: 14px 0 4px; }
+  #quiz .emo { font-size: 42px; line-height: 1.1; }
+  #quiz .hint { font-family: ui-monospace, Consolas, monospace; font-size: 22px; letter-spacing: 4px; color: #6a3fc0; margin: 6px 0 10px; }
+  #quiz input { width: 100%; font-size: 22px; padding: 8px 10px; border: 2px solid #6a3fc0; border-radius: 10px; text-align: center; box-sizing: border-box; }
+  #quiz .msg { min-height: 1.6em; margin: 8px 0; font-weight: 700; }
+  #quiz .msg.ok { color: #1b8a3a; } #quiz .msg.no { color: #c0392b; }
+  #quiz .btns { display: flex; gap: 8px; justify-content: center; }
+  #quiz .btns button { padding: 8px 14px; font-weight: 700; border-radius: 10px; background: #6a3fc0; color: #fff; }
+  #quiz .btns button.sub { background: #e5e1ee; color: #333; }
+  #quiz .tip { font-size: 12px; color: #888; margin-top: 8px; }
+  /* 著色小遊戲（哈囉老師） */
+  #paint { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100vw - 24px)); z-index: 6;
+    background: #fff; border-radius: 16px; box-shadow: var(--shadow); padding: 12px 14px; text-align: center; }
+  #paint .top { display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 700; }
+  #paint .cat { background: #e8508a; color: #fff; border-radius: 999px; padding: 2px 10px; }
+  #paint canvas { display: block; width: min(100%, 50vh); aspect-ratio: 1; margin: 8px auto; border: 2px solid #ddd; border-radius: 8px; background: #fff; touch-action: none; cursor: crosshair; }
+  #paint .pal { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+  #paint .pal button { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #999; padding: 0; box-shadow: none; }
+  #paint .pal button.on { outline: 3px solid #222; outline-offset: 2px; }
+  #paint .msg { min-height: 1.4em; margin: 6px 0; font-weight: 700; font-size: 14px; }
+  #paint .btns { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+  #paint .btns button { padding: 7px 12px; font-weight: 700; border-radius: 10px; background: #e8508a; color: #fff; }
+  #paint .btns button.sub { background: #f1e6ec; color: #333; }
+  /* 剪刀石頭布（Poyen 老師）：小小的放在畫面下方，中間留給老師（才看得到老師出拳、換表情） */
+  #rps { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); width: min(340px, calc(100vw - 24px)); z-index: 6;
+    background: #fff; border-radius: 14px; box-shadow: var(--shadow); padding: 8px 12px 10px; text-align: center; }
+  #rps .top { display: flex; justify-content: space-between; font-size: 12px; color: #666; }
+  #rps .vs { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 2px 0; }
+  #rps .vs > div { width: 70px; } #rps .vs small { display: block; color: #777; font-size: 11px; }
+  #rps .score { font-size: 18px; font-weight: 900; white-space: nowrap; }
+  #rps .hand { font-size: 32px; line-height: 1.1; min-height: 36px; }
+  #rps .hand.shake { animation: rpsShake .3s ease-in-out infinite; }
+  @keyframes rpsShake { 50% { transform: translateY(-6px); } }
+  #rps .msg { min-height: 1.4em; font-size: 13px; font-weight: 700; margin: 2px 0 6px; }
+  #rps .msg.ok { color: #1b8a3a; } #rps .msg.no { color: #c0392b; }
+  #rps .btns { display: flex; gap: 6px; justify-content: center; align-items: stretch; }
+  #rps .btns button { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 22px; padding: 4px 10px;
+    border-radius: 10px; background: #8fdc2c; line-height: 1; }
+  #rps .btns button small { font-size: 11px; font-weight: 700; color: #234; line-height: 1.2; }
+  #rps .btns button:disabled { opacity: .45; }
+  #rps .btns .quit { background: #e5e1ee; color: #333; font-size: 12px; font-weight: 700; justify-content: center; }
+  /* OOXX（杜老師）：一樣放在畫面下方 */
+  #ooxx { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); width: min(260px, calc(100vw - 24px)); z-index: 6;
+    background: #fff; border-radius: 14px; box-shadow: var(--shadow); padding: 8px 12px 10px; text-align: center; }
+  #ooxx .top { display: flex; justify-content: space-between; font-size: 12px; color: #666; }
+  #ooxx .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 168px; margin: 4px auto; }
+  #ooxx .cell { position: relative; height: 52px; font-size: 28px; line-height: 1; border-radius: 8px; background: #f3efe4; padding: 0; }
+  #ooxx .cell:empty::after { content: attr(data-k); color: #bbb; font-size: 13px; font-weight: 700; }
+  #ooxx .cell:not(:disabled):hover { background: #fde9b8; }
+  #ooxx .cell.win { background: #ffe066; }
+  #ooxx .msg { min-height: 1.4em; font-size: 13px; font-weight: 700; margin: 2px 0 6px; }
+  #ooxx .msg.ok { color: #1b8a3a; } #ooxx .msg.no { color: #c0392b; }
+  #ooxx .quit { background: #e5e1ee; color: #333; font-size: 12px; font-weight: 700; border-radius: 10px; padding: 4px 12px; }
+  /* 顏色對對碰（丁老師）：4×3 翻牌 */
+  #cm { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); width: min(360px, calc(100vw - 24px)); z-index: 6;
+    background: #fff; border-radius: 14px; box-shadow: var(--shadow); padding: 8px 12px 10px; text-align: center; }
+  #cm .top { display: flex; justify-content: space-between; font-size: 12px; color: #666; }
+  #cm .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin: 6px 0; }
+  #cm .cc { height: 62px; border-radius: 9px; background: #6c5ce7; color: #fff; padding: 2px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2px; line-height: 1; }
+  #cm .cc .q { font-size: 24px; }
+  #cm .cc.up { background: #fbf7ee; color: #333; }
+  #cm .cc.ok { background: #e6f6dc; box-shadow: inset 0 0 0 2px #6abf4b; }
+  #cm .cc i { display: inline-block; width: 18px; height: 18px; border-radius: 50%; border: 1px solid #999; }
+  #cm .cc i.big { width: 30px; height: 30px; }
+  #cm .cc b { font-size: 12px; }
+  #cm .cc small { flex-basis: 100%; font-size: 11px; font-weight: 700; }
+  #cm .msg { min-height: 1.4em; font-size: 13px; font-weight: 700; margin: 2px 0 6px; }
+  #cm .msg.ok { color: #1b8a3a; } #cm .msg.no { color: #c0392b; }
+  #cm .quit { background: #e5e1ee; color: #333; font-size: 12px; font-weight: 700; border-radius: 10px; padding: 4px 12px; }
+  /* 效能資訊（?perf 或 ` 鍵） */
+  #perf { position: fixed; right: 8px; bottom: 8px; z-index: 30; background: rgba(20, 24, 30, 0.82); color: #e8eef5; font: 12px/1.6 ui-monospace, Consolas, monospace;
+    padding: 6px 10px; border-radius: 8px; max-width: min(360px, calc(100vw - 16px)); pointer-events: auto; }
+  #perf b { font-size: 15px; } #perf .ok { color: #7ee08a; } #perf .mid { color: #ffd166; } #perf .bad { color: #ff7b72; }
+  #perf button { margin-top: 3px; font: inherit; font-size: 11px; padding: 1px 8px; border-radius: 6px; background: #3a4452; color: #fff; }
+  /* 英文聽力「聽聽看，是哪一個？」（Joanne 老師） */
+  #listen { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); width: min(380px, calc(100vw - 24px)); z-index: 6;
+    background: #fff; border-radius: 14px; box-shadow: var(--shadow); padding: 8px 12px 10px; text-align: center; }
+  #listen .top { display: flex; justify-content: space-between; font-size: 12px; color: #666; }
+  #listen .prog { font-size: 12px; color: #888; margin-top: 2px; }
+  #listen .word { font-size: 28px; font-weight: 900; letter-spacing: 1px; margin: 2px 0 4px; color: #2b4a8a; }
+  #listen .tools { display: flex; gap: 6px; justify-content: center; margin-bottom: 8px; }
+  #listen .tools button { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 10px; background: #dfe9ff; color: #233; }
+  #listen .btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  #listen .btns button { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 32px; padding: 6px 2px; border-radius: 10px; background: #ffe08a; line-height: 1.1; }
+  #listen .btns button small { font-size: 11px; color: #555; }
+  #listen .btns button.right { background: #b9eaa0; } #listen .btns button.wrong { background: #f6b3ab; }
+  #listen .msg { min-height: 1.4em; font-size: 13px; font-weight: 700; margin: 6px 0; }
+  #listen .msg.ok { color: #1b8a3a; } #listen .msg.no { color: #c0392b; }
+  #listen .quit { background: #e5e1ee; color: #333; font-size: 12px; font-weight: 700; border-radius: 10px; padding: 4px 12px; }
+  /* 注音符號大闖關（一年一班林老師） */
+  #zy { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); width: min(340px, calc(100vw - 24px)); z-index: 6;
+    background: #fff; border-radius: 14px; box-shadow: var(--shadow); padding: 8px 12px 10px; text-align: center; }
+  #zy .top { display: flex; justify-content: space-between; font-size: 12px; color: #666; }
+  #zy .pic { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 2px 0; }
+  #zy .emo { font-size: 34px; } #zy .word { font-size: 30px; font-weight: 900; }
+  #zy .ask { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  #zy .btns { display: flex; gap: 6px; justify-content: center; }
+  #zy .btns button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 22px; font-weight: 800; padding: 6px 4px; border-radius: 10px; background: #ffe08a; line-height: 1.1; }
+  #zy .btns button small { font-size: 11px; color: #555; }
+  #zy .btns button.right { background: #b9eaa0; } #zy .btns button.wrong { background: #f6b3ab; }
+  #zy .msg { min-height: 1.4em; font-size: 13px; font-weight: 700; margin: 6px 0; }
+  #zy .msg.ok { color: #1b8a3a; } #zy .msg.no { color: #c0392b; }
+  #zy .quit { background: #e5e1ee; color: #333; font-size: 12px; font-weight: 700; border-radius: 10px; padding: 4px 12px; }
+  /* 21 點（蔡老師）：一樣放在畫面下方 */
+  #bj { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); width: min(340px, calc(100vw - 24px)); z-index: 6;
+    background: #fff; border-radius: 14px; box-shadow: var(--shadow); padding: 8px 12px 10px; text-align: center; }
+  #bj .top { display: flex; justify-content: space-between; font-size: 12px; color: #666; }
+  #bj .hand { display: flex; align-items: center; gap: 8px; margin: 4px 0; text-align: left; }
+  #bj .hand small { width: 44px; flex: none; color: #777; font-size: 11px; font-weight: 700; }
+  #bj .cards { flex: 1; display: flex; flex-wrap: wrap; gap: 3px; min-height: 34px; }
+  #bj .card { display: inline-block; min-width: 30px; padding: 4px 3px; border: 1px solid #ccc; border-radius: 5px; background: #fffef8; font-size: 15px; font-weight: 800; text-align: center; }
+  #bj .card.back { background: #3b5bab; color: #fff; }
+  #bj .pt { width: 58px; flex: none; font-size: 13px; font-weight: 900; text-align: right; }
+  #bj .msg { min-height: 1.4em; font-size: 13px; font-weight: 700; margin: 2px 0 6px; }
+  #bj .msg.ok { color: #1b8a3a; } #bj .msg.no { color: #c0392b; }
+  #bj .btns { display: flex; gap: 6px; justify-content: center; }
+  #bj .btns button { font-size: 14px; font-weight: 800; padding: 6px 12px; border-radius: 10px; background: #8fdc2c; }
+  #bj .btns .quit { background: #e5e1ee; color: #333; font-size: 12px; }
+  /* 直笛記憶（小瑜老師）：一樣放在畫面下方 */
+  #flute { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); width: min(380px, calc(100vw - 24px)); z-index: 6;
+    background: #fff; border-radius: 14px; box-shadow: var(--shadow); padding: 8px 10px 8px; text-align: center; }
+  #flute .top { display: flex; justify-content: space-between; font-size: 12px; color: #666; }
+  #flute .top b { color: #6e5233; }
+  #flute .prog { display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; min-height: 12px; margin: 5px 0 2px; }
+  #flute .prog i { width: 10px; height: 10px; border-radius: 50%; background: #e3dccf; }
+  #flute .msg { min-height: 1.4em; font-size: 13px; font-weight: 700; margin: 2px 0 6px; }
+  #flute .msg.ok { color: #1b8a3a; } #flute .msg.no { color: #c0392b; }
+  #flute .keys { display: flex; gap: 5px; justify-content: center; }
+  #flute .keys button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px 2px 4px;
+    border-radius: 10px; background: color-mix(in srgb, var(--c) 30%, #fff); border: 2px solid var(--c); color: #234; transition: transform .1s; }
+  #flute .keys button b { font-size: 14px; line-height: 1.1; } #flute .keys button b small { display: block; font-size: 9px; }
+  #flute .keys button > small { font-size: 10px; color: #555; }
+  #flute .keys button.lit { background: var(--c); transform: translateY(-4px) scale(1.06); }
+  #flute .keys button:disabled { opacity: .55; cursor: default; } #flute .keys button.lit:disabled { opacity: 1; }
+  #flute .fing { display: grid; grid-template-columns: 6px 6px; column-gap: 1px; row-gap: 1px; }
+  #flute .fing i { grid-column: 2; width: 6px; height: 6px; border-radius: 50%; border: 1px solid #234; box-sizing: border-box; }
+  #flute .fing i.th { grid-column: 1; grid-row: 1; border-style: dashed; }
+  #flute .fing i.on { background: #234; }
+  #flute .foot { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 11px; color: #777; }
+  #bgmBtn i { font-style: normal; } #bgmBtn.off { opacity: .6; }
+  @media (max-width: 1180px) { #bgmBtn span { display: none; } }   /* 上面那排擠不下：只留圖示 */
+  #flute .quit { background: #e5e1ee; color: #333; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 8px; }
+  /* 節奏划水（游泳館的陳老師）：提示從右邊滑到圈圈時按；手機按下面三個大按鈕 */
+  #swim { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); width: min(400px, calc(100vw - 24px)); z-index: 6;
+    background: #fff; border-radius: 14px; box-shadow: var(--shadow); padding: 8px 10px 8px; text-align: center; user-select: none; -webkit-user-select: none; }
+  #swim .top { display: flex; justify-content: space-between; font-size: 12px; color: #666; }
+  #swim .top b { color: #1f6fb2; }
+  #swim .lane { position: relative; height: 8px; margin: 7px 14px 4px 6px; border-radius: 4px; background: repeating-linear-gradient(90deg, #d63a3a 0 8px, #f2f2f2 8px 16px); }
+  #swim .lane i { position: absolute; top: 50%; transform: translate(-50%, -50%); font-style: normal; font-size: 16px; transition: left .2s linear; }
+  #swim .lane::after { content: '🏁'; position: absolute; right: -14px; top: 50%; transform: translateY(-55%); font-size: 13px; }
+  #swim .track { position: relative; height: 54px; margin: 6px 0 2px; border-radius: 12px; background: linear-gradient(#bfe6fb, #8fd0f2); overflow: hidden; }
+  #swim .ring { position: absolute; left: 12%; top: 50%; width: 46px; height: 46px; transform: translate(-50%, -50%); border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 2px #1f6fb2; }
+  #swim .ring.pulse { animation: swimPulse .3s ease-out; }
+  @keyframes swimPulse { from { transform: translate(-50%, -50%) scale(1.18); background: rgba(255, 255, 255, .6); } to { transform: translate(-50%, -50%) scale(1); } }
+  #swim .cue { position: absolute; top: 50%; width: 38px; height: 38px; transform: translate(-50%, -50%); border-radius: 50%; font-style: normal; font-size: 21px; line-height: 38px; }
+  #swim .cue.L { background: #4f8fe8; } #swim .cue.R { background: #f2a03a; } #swim .cue.B { background: #3cc1a8; }
+  #swim .track:not(.timed) .cue { transition: left .18s ease-out; }
+  #swim .track:not(.timed) .cue.next { width: 46px; height: 46px; line-height: 46px; font-size: 26px; }
+  #swim .cue.hit { animation: swimHit .35s forwards; } #swim .cue.miss { animation: swimMiss .35s forwards; }
+  @keyframes swimHit { to { transform: translate(-50%, -90%) scale(1.5); opacity: 0; } }
+  @keyframes swimMiss { to { transform: translate(-50%, 0) scale(.6); opacity: 0; filter: grayscale(1); } }
+  #swim .msg { min-height: 1.4em; font-size: 13px; font-weight: 700; margin: 4px 0 6px; }
+  #swim .msg.ok { color: #1b8a3a; } #swim .msg.no { color: #c0392b; }
+  #swim .modes, #swim .pads { display: flex; gap: 6px; }
+  #swim .modes button { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 8px 4px; border-radius: 12px; background: #e3f2fc; border: 2px solid #1f6fb2; color: #1a3550; }
+  #swim .modes b { font-size: 16px; } #swim .modes small { font-size: 11px; color: #456; }
+  #swim .pads button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 2px 6px; border-radius: 14px;
+    background: color-mix(in srgb, var(--c) 25%, #fff); border: 2px solid var(--c); color: #234; font-size: 30px; line-height: 1; touch-action: manipulation; transition: transform .08s; }
+  #swim .pads button small { font-size: 11px; color: #345; }
+  #swim .pads button.lit { background: var(--c); transform: scale(.94); }
+  #swim .foot { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 11px; color: #777; }
+  #swim .quit { background: #e5e1ee; color: #333; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 8px; }
+  /* 蜜袋鼯能吃嗎？（邱老師） */
+  #food { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); width: min(360px, calc(100vw - 24px)); z-index: 6;
+    background: #fff; border-radius: 14px; box-shadow: var(--shadow); padding: 8px 12px 10px; text-align: center; }
+  #food .top { display: flex; justify-content: space-between; font-size: 12px; color: #666; }
+  #food .item { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 4px 0 2px; }
+  #food .emo { font-size: 40px; line-height: 1; } #food .nm { font-size: 20px; font-weight: 900; color: #6b3a4a; }
+  #food .msg { min-height: 2.8em; font-size: 13px; font-weight: 700; margin: 2px 0 6px; line-height: 1.4; }
+  #food .msg.ok { color: #1b8a3a; } #food .msg.no { color: #c0392b; }
+  #food .btns { display: flex; gap: 6px; justify-content: center; align-items: stretch; }
+  #food .btns button { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 22px; padding: 4px 16px; border-radius: 10px; line-height: 1; }
+  #food .btns [data-a="1"] { background: #c8efc0; } #food .btns [data-a="0"] { background: #f8c9c9; }
+  #food .btns button small { font-size: 11px; font-weight: 700; color: #234; line-height: 1.2; }
+  #food .btns button:disabled { opacity: .45; }
+  #food .btns .quit { background: #e5e1ee; color: #333; font-size: 12px; font-weight: 700; justify-content: center; }
+  /* 樂樂棒球（張校長）：放在上面，下面留給球場 */
+  #bb { position: fixed; left: 50%; top: 74px; transform: translateX(-50%); width: min(380px, calc(100vw - 24px)); z-index: 6;
+    background: #fff; border-radius: 14px; box-shadow: var(--shadow); padding: 8px 12px 10px; text-align: center; }
+  #bb .top { display: flex; justify-content: space-between; font-size: 12px; color: #666; }
+  #bb .cnt { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; font-size: 13px; font-weight: 700; margin: 4px 0; }
+  #bb .cnt i { font-style: normal; }
+  #bb .msg { min-height: 1.4em; font-size: 13px; font-weight: 700; margin: 2px 0 6px; }
+  #bb .msg.ok { color: #1b8a3a; } #bb .msg.no { color: #c0392b; }
+  #bb .btns { display: flex; gap: 6px; justify-content: center; }
+  #bb .btns button { padding: 7px 16px; font-weight: 700; border-radius: 10px; background: #1f3a7a; color: #fff; font-size: 15px; }
+  #bb .btns .quit { background: #e5e1ee; color: #333; font-size: 12px; }
+  body.mc .brand, body.mc #search, body.mc #info, body.mc #help .card, body.mc #gallery .card-wrap, body.mc #stairPanel, body.mc #quiz, body.mc #paint, body.mc #rps, body.mc #ooxx, body.mc #bj, body.mc #cm, body.mc #zy, body.mc #flute, body.mc #swim, body.mc #food, body.mc #bb {
+    background: var(--mc-panel); color: var(--mc-ink); border: 3px solid #111; border-radius: 0;
+    box-shadow: inset 3px 3px 0 #fff, inset -3px -3px 0 #555, 0 6px 0 rgba(0,0,0,.25);
+  }
+  body.mc .brand b { font-size: 20px; color: #2b2b2b; white-space: nowrap; }
+  body.mc .brand small { white-space: nowrap; }
+  body.mc .brand small { color: #555; }
+  body.mc .brand #floorName { color: #b5470b; }
+  body.mc #search header, body.mc #gallery header { border-bottom: 3px solid #8b8b8b; }
+  body.mc #q { background: #000; color: #fff; border: 2px solid #a0a0a0; border-radius: 0; font-family: inherit; }
+  body.mc #q:focus { border-color: #fff; }
+  body.mc #results li { border-radius: 0; }
+  body.mc #results li:hover { background: #b0b0b0; }
+  body.mc #results .s, body.mc #gallery .card small { color: #555; }
+  body.mc #results .dot { border-radius: 0; border: 2px solid #333; }
+  body.mc #info .meta span { background: #8b8b8b; color: #fff; border-radius: 0; text-shadow: 1px 1px 0 #444; }
+  body.mc #info .title { font-weight: 400; font-size: 26px; }
+  body.mc #gallery .card { background: #8b8b8b; border: 2px solid #111; border-radius: 0; color: #fff; text-shadow: 1px 1px 0 #333; }
+  body.mc #gallery .card small { color: #e6e6e6; }
+  body.mc #gallery h3 { color: #4a1677; }
+  body.mc #navbar, body.mc #toast, body.mc #panoPrompt { border-radius: 0; border: 2px solid #111; background: rgba(0,0,0,.72); }
+  body.mc #navbar b { color: #ffd84a; }
+  body.mc #toast { color: #ffe066; text-shadow: 2px 2px 0 #3a2a00; }
+  body.mc #panoPrompt { background: #5a1f8f; box-shadow: inset 2px 2px 0 #9d4edd, inset -2px -2px 0 #2c0b4a; }
+  body.mc #stairPanel .t { color: #b5470b; }
+  body.mc #help td { border-bottom-color: #9a9a9a; }
+  body.mc #help h3 { color: #2f4fa8; }
+  body.mc .legend i { border-radius: 0; }
+  body.mc #joy { border-radius: 0; background: rgba(0,0,0,.25); border: 3px solid rgba(255,255,255,.6); }
+  body.mc #joy .knob { border-radius: 0; background: #c6c6c6; box-shadow: inset 3px 3px 0 #fff, inset -3px -3px 0 #555; }
+  body.mc #pano .title, body.mc #pano .info, body.mc #pano .hint { border-radius: 0; border: 2px solid #111; background: rgba(0,0,0,.65); }
+  body.mc #pano .title b { font-weight: 400; }
+  body.mc kbd { border-radius: 0; }
+  body.mc #info .x { background: none; box-shadow: none; border: 0; color: #555; text-shadow: none; }
+  body.mc .style-pick button.on { outline: 3px solid #4f8a2b; }
+  body.mc #chooser .card-wrap { background: #fbf6ea; color: #2b2b2b; border: 3px solid #111; border-radius: 0;
+    box-shadow: 10px 10px 0 rgba(0,0,0,.28); }                 /* 紙條風格（同一般風格） */
+  body.mc #chooser h2 { font-family: "Cubic 11", "Noto Sans TC", sans-serif; font-weight: 400; }
+  body.mc #chooser .choices button { background: #8fc8ff; box-shadow: inset 3px 3px 0 #c8e4ff, inset -3px -3px 0 #4b7fae; padding: 10px 6px 14px; }
+  body.mc #chooser .outfits button { padding: 5px 14px; font-size: 14px; }
+  body.mc #chooser .outfits button.on { background: #d32f2f; box-shadow: inset 2px 2px 0 #ff8080, inset -2px -2px 0 #8a1414; }
+  body.mc #chooser .choices button.on { outline: 4px solid #d32f2f; }
+
+  @media (max-width: 640px) {
+    #top { flex-wrap: wrap; }
+    .brand b { font-size: 15px; }
+    .seg button { padding: 6px 8px; font-size: 13px; }
+    #search { top: auto; bottom: 0; right: 0; left: 0; width: 100%; max-height: 70vh; border-radius: 16px 16px 0 0; }
+    #floors button { width: 40px; height: 34px; font-size: 13px; }
+    #navbar { top: auto; bottom: 160px; }
+  }
+  /* 首頁封面放在 @layer 外面，才不會被方塊風的按鈕樣式蓋掉 */
+  /*（參考 DSLab）：米白紙色背景、等角全景、紙條標籤 */
+  #cover { position: fixed; inset: 0; z-index: 16; background: #f3eee3; overflow: hidden; color: #2b2b2b; }
+  #cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; }
+  #cover .tags { position: absolute; inset: 0; pointer-events: none; }
+  #cover .ctag { position: absolute; transform: translate(calc(-50% + var(--dx, 0px)), calc(-100% - var(--lift, 44px))); pointer-events: auto; background: #fbf6ea; color: #2b2b2b;
+    border: 3px solid #2b2b2b; border-left: 9px solid var(--acc); border-radius: 0; padding: 7px 12px 6px 9px; box-shadow: 5px 5px 0 rgba(0,0,0,.25);
+    text-align: left; line-height: 1.15; text-shadow: none; transition: transform .15s; white-space: nowrap; }
+  #cover .ctag::before { content: ''; position: absolute; top: -11px; left: 50%; width: 44px; height: 15px; margin-left: -22px; background: rgba(226,138,138,.85); transform: rotate(-3deg); }
+  #cover .ctag::after { content: ''; position: absolute; left: calc(50% - 6px - var(--dx, 0px)); top: calc(100% + 3px); width: 3px; height: calc(var(--lift, 44px) - 3px); background: #2b2b2b; }
+  #cover .ctag b { display: block; font-size: 17px; font-weight: 900; }
+  #cover .ctag small { font-size: 10px; letter-spacing: 2px; color: var(--acc); font-weight: 700; }
+  #cover .ctag:hover, #cover .ctag.on { transform: translate(calc(-50% + var(--dx, 0px)), calc(-100% - var(--lift, 44px) - 6px)); background: #fff; filter: none; }
+  #cover .ctag.on { outline: 3px solid var(--acc); }
+  #cover .intro { position: absolute; left: 4vw; top: 13vh; max-width: 36vw; }
+  #cover .kicker { color: #c0392b; letter-spacing: 4px; font-weight: 700; font-size: 12px; }
+  #cover h1 { font-size: clamp(44px, 7vw, 100px); margin: 6px 0 2px; font-weight: 900; line-height: 1; }
+  html[lang="en"] #cover h1 { font-size: clamp(34px, 4.2vw, 64px); }   /* 英文校名比較長，字小一點才不會壓到右邊的校園圖 */
+  #cover .sub { margin: 0 0 14px; font-weight: 700; color: #6b6458; }
+  #cover .lead { font-size: 18px; line-height: 1.7; margin: 0 0 16px; }
+  #cover .btns button { padding: 10px 18px; margin: 0 8px 8px 0; font-weight: 900; font-size: 16px; border: 3px solid #2b2b2b; border-radius: 0;
+    box-shadow: 4px 4px 0 rgba(0,0,0,.25); background: #fbf6ea; color: #2b2b2b; text-shadow: none; }
+  #cover .btns .primary { background: #c0392b; color: #fff; }
+  #cover .guide { position: absolute; left: 4vw; bottom: 5vh; width: min(380px, calc(100vw - 32px)); background: #fbf6ea; border: 3px solid #2b2b2b;
+    box-shadow: 8px 8px 0 rgba(0,0,0,.25); padding: 0 16px 14px; transform: rotate(-.6deg); }
+  #cover .guide .hd { margin: 0 -16px 10px; background: #c0392b; color: #fff; padding: 6px 14px; font-size: 12px; letter-spacing: 3px; font-weight: 700; }
+  #cover .guide h3 { margin: 0 0 4px; font-size: 22px; }
+  #cover .guide p { margin: 0 0 10px; font-size: 14px; color: #4a4a4a; }
+  #cover .list { display: flex; flex-wrap: wrap; gap: 6px; }
+  #cover .list button { border: 2px solid #2b2b2b; border-left: 6px solid var(--acc); background: #fff; color: #2b2b2b; padding: 3px 8px; border-radius: 0;
+    font-size: 13px; font-weight: 700; box-shadow: none; text-shadow: none; }
+  #cover .list button.on { background: #ffe9a8; }
+  #cover .go { margin-top: 10px; background: #c0392b; color: #fff; border: 3px solid #2b2b2b; border-radius: 0; padding: 6px 14px; font-weight: 900;
+    text-shadow: none; box-shadow: 3px 3px 0 rgba(0,0,0,.25); }
+  #cover .credit { position: absolute; right: 2vw; bottom: 5vh; background: #fbf6ea; border: 3px solid #2b2b2b; box-shadow: 6px 6px 0 rgba(0,0,0,.25);
+    padding: 0 14px 10px; font-size: 13px; line-height: 1.7; transform: rotate(.6deg); }
+  #cover .credit .hd { margin: 0 -14px 6px; background: #2b2b2b; color: #fbf6ea; padding: 4px 12px; font-size: 11px; letter-spacing: 3px; font-weight: 700; }
+  #cover .credit dl { margin: 0; display: grid; grid-template-columns: auto 1fr; column-gap: 6px; }
+  #cover .credit dt { color: #6b6458; font-weight: 700; }
+  #cover .credit dd { margin: 0; font-weight: 700; }
+  #cover .credit a { color: #c0392b; text-decoration: underline; text-underline-offset: 2px; }
+  #cover .credit a:hover { color: #8e1f14; }
+  @media (max-width: 760px), (max-aspect-ratio: 23/20) {
+    #cover .intro { left: 16px; right: 16px; top: 18px; max-width: none; }
+    #cover h1 { font-size: 46px; }
+    html[lang="en"] #cover h1 { font-size: 34px; }
+    #cover .kicker { padding-right: 60px; }   /* 右上角的語言按鈕不要壓到字 */
+    #cover .lead { display: none; }
+    #cover .guide { left: 16px; bottom: 88px; }
+    #cover .credit { left: 16px; right: 16px; bottom: 12px; padding: 4px 10px; font-size: 11px; line-height: 1.45; transform: none; box-shadow: 4px 4px 0 rgba(0,0,0,.25); }
+    #cover .credit .hd { display: none; }
+    #cover .tags { display: none; }                         /* 手機：浮動紙條太擠，改用下面導覽卡的按鈕 */
+  }
+
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "./vendor/three/build/three.module.js",
+  "three/addons/": "./vendor/three/examples/jsm/"
+} }
+</script>
+<style>body > :not(#scene) { display: none !important; } #scene { inset: 0; }</style>
+</head>
+<body>
+<div id="scene"></div>
+
+<div id="top">
+  <div class="brand"><b data-en="Xikou 3D Campus">溪口國小 3D 校園</b><small><span data-en="Year 115 · Now: ">115 學年度 · 目前：</span><span id="floorName">全校</span></small></div>
+  <div class="seg" role="group" aria-label="視角" data-en-aria="View">
+    <button data-mode="bird" data-en="🛰️ Bird's-eye">🛰️ 鳥瞰</button>
+    <button data-mode="third" data-en="🧍 Third">🧍 第三人稱</button>
+    <button data-mode="first" data-en="👀 First">👀 第一人稱</button>
+  </div>
+  <button class="iconbtn" id="avatarBtn" aria-label="選擇角色" data-en-aria="Choose character" data-en="👕 Avatar">👕 角色</button>
+  <button class="iconbtn" id="passBtn" aria-label="校園護照" data-en-aria="Campus passport">📒<span data-en=" Passport"> 護照</span></button>
+  <div class="timeWrap">
+    <button class="iconbtn" id="timeBtn" aria-label="時間" data-en-aria="Time of day" aria-haspopup="true" aria-expanded="false"><i>☀️</i><span> 中午</span></button>
+    <div class="seg timeMenu" id="timeMenu" role="menu" aria-label="時間" data-en-aria="Time of day" hidden></div>
+  </div>
+  <div class="spacer"></div>
+  <button class="iconbtn" id="bgmBtn" aria-label="背景音樂：校歌" data-en-aria="Background music: school song" aria-pressed="true"><i>🎵</i><span data-en=" Song"> 校歌</span></button>
+  <button class="iconbtn" id="openGallery" style="background:#7b2cbf;color:#fff" data-en="📷 360° Tour">📷 實景導覽</button>
+  <button class="iconbtn primary" id="openSearch" data-en="🔍 Find a room">🔍 找教室</button>
+  <button class="iconbtn langBtn" id="langBtn" aria-label="切換中文／English" title="切換中文／English">EN</button>
+  <button class="iconbtn" id="helpBtn" aria-label="說明" data-en-aria="Help">❔</button>
+</div>
+
+<div id="floors"></div>
+<div id="where"><i>📍</i><span>校園</span></div>
+<div id="minimap"><canvas width="300" height="300"></canvas><b class="n" data-en="N">北</b><b class="fl">1F</b></div>
+
+<div id="search" hidden>
+  <header>
+    <input id="q" type="search" placeholder="輸入班級、教室號碼或名稱，例如 503、健康中心" data-en-ph="Class, room number or name, e.g. 503, Library" autocomplete="off">
+    <button id="closeSearch" data-en="Close">關閉</button>
+  </header>
+  <label class="opt"><input type="checkbox" id="preferElevator"> <span data-en="🛗 Prefer the elevator (no stairs between floors)">🛗 優先搭電梯（換樓層不走樓梯）</span></label>
+  <label class="opt"><input type="checkbox" id="navChallenge"> <span data-en="🧭 Wayfinding challenge (no yellow line, only clues and the minimap)">🧭 挑戰尋路（不畫黃線，只給線索和小地圖）</span></label>
+  <ul id="results"></ul>
+</div>
+
+<div id="info" hidden>
+  <button class="x" data-act="close" aria-label="關閉" data-en-aria="Close">✕</button>
+  <div class="title"></div>
+  <div class="meta"></div>
+  <div class="acts">
+    <button data-act="go" data-en="🧭 Take me there">🧭 帶我去</button>
+    <button data-act="tp" data-en="✨ Teleport">✨ 傳送</button>
+    <button data-act="share" data-en="🔗 Share">🔗 分享</button>
+  </div>
+</div>
+
+<div id="navbar" hidden><span class="msg"></span><button data-en="End">結束導航</button><button id="revealNav" hidden data-en="Show route">顯示路線</button></div>
+<div id="stairPanel" hidden></div>
+<div id="joy"><div class="knob"></div></div>
+<div id="panoPrompt" hidden></div>
+<button id="actPrompt" hidden></button>
+<button id="quitGame" hidden data-en="✖ End game">✖ 結束比賽</button>
+<div id="quiz" hidden>
+  <div class="top"><span class="cat"></span><span class="prog"></span></div>
+  <div class="emo"></div><div class="q"></div><div class="hint"></div>
+  <input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="用鍵盤打英文單字" data-en-ph="Type the English word">
+  <div class="msg"></div>
+  <div class="btns"><button class="go" data-en="Submit Enter">送出 Enter</button><button class="sub skip" data-en="I don't know">我不會</button><button class="sub quit" data-en="Quit Esc">結束 Esc</button></div>
+  <div class="tip">🔊 答完會唸出單字的發音</div>
+</div>
+<div id="paint" hidden>
+  <div class="top"><span class="cat" data-en="🎨 Coloring Book">🎨 哈囉老師的著色本</span><span class="name"></span></div>
+  <canvas width="400" height="400"></canvas>
+  <div class="pal"></div>
+  <div class="msg"></div>
+  <div class="btns"><button class="done" data-en="Done ✨">完成 ✨</button><button class="sub next" data-en="Another one">換一隻</button><button class="sub clear" data-en="Start over">重來</button><button class="sub save" data-en="Save image">存成圖片</button><button class="sub quit" data-en="Quit Esc">結束 Esc</button></div>
+</div>
+<div id="rps" hidden>
+  <div class="top"><span data-en="✂️ Rock-Paper-Scissors · Best of 3">✂️ 剪刀石頭布・三戰兩勝</span><span class="round"></span></div>
+  <div class="vs"><div><small data-en="You">你</small><div class="hand me">❔</div></div><div class="score"></div><div><small class="who"></small><div class="hand them">❔</div></div></div>
+  <div class="msg"></div>
+  <div class="btns">
+    <button data-h="0">✌️<small data-en="Scissors 1">剪刀 1</small></button><button data-h="1">✊<small data-en="Rock 2">石頭 2</small></button><button data-h="2">🖐️<small data-en="Paper 3">布 3</small></button>
+    <button class="quit" data-en="Quit<br>Esc">結束<br>Esc</button>
+  </div>
+</div>
+<div id="ooxx" hidden>
+  <div class="top"><span><span data-en="⭕ Tic-tac-toe · You ⭕ vs">⭕ OOXX・你 ⭕ vs</span> <b class="who"></b> ❌</span></div>
+  <div class="board"><button class="cell"></button><button class="cell"></button><button class="cell"></button><button class="cell"></button><button class="cell"></button><button class="cell"></button><button class="cell"></button><button class="cell"></button><button class="cell"></button></div>
+  <div class="msg"></div>
+  <button class="quit" data-en="Quit Esc">結束 Esc</button>
+</div>
+<div id="zy" hidden>
+  <div class="top"><span><span data-en="🔤 Zhuyin Challenge · ">🔤 注音符號大闖關・</span><b class="lv"></b></span><span class="hearts"></span></div>
+  <div class="pic"><span class="emo"></span><span class="word"></span></div>
+  <div class="ask"></div>
+  <div class="btns"><button data-k="0"></button><button data-k="1"></button><button data-k="2"></button></div>
+  <div class="msg"></div>
+  <button class="quit" data-en="Quit Esc">結束 Esc</button>
+</div>
+<div id="listen" hidden>
+  <div class="top"><span><span data-en="🎧 Listen and Choose · ">🎧 聽聽看，是哪一個？・</span><b class="who"></b></span><span class="hearts"></span></div>
+  <div class="prog"></div>
+  <div class="word"></div>
+  <div class="tools"><button class="again" data-en="🔊 Replay R">🔊 重聽 R</button><button class="slow" data-en="🐢 Slowly S">🐢 慢慢唸 S</button><button class="peek" data-en="👀 Show word">👀 看字</button></div>
+  <div class="btns"><button data-k="0"></button><button data-k="1"></button><button data-k="2"></button><button data-k="3"></button></div>
+  <div class="msg"></div>
+  <button class="quit" data-en="Quit Esc">結束 Esc</button>
+</div>
+<div id="cm" hidden>
+  <div class="top"><span><span data-en="🎨 Color Match · ">🎨 顏色對對碰・</span><b class="who"></b></span><span class="flips"></span></div>
+  <div class="grid"></div>
+  <div class="msg"></div>
+  <button class="quit" data-en="Quit Esc">結束 Esc</button>
+</div>
+<div id="bj" hidden>
+  <div class="top"><span data-en="🃏 Blackjack · Closest to 21 wins">🃏 21 點・最接近 21 的贏</span><span class="wins"></span></div>
+  <div class="hand them"><small class="who"></small><div class="cards"></div><span class="pt"></span></div>
+  <div class="hand me"><small data-en="You">你</small><div class="cards"></div><span class="pt"></span></div>
+  <div class="msg"></div>
+  <div class="btns"><button class="hit" data-en="Hit 1">要牌 1</button><button class="stand" data-en="Stand 2">停牌 2</button><button class="again" hidden data-en="Play again 1">再玩一局 1</button><button class="quit" data-en="Quit Esc">結束 Esc</button></div>
+</div>
+<div id="flute" hidden>
+  <div class="top"><span><span data-en="🎵 Recorder Memory · ">🎵 直笛記憶・</span><b class="lv"></b></span><span class="lives"></span></div>
+  <div class="prog"></div>
+  <div class="msg"></div>
+  <div class="keys"></div>
+  <div class="foot"><span class="best"></span><button class="quit" data-en="Quit Esc">結束 Esc</button></div>
+</div>
+<div id="swim" hidden>
+  <div class="top"><span><span data-en="🏊 Rhythm Swim · ">🏊 節奏划水・</span><b class="md"></b></span><span class="dist"></span></div>
+  <div class="lane"><i>🏊</i></div>
+  <div class="track"><span class="ring"></span><div class="cues"></div></div>
+  <div class="msg"></div>
+  <div class="modes"></div>
+  <div class="pads"></div>
+  <div class="foot"><span class="best"></span><button class="quit" data-en="Quit Esc">結束 Esc</button></div>
+</div>
+<div id="food" hidden>
+  <div class="top"><span class="ttl">🐿️ 蜜袋鼯能吃嗎？</span><span class="round"></span></div>
+  <div class="item"><span class="emo"></span><span class="nm"></span></div>
+  <div class="msg"></div>
+  <div class="btns">
+    <button data-a="1">✅<small>可以吃 1</small></button><button data-a="0">❌<small>不能吃 2</small></button>
+    <button class="quit" data-en="Quit<br>Esc">結束<br>Esc</button>
+  </div>
+</div>
+<div id="bb" hidden>
+  <div class="top"><span data-en="⚾ T-Ball · Batter vs Pitcher">⚾ 樂樂棒球・投打對決</span><span class="runs"></span></div>
+  <div class="cnt"><span><span data-en="Strikes">好球</span> <b class="s"></b></span><span><span data-en="Balls">壞球</span> <b class="b"></b></span><span><span data-en="Outs">出局</span> <b class="o"></b></span><span class="bases"></span></div>
+  <div class="msg"></div>
+  <div class="btns"><button class="swing" data-en="⚾ Swing F">⚾ 揮棒 F</button><button class="quit" data-en="Quit Esc">結束 Esc</button></div>
+</div>
+<div id="power" hidden><div class="lbl" data-en="Press again when it is in the green zone!">時機抓在綠色區域再按一次！</div><div class="sweet"></div><div class="bar"></div></div>
+
+<div id="gallery" hidden>
+  <div class="card-wrap">
+    <header><b data-en="📷 360° Virtual Tour">📷 360° 實景導覽</b><button class="close" data-en="Close">關閉</button></header>
+    <div class="list"></div>
+  </div>
+</div>
+
+<div id="cover" hidden>
+  <button class="langBtn coverLang" aria-label="切換中文／English">EN</button>
+  <img alt="溪口國小 3D 校園全景" data-en-alt="Xikou Elementary 3D campus overview">
+  <div class="tags"></div>
+  <div class="intro">
+    <div class="kicker">XIKOU ELEMENTARY · 3D CAMPUS</div>
+    <h1 data-en="Xikou<br>Elementary">溪口國小</h1>
+    <p class="sub" data-en="3D Campus · School Year 115">3D 校園 · 115 學年度</p>
+    <p class="lead" data-en="Walk into Xikou Elementary,<br>find any room, follow the yellow line,<br>and explore 360° views.">走進溪口國小，<br>找教室、跟著黃線帶路、<br>看 360° 實景。</p>
+    <div class="btns"><button class="primary" data-act="walk" data-en="Walk in">走進校園</button><button data-act="bird" data-en="Bird's-eye view">先看鳥瞰</button></div>
+  </div>
+  <div class="guide">
+    <div class="hd" data-en="FIELD GUIDE · Campus Guide">FIELD GUIDE · 校園導覽</div>
+    <h3 data-en="Welcome to Xikou Elementary">歡迎來到溪口國小</h3>
+    <p data-en="Tap a building or place to read about it, then tap again to go there.">點一棟建築或地點看介紹，再點一次就直接過去。</p>
+    <div class="list"></div>
+    <button class="go" hidden data-en="Take me there ↗">帶我過去 ↗</button>
+  </div>
+  <div class="credit">
+    <div class="hd" data-en="CREDITS">CREDITS · 製作資訊</div>
+    <dl>
+      <dt data-en="Designer:">設計者：</dt><dd data-en="Upsky (Teacher Sky)">Upsky（阿喵老師）</dd>
+      <dt data-en="Inspired by:">發想：</dt><dd data-en="Watt (Facebook) / <a href=&quot;https://3dtypsmap.vercel.app/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;>Dayong Elementary</a>">FB 瓦特／<a href="https://3dtypsmap.vercel.app/" target="_blank" rel="noopener">大勇國小</a></dd>
+      <dt data-en="Tools:">使用工具：</dt><dd>Claude Code、Muse AI</dd>
+      <dt data-en="Thanks to:">特別感謝：</dt><dd data-en="All teachers and students of Xikou Elementary">溪口國小全體師生</dd>
+    </dl>
+  </div>
+</div>
+
+<div id="chooser" hidden>
+  <div class="card-wrap">
+    <div class="guide" data-en="FIELD GUIDE · <b>Xikou Campus Guide</b>">FIELD GUIDE · <b>溪口國小校園導覽</b></div>
+    <h2 data-en="Choose your character">選擇你的角色</h2>
+    <p data-en="Put on the Xikou uniform and explore the campus!">穿上溪口國小的制服，一起逛校園！</p>
+    <div class="outfits" role="group" aria-label="服裝" data-en-aria="Outfit"></div>
+    <div class="outfits bbgirl" role="group" aria-label="女生籃球隊服款式" data-en-aria="Girls' basketball style" hidden></div>
+    <div class="choices">
+      <button data-gender="boy"><img alt="男學生" data-en-alt="Boy"><b data-en="Boy">男學生</b></button>
+      <button data-gender="girl"><img alt="女學生" data-en-alt="Girl"><b data-en="Girl">女學生</b></button>
+    </div>
+    <div class="keys" data-en="Tap the ground or minimap: walk there　<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk (<kbd>Shift</kbd> run, <kbd>Space</kbd> jump)<br>Drag: look around　<kbd>M</kbd> bird's-eye　<kbd>V</kbd> first/third person　<kbd>C</kbd> change character　<kbd>/</kbd> find a room　<kbd>F</kbd> interact">
+      點地面或小地圖：自動走過去　<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 走路（<kbd>Shift</kbd> 跑、<kbd>空白</kbd> 跳）<br>
+      拖曳畫面：轉頭　<kbd>M</kbd> 鳥瞰　<kbd>V</kbd> 第一／第三人稱　<kbd>C</kbd> 換角色　<kbd>/</kbd> 找教室　<kbd>F</kbd> 互動
+    </div>
+    <button class="bird" data-act="bird" data-en="🛰️ Bird's-eye view first">🛰️ 先看鳥瞰</button><br>
+    <small data-en="You can change later with &quot;👕 Avatar&quot; at the top or the C key">之後可以按上方「👕 角色」或 C 鍵換角色</small>
+  </div>
+</div>
+
+<div id="pano" hidden>
+  <div class="canvas"></div>
+  <div class="bar">
+    <button class="close">✕ 回到 3D 校園</button>
+    <div class="title"><b></b><small></small></div>
+    <div class="tabs"></div>
+    <div class="spacer"></div>
+    <button class="locate">📍 在地圖上</button>
+  </div>
+  <div class="hint"></div>
+  <div class="loading" hidden>載入中…</div>
+  <div class="notice" hidden></div>
+  <div class="info">
+    <div class="text"></div>
+    <div class="ctrl">
+      <button class="audio">🔊 聽介紹</button>
+      <button class="more">展開 / 收合</button>
+      <button class="lang">English</button>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="prev" aria-label="上一個">‹ 上一個</button>
+    <span class="count"></span>
+    <button class="next" aria-label="下一個">下一個 ›</button>
+  </div>
+</div>
+<div id="toast"></div>
+<div id="fade"></div>
+
+<div id="passport" hidden><div class="card"><button class="close" aria-label="關閉護照" data-en-aria="Close passport">✕</button><div class="body"></div></div></div>
+<div id="help" hidden>
+  <div class="card">
+    <button class="close">✕</button>
+    <h2 data-en="How to play">怎麼玩？</h2>
+    <h3 data-en="Computer">電腦</h3>
+    <table>
+      <tr><td data-en="Tap ground / minimap">點地面 / 小地圖</td><td data-en="Walk there automatically (arrow keys to stop)">自動走過去（按方向鍵就停）</td></tr>
+      <tr><td data-en="📒 Passport">📒 護照</td><td data-en="See how many teachers you have met and stamps you have collected">看看認識了幾位老師、蓋了幾個章</td></tr>
+      <tr><td data-en="🧭 Wayfinding challenge">🧭 挑戰尋路</td><td data-en="Tick it in "Find a room": no yellow line, just clues and the minimap">在「找教室」勾選後，不畫黃線，只靠線索和小地圖找路</td></tr>
+      <tr><td>W A S D</td><td data-en="Walk forward / back / left / right">前後左右走</td></tr>
+      <tr><td data-en="Drag mouse / ← →">滑鼠拖曳 / ← →</td><td data-en="Look around">轉頭看</td></tr>
+      <tr><td>Shift</td><td data-en="Run">跑步</td></tr>
+      <tr><td data-en="Space">空白鍵</td><td data-en="Jump">跳</td></tr>
+      <tr><td data-en="Stairs">走上樓梯</td><td data-en="Walk onto the stairs to change floors (left side up, right side down)">直接走進樓梯就能上下樓（左邊上樓、右邊下樓）</td></tr>
+      <tr><td>E / Q</td><td data-en="At the stairs: go up / down one floor">站在樓梯口時：自動走上 / 走下一層</td></tr>
+      <tr><td>M</td><td data-en="Switch bird's-eye / walking">切換鳥瞰 / 走路</td></tr>
+      <tr><td>V</td><td data-en="Switch first / third person">切換第一 / 第三人稱</td></tr>
+      <tr><td>C</td><td data-en="Change character (boy / girl)">換角色（男學生 / 女學生）</td></tr>
+      <tr><td data-en="Mouse wheel">滑鼠滾輪</td><td data-en="Zoom in / out in third person">第三人稱時把鏡頭拉近 / 拉遠</td></tr>
+      <tr><td>F</td><td data-en="Interact: shoot hoops, go down the slide or play with a teacher (for shooting, press again in the green zone)">互動：在籃框、溜滑梯、老師旁邊時投籃 / 溜滑梯 / 一起玩（投籃要在綠色區域再按一次）</td></tr>
+      <tr><td>/</td><td data-en="Find a room">找教室</td></tr>
+      <tr><td>P</td><td data-en="360° virtual tour">360° 實景導覽</td></tr>
+      <tr><td>Enter</td><td data-en="Next to a purple 📷: open the 360° view">站在紫色 📷 旁邊時：看 360° 實景</td></tr>
+    </table>
+    <h3 data-en="Phone / tablet">手機 / 平板</h3>
+    <table>
+      <tr><td data-en="Tap ground / minimap">點地面 / 小地圖</td><td data-en="Walk there automatically">自動走過去</td></tr>
+      <tr><td data-en="Joystick (bottom left)">左下搖桿</td><td data-en="Walk">走路</td></tr>
+      <tr><td data-en="Drag the screen">畫面拖曳</td><td data-en="Look around">轉頭看</td></tr>
+      <tr><td data-en="Tap a room">點教室</td><td data-en="Info and directions">看資訊、帶我去</td></tr>
+    </table>
+    <h3 data-en="Finding your way">找路</h3>
+    <p style="margin:0;font-size:14px" data-en="Press &quot;🔍 Find a room&quot; and type a class (e.g. <b>503</b> or <b>Class 5-3</b>), a room number or a name, then press &quot;Go&quot;. A <b style=&quot;background:#ffd400;padding:0 4px;border-radius:4px&quot;>yellow route</b> appears on the ground. To change floors, follow it to the stairs and walk up, or press &quot;▲ Up to&quot; to climb automatically.">按「🔍 找教室」輸入班級（例如 <b>503</b> 或 <b>五年三班</b>）、教室號碼或名稱，再按「帶我去」，地上會出現<b style="background:#ffd400;padding:0 4px;border-radius:4px">黃色路線</b>。要換樓層時，跟著黃線走到樓梯口，直接走上樓梯，或按「▲ 走上」讓角色自己走。</p>
+    <h3 data-en="Colors">顏色</h3>
+    <div class="legend">
+      <span data-en="<i style=&quot;background:#fff1bf&quot;></i>Classroom"><i style="background:#fff1bf"></i>班級教室</span><span data-en="<i style=&quot;background:#cdeccd&quot;></i>Special classroom"><i style="background:#cdeccd"></i>專科教室</span>
+      <span data-en="<i style=&quot;background:#cfe2ff&quot;></i>Office"><i style="background:#cfe2ff"></i>行政辦公室</span><span data-en="<i style=&quot;background:#ffd6e8&quot;></i>Kindergarten"><i style="background:#ffd6e8"></i>幼兒園</span>
+      <span data-en="<i style=&quot;background:#cdb89a&quot;></i>Stairs"><i style="background:#cdb89a"></i>樓梯</span><span data-en="<i style=&quot;background:#dcdcdc&quot;></i>Restroom"><i style="background:#dcdcdc"></i>廁所</span>
+    </div>
+    <h3 data-en="Character">角色</h3>
+    <div class="style-pick"><button id="changeAvatar" data-en="👕 Change character (boy / girl)">👕 換角色（男學生 / 女學生）</button></div>
+    <h3 data-en="Visual style">畫面風格</h3>
+    <div class="style-pick">
+      <button data-style="block" data-en="🧱 Blocky">🧱 方塊風</button>
+      <button data-style="classic" data-en="🏫 Simple">🏫 簡約風</button>
+    </div>
+    <h3 data-en="Settings">設定</h3>
+    <label><span data-en="Walking speed">移動速度</span> <input id="speed" type="range" min="50" max="200" value="150"> <span id="speedV">150%</span></label>
+    <label><span data-en="Turning sensitivity">轉頭靈敏度</span> <input id="sens" type="range" min="30" max="250" value="100"> <span id="sensV">100%</span></label>
+    <p style="font-size:12px;color:#8a96a3;margin:14px 0 0" data-en="Source: school floor plans for school year 115 (2026-08-03). Locations are estimated from the plans and for reference only.">資料來源：115 學年度校區平面圖（2026-08-03 版）。位置為依平面圖估算，僅供參考。</p>
+  </div>
+</div>
+
+<div id="loading"><span>正在生成校園世界…</span></div>
+<script>
+  // 英文介面：載入畫面先換成英文（app.js 還沒跑）
+  (function () {
+    var l = new URLSearchParams(location.search).get('lang');
+    try { l = l || sessionStorage.getItem('campus-lang'); } catch (e) {}
+    if (l === 'en') { document.documentElement.lang = 'en'; document.querySelector('#loading span').textContent = 'Building the campus…'; }
+  })();
+</script>
+
+<!-- 修改資料或程式後，把 v= 的數字加 1，瀏覽器才會抓新版 -->
+<script>
+  // 先套用介面風格，避免畫面閃一下
+  (function () {
+    var s = new URLSearchParams(location.search).get('style');
+    try { s = s || localStorage.getItem('campus-style'); } catch (e) {}
+    if (s !== 'classic') document.body.classList.add('mc');
+  })();
+</script>
+<script src="js/campus-data.js?build=20261025-animals2"></script>
+<script src="../campus-layout.js?build=20261025-animals2"></script>
+<script src="js/pano-data.js?build=20261025-animals2"></script>
+<script type="module" src="js/app.js?build=20261025-animals2"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>溪口卡丁車 · M0 賽道勘查</title>
+  <meta name="description" content="溪口校園賽道 M0 審核預覽：保留校園、比較路線、查看路寬與障礙。">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="review.css?build=20261025-animals2">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="溪口卡丁車首頁"><span class="brand-mark">溪</span><span><b>溪口卡丁車</b><small>XIKOU KART / CAMPUS CIRCUIT</small></span></a>
+    <div class="phase"><i></i>M0 勘查存檔<span>v234 配置</span></div>
+    <a class="text-link" href="play.html" style="background:#17383e;color:#fff6df;padding:12px 18px;border-radius:9px;font-weight:700;border:0">M3・M4 加速賽／幽靈挑戰 →</a>
+  </header>
+  <main>
+    <section class="stage" aria-label="校園賽道預覽">
+      <iframe id="campus" src="campus/index.html?style=block" title="獨立溪口校園 3D 副本" loading="eager"></iframe>
+      <div id="map" hidden aria-label="校園俯視路線圖"></div>
+      <div class="stage-top"><div class="segmented" role="group" aria-label="預覽模式"><button id="view3d" class="active" aria-pressed="true">3D 校園</button><button id="viewMap" aria-pressed="false">俯視路線</button></div><span class="local-tag">LOCAL PREVIEW</span></div>
+      <div id="sceneLoading" class="loading-card"><span class="spinner"></span><b>正在建立校園副本</b><small>首次載入需要生成建築與材質</small></div>
+      <div class="scene-caption"><span class="eyebrow">ROUTE STUDY / 01</span><h1 id="sceneTitle">熟悉的校園，<br>新的起跑線。</h1><p id="sceneHint">拖曳旋轉 · 滾輪縮放 · 兩指縮放</p></div>
+      <div class="stage-bottom"><div class="legend"><span><i class="cyan"></i>建議環線</span><span><i class="amber"></i>需改造草案</span><span><i class="issue-dot">!</i>勘查問題</span></div><button id="downloadMap" class="map-export">下載路線圖 ↓</button></div>
+      <div class="tourbar" id="tourbar" hidden><span>路線巡覽</span><input id="tourSeek" aria-label="巡覽位置" type="range" min="0" max="999" value="0"><button id="stopTour">結束巡覽</button></div>
+    </section>
+    <aside class="sidebar">
+      <div class="sidebar-heading"><span class="eyebrow">CAMPUS / TRACK REVIEW</span><h2>先把路線選好。</h2><p>保留校園配置，確認一條真正能跑的路。</p></div>
+      <div class="route-picker" role="group" aria-label="候選賽道"><button class="route-option selected" data-route="field" aria-pressed="true"><span class="route-letter">A</span><span><b>操場環線</b><small>沿既有跑道 · 建議起步</small></span><i>↗</i></button><button class="route-option" data-route="campus" aria-pressed="false"><span class="route-letter amber-letter">B</span><span><b>校園外圈</b><small>穿越校門區 · 需局部改造</small></span><i>↗</i></button></div>
+      <div class="route-summary"><div class="route-title"><h3 id="routeName">A · 操場環線</h3><span id="routeStatus" class="pill">建議先做</span></div><p id="routeDescription"></p><div class="stats"><div><b id="length">168<small>m</small></b><span>單圈長度</span></div><div><b id="width">4<small>m</small></b><span>規劃路寬</span></div><div><b id="elevation">0<small>m</small></b><span>目標高差</span></div></div><ul id="routeNotes"></ul></div>
+      <section class="controls"><h3>看校園與路線</h3><div class="view-buttons"><button data-view="campus" class="active">全校鳥瞰</button><button data-view="field">操場近看</button><button data-view="gate">校門通道</button><button data-view="north">北側瓶頸</button></div><div class="switch-row"><label for="showRoute">顯示賽道標記</label><input id="showRoute" type="checkbox" checked></div><button id="tour" class="primary" disabled>沿線巡覽 <span>→</span></button><p class="micro">巡覽為路線展示；車輛駕駛於 M1 製作。</p></section>
+      <section class="audit"><div class="section-heading"><h3>路線初檢</h3><span id="auditPill" class="pill neutral">分析中</span></div><p id="auditSummary">等待場景與障礙資料載入…</p><details><summary>查看瓶頸與高差 <span>＋</span></summary><div id="issueList"></div></details></section>
+      <section class="performance"><div class="section-heading"><h3>本機預覽效能</h3><select id="quality" aria-label="畫質"><option value="balanced">均衡・關陰影</option><option value="detail">細節・開陰影</option></select></div><div class="perf-values"><span><b id="fps">—</b> FPS</span><span id="drawcalls">等待測量</span></div><p id="perfDetail" class="micro">只代表目前裝置與此場景，不代表 iPad 實測。</p><button id="exportAudit" class="secondary" disabled>匯出勘查與效能資料 ↓</button></section>
+      <footer class="review-footer"><span>M0 / REVIEW ONLY</span><p>此版供確認校園與路線。驗收後才進入 M1。</p></footer>
+    </aside>
+  </main>
+  <script src="campus/js/campus-data.js?build=20261025-animals2"></script>
+  <script type="module" src="review.js?build=20261025-animals2"></script>
+</body>
+</html>
