@@ -145,7 +145,7 @@ addEventListener('message',e=>{
   if(data.type==='started'){started=true;paused=false;finished=false;activeMode=data.mode||activeMode;setMenu();}
   if(data.type==='pause'){paused=data.paused;flush();setMenu();}
   if(data.type==='menu')menuStateOnly();
-  if(data.type==='reset'&&!data.initial)toast(activeMode==='race'?'已回到檢查點，計時繼續':`已重置 · ${data.spawn}`);
+  if(data.type==='reset'&&!data.initial){const spawn=ROUTE_ID==='courtyard'?({'北側通道':'走廊','東側通道':'中庭'}[data.spawn]||data.spawn):data.spawn;toast(activeMode==='race'?'已回到檢查點，計時繼續':`已重置 · ${spawn}`);}
   if(data.type==='finished')finish(data.result,data.race,data.recording);
   if(data.type==='state'){
     const s=lastState=data.state;activeMode=s.mode||activeMode;
