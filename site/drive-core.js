@@ -1,5 +1,5 @@
-import { DRIVE } from './drive-config.js?build=20261026-friendly3';
-import { effectState, updateEffects, cancelDrift } from './effects-core.js?build=20261026-friendly3';
+import { DRIVE } from './drive-config.js?build=20261026-lab1';
+import { effectState, updateEffects, cancelDrift } from './effects-core.js?build=20261026-lab1';
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const toward=(v,target,step)=>v<target?Math.min(target,v+step):Math.max(target,v-step);

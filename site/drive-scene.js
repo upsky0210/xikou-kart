@@ -1,13 +1,13 @@
-import { ACTIVE_ROUTE, LAPS, ROUTE_ID } from './session-config.js?build=20261026-friendly3';
-import { buildKart } from './kart-model.js?build=20261026-friendly3';
-import { prepareStaticScene } from './scene-utils.js?build=20261026-friendly3';
-import { DRIVE, SPAWNS } from './drive-config.js?build=20261026-friendly3';
-import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=20261026-friendly3';
-import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=20261026-friendly3';
-import { RaceSession, makeGates } from './race-core.js?build=20261026-friendly3';
-import { buildRaceDecor } from './race-decor.js?build=20261026-friendly3';
-import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=20261026-friendly3';
-import { cancelDrift } from './effects-core.js?build=20261026-friendly3';
+import { ACTIVE_ROUTE, LAPS, ROUTE_ID } from './session-config.js?build=20261026-lab1';
+import { buildKart } from './kart-model.js?build=20261026-lab1';
+import { prepareStaticScene } from './scene-utils.js?build=20261026-lab1';
+import { DRIVE, SPAWNS } from './drive-config.js?build=20261026-lab1';
+import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=20261026-lab1';
+import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=20261026-lab1';
+import { RaceSession, makeGates } from './race-core.js?build=20261026-lab1';
+import { buildRaceDecor } from './race-decor.js?build=20261026-lab1';
+import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=20261026-lab1';
+import { cancelDrift } from './effects-core.js?build=20261026-lab1';
 
 export function initScene(api){
   const {THREE:T,scene,renderer,camera,orbit,floors,rooms}=api;
@@ -124,7 +124,7 @@ export function initScene(api){
       race=new RaceSession({laps:LAPS,gates,name:sessionName,id}).begin();
       recorder=new GhostRecorder();
       state.x=gates[0].x-gates[0].fx*3;state.z=gates[0].z-gates[0].fz*3;state.yaw=Math.atan2(gates[0].fx,gates[0].fz);
-      if(qa){const module=await import('./qa-driver.js?build=20261026-friendly3');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
+      if(qa){const module=await import('./qa-driver.js?build=20261026-lab1');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
     }
     playing=true;cameraSnap=true;setPause(false);send('started',{mode});
   }

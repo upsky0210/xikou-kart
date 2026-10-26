@@ -1,4 +1,4 @@
-import { ROUTES } from './track-config.js?build=20261026-friendly3';
+import { ROUTES } from './track-config.js?build=20261026-lab1';
 const query=new URLSearchParams(typeof location==='undefined'?'':location.search);
 export const ROUTE_ID=query.get('track')==='campus'?'campus':'field';
 export const ACTIVE_ROUTE=ROUTES[ROUTE_ID];

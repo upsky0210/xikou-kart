@@ -1,6 +1,6 @@
 // Developer-only regression controller, activated solely by the ?qa=1 test UI.
 // No AI opponent or autoplay control is exposed in the normal game.
-import { ROUTES, world, pointAt, lengthMetres } from './track-config.js?build=20261026-friendly3';
+import { ROUTES, world, pointAt, lengthMetres } from './track-config.js?build=20261026-lab1';
 const paths=new Map();
 function path(route){if(!paths.has(route.id)){const count=1800;paths.set(route.id,{count,length:lengthMetres(route.points),poses:Array.from({length:count},(_,i)=>world(pointAt(route.points,i/count)))});}return paths.get(route.id);}
 export function regressionInput(state,targetSpeed=7.6,route=ROUTES.field){

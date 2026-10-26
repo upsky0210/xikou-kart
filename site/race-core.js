@@ -1,6 +1,6 @@
-import { ACTIVE_ROUTE } from './session-config.js?build=20261026-friendly3';
-import { ROUTES, world } from './track-config.js?build=20261026-friendly3';
-import { TRACK_ID } from './game-version.js?build=20261026-friendly3';
+import { ACTIVE_ROUTE } from './session-config.js?build=20261026-lab1';
+import { ROUTES, world } from './track-config.js?build=20261026-lab1';
+import { TRACK_ID } from './game-version.js?build=20261026-lab1';
 
 export function makeGates(route=ACTIVE_ROUTE){
   return route.checkpoints.map((index,i)=>{

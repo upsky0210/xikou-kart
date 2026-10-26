@@ -1,7 +1,7 @@
-import { buildAnimal } from './animal-model.js?build=20261026-friendly3';
-import { getRacer } from './racer-catalog.js?build=20261026-friendly3';
+import { buildAnimal } from './animal-model.js?build=20261026-lab1';
+import { getRacer } from './racer-catalog.js?build=20261026-lab1';
 // Original geometry, shared by the player and the non-colliding ghost.
-export function buildKart(T,racerId='cat'){
+export function buildKart(T,racerId='cat',options={}){
   const profile=getRacer(racerId);
   const car=new T.Group(),wheels=[];
   const mat=(color,metalness=0,roughness=.5)=>new T.MeshStandardMaterial({color,metalness,roughness});
@@ -26,7 +26,7 @@ export function buildKart(T,racerId='cat'){
     for(let k=0;k<5;k++){const a=k*Math.PI*2/5;box(.015,.045,.20,Math.sign(x)*.14,Math.sin(a)*.08,Math.cos(a)*.08,teal,pivot);}
     wheels.push({pivot,tire,hub,front:z>0});
   }
-  const {driver,head}=buildAnimal(T,profile.id);car.add(driver);
+  const {driver,head}=buildAnimal(T,profile.id,options);car.add(driver);
   const steeringWheel=mesh(new T.TorusGeometry(.20,.027,8,24),dark,0,1,.30);steeringWheel.rotation.x=-.6;
   // Procedural race number decal: no external image or model dependencies.
   const cv=document.createElement('canvas');cv.width=cv.height=128;const c=cv.getContext('2d');c.fillStyle='#fff3d5';c.beginPath();c.arc(64,64,57,0,7);c.fill();c.fillStyle='#164c54';c.font='900 72px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(profile.number,64,68);

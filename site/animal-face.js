@@ -1,5 +1,5 @@
 // Facial details are painted onto the head surface, without protruding eyeballs or cheek meshes.
-export function makeAnimalFace(T,p){
+export function makeAnimalFace(T,p,baseOnly=false){
   const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=512;
   const c=canvas.getContext('2d');c.fillStyle=p.fur;c.fillRect(0,0,1024,512);
   const oval=(x,y,rx,ry,color)=>{c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fill();};
@@ -13,7 +13,7 @@ export function makeAnimalFace(T,p){
   }else if(p.id==='boar')oval(256,329,77,41,'#dfb2a2');
   else oval(256,334,p.id==='hamster'?116:90,65,p.light);
   if(p.id==='meerkat')for(const side of[-1,1])oval(256+side*70,232,58,73,p.dark);
-  for(const side of[-1,1]){
+  if(!baseOnly)for(const side of[-1,1]){
     const x=256+side*70;
     oval(x,235,43,56,'#fffaf0');oval(x-side*4,239,30,44,p.dark);oval(x-side*4,241,22,35,'#292a30');
     oval(x-12,218,10,13,'#fffaf0');oval(x+10,256,4,5,'#fffaf0');
@@ -23,11 +23,11 @@ export function makeAnimalFace(T,p){
       path([[256+side*36,118],[256+side*53,124],[256+side*45,171]],p.dark);
       path([[256+side*74,135],[256+side*91,146],[256+side*80,182]],p.dark);
     }
-    path([[242,304],[270,304],[256,318]],'#c77e79');
+    if(!baseOnly)path([[242,304],[270,304],[256,318]],'#c77e79');
   }else if(p.id==='horse'||p.id==='boar'){
     for(const side of[-1,1])oval(256+side*27,326,9,6,p.dark);
-  }else oval(256,309,16,10,p.id==='hamster'?'#c88279':'#3e3836');
-  c.strokeStyle=p.dark;c.lineWidth=4;c.lineCap='round';c.beginPath();c.moveTo(238,345);c.quadraticCurveTo(256,355,274,345);c.stroke();
+  }else if(!baseOnly)oval(256,309,16,10,p.id==='hamster'?'#c88279':'#3e3836');
+  if(!baseOnly){c.strokeStyle=p.dark;c.lineWidth=4;c.lineCap='round';c.beginPath();c.moveTo(238,345);c.quadraticCurveTo(256,355,274,345);c.stroke();}
   if(p.id==='hamster'){c.fillStyle='#fffaf0';c.fillRect(248,348,16,13);}
   const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;texture.anisotropy=2;
   return texture;

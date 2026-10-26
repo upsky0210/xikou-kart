@@ -1,14 +1,14 @@
-import { installControlMode } from './control-mode.js?build=20261026-friendly3';
-import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=20261026-friendly3';
-import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE, PREVIOUS_SESSION_SCOPE } from './session-config.js?build=20261026-friendly3';
-import { InputState, KEY_ACTION } from './drive-core.js?build=20261026-friendly3';
-import { DRIVE } from './drive-config.js?build=20261026-friendly3';
-import { cleanName, formatTime, makeGates } from './race-core.js?build=20261026-friendly3';
-import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=20261026-friendly3';
-import { drawMap } from './minimap.js?build=20261026-friendly3';
-import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=20261026-friendly3';
-import { GameSound } from './sound.js?build=20261026-friendly3';
-import { RULES_LABEL } from './game-version.js?build=20261026-friendly3';
+import { installControlMode } from './control-mode.js?build=20261026-lab1';
+import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=20261026-lab1';
+import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE, PREVIOUS_SESSION_SCOPE } from './session-config.js?build=20261026-lab1';
+import { InputState, KEY_ACTION } from './drive-core.js?build=20261026-lab1';
+import { DRIVE } from './drive-config.js?build=20261026-lab1';
+import { cleanName, formatTime, makeGates } from './race-core.js?build=20261026-lab1';
+import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=20261026-lab1';
+import { drawMap } from './minimap.js?build=20261026-lab1';
+import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=20261026-lab1';
+import { GameSound } from './sound.js?build=20261026-lab1';
+import { RULES_LABEL } from './game-version.js?build=20261026-lab1';
 
 const $=s=>document.querySelector(s),frame=$('#world'),inputs=new InputState(),gates=makeGates();
 const QA=new URLSearchParams(location.search).get('qa')==='1';
