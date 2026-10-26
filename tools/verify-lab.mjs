@@ -22,6 +22,10 @@ check('loop is continuous, its 1.2 m ramps are at most 11.1 percent, and its spa
   const s=createState(poseAt(8));s.x+=.4;s.z+=.3;resetState(s,nearestPose(s.x,s.z));assert.equal(contacts(s,grid,LAB_DRIVE).length,0);assert.equal(s.speed,0);
 });
 let evidence;
+check('the full-width ribbon has no self-crossing rail at rounded corners or the start seam',()=>{
+  const cross=(a,b,c)=>(b.x-a.x)*(c.z-a.z)-(b.z-a.z)*(c.x-a.x);
+  for(let i=0;i<BARRIERS.length;i++)for(let j=i+1;j<BARRIERS.length;j++){const w=BARRIERS[i],v=BARRIERS[j],a={x:w.ax,z:w.az},b={x:w.bx,z:w.bz},c={x:v.ax,z:v.az},d={x:v.bx,z:v.bz};assert.ok(!(cross(a,b,c)*cross(a,b,d)<-1e-10&&cross(c,d,a)*cross(c,d,b)<-1e-10),`crossing rails ${i},${j}`);}
+});
 check('same physics drives two complete loops with no collision or lane departure',()=>{
   const s=createState(poseAt(0)),g=new SpatialGrid([],BARRIERS);let travel=0,prev=0,maxOffCentre=0,t;
   for(t=0;t<120*150;t++){step(s,demoInput(s),1/120,g,null,LAB_DRIVE);const p=nearestPose(s.x,s.z);travel+=(p.distance-prev+LENGTH*1.5)%LENGTH-LENGTH*.5;prev=p.distance;maxOffCentre=Math.max(maxOffCentre,p.error);if(travel>LENGTH*2)break;}
