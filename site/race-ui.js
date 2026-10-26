@@ -1,13 +1,13 @@
-import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=20261025-animals2';
-import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE } from './session-config.js?build=20261025-animals2';
-import { InputState, KEY_ACTION } from './drive-core.js?build=20261025-animals2';
-import { DRIVE } from './drive-config.js?build=20261025-animals2';
-import { cleanName, formatTime, makeGates } from './race-core.js?build=20261025-animals2';
-import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=20261025-animals2';
-import { drawMap } from './minimap.js?build=20261025-animals2';
-import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=20261025-animals2';
-import { GameSound } from './sound.js?build=20261025-animals2';
-import { RULES_LABEL } from './game-version.js?build=20261025-animals2';
+import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=20261026-soft-faces';
+import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE } from './session-config.js?build=20261026-soft-faces';
+import { InputState, KEY_ACTION } from './drive-core.js?build=20261026-soft-faces';
+import { DRIVE } from './drive-config.js?build=20261026-soft-faces';
+import { cleanName, formatTime, makeGates } from './race-core.js?build=20261026-soft-faces';
+import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=20261026-soft-faces';
+import { drawMap } from './minimap.js?build=20261026-soft-faces';
+import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=20261026-soft-faces';
+import { GameSound } from './sound.js?build=20261026-soft-faces';
+import { RULES_LABEL } from './game-version.js?build=20261026-soft-faces';
 
 const $=s=>document.querySelector(s),frame=$('#world'),inputs=new InputState(),gates=makeGates();
 const QA=new URLSearchParams(location.search).get('qa')==='1';

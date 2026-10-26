@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - name: Version game assets
+        run: python3 tools/stamp-version.py "$GITHUB_SHA"
       - name: Check static assets
         run: python3 tools/verify-site.py
       - name: Configure Pages

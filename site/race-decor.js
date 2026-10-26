@@ -1,6 +1,6 @@
-import { ACTIVE_ROUTE } from './session-config.js?build=20261025-animals2';
-import { BOOST_PADS } from './effects-config.js?build=20261025-animals2';
-import { ROUTES, world, pointAt, distanceRect, distanceSegment } from './track-config.js?build=20261025-animals2';
+import { ACTIVE_ROUTE } from './session-config.js?build=20261026-soft-faces';
+import { BOOST_PADS } from './effects-config.js?build=20261026-soft-faces';
+import { ROUTES, world, pointAt, distanceRect, distanceSegment } from './track-config.js?build=20261026-soft-faces';
 export function buildRaceDecor(T,scene,obstacles,walls,cameraBoxes){
   const group=new T.Group();scene.add(group);
   const arrow=new T.BufferGeometry();arrow.setAttribute('position',new T.Float32BufferAttribute([0,0,.6,-.4,0,-.3,.4,0,-.3],3));arrow.computeVertexNormals();

@@ -1,4 +1,4 @@
-import { mergeGeometries } from './campus/vendor/three/examples/jsm/utils/BufferGeometryUtils.js?build=20261025-animals2';
+import { mergeGeometries } from './campus/vendor/three/examples/jsm/utils/BufferGeometryUtils.js?build=20261026-soft-faces';
 export function prepareStaticScene(T,scene) {
   // M0 freezes the inherited scene. Batch visible opaque meshes by material,
   // applying world transforms before moving them out of their original parents.

@@ -39,6 +39,40 @@ python -m http.server 5174 --directory site
 
 開啟 http://localhost:5174/ 。請透過 HTTP 伺服器執行，勿直接以檔案方式開啟 HTML。
 
+## 在家裡與學校兩台電腦更新
+
+第一次在學校電腦下載：
+
+```powershell
+git clone https://github.com/upsky0210/xikou-kart.git C:\AI\Codex\Kart
+cd C:\AI\Codex\Kart
+python -m http.server 5174 --directory site
+```
+
+若該資料夾已經有檔案，請另選新的空資料夾，不要覆蓋現有專案。完整遊戲原始碼都在 `site/`，不需要另外複製 3D School。
+
+每次開始修改前，在這份 Git 儲存庫內執行：
+
+```powershell
+git status
+git pull --ff-only
+```
+
+修改 `site/`，本機試玩確認後：
+
+```powershell
+python tools/verify-site.py
+git add site
+git commit -m "Update kart game"
+git push origin main
+```
+
+`pull` 是下載更新；`commit` 保存本機修改；`push` 上傳後才會觸發網站更新。公開儲存庫任何人都能下載，但推送必須登入有寫入權限的 GitHub 帳號。學校電腦若沒有 Git／Python，需先依該電腦的管理方式準備工具。
+
+換電腦前先 commit、push；另一台開始工作前先 pull。若 Git 顯示未提交修改或衝突，先保留並處理該修改，不使用強制推送或硬重設。
+
+原開發電腦的儲存庫在 `C:\AI\Codex\Kart\publish\xikou-kart`，請在這裡執行 Git 指令並修改 `site/`。外層舊 `dist/` 是本機預覽副本，不再用它覆蓋 Git 儲存庫。
+
 ## GitHub Pages
 
 本儲存庫使用 GitHub Actions 將 `site/` 發佈至 Pages；推送 `main` 後自動更新。第一次需在儲存庫 Settings → Pages 將來源設為 GitHub Actions。

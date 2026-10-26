@@ -1,6 +1,6 @@
-import { InputState, KEY_ACTION } from './drive-core.js?build=20261025-animals2';
-import { ROUTES, ORIGIN, SCALE } from './track-config.js?build=20261025-animals2';
-import { DRIVE } from './drive-config.js?build=20261025-animals2';
+import { InputState, KEY_ACTION } from './drive-core.js?build=20261026-soft-faces';
+import { ROUTES, ORIGIN, SCALE } from './track-config.js?build=20261026-soft-faces';
+import { DRIVE } from './drive-config.js?build=20261026-soft-faces';
 const $=s=>document.querySelector(s),frame=$('#world'),inputs=new InputState();
 let ready=false,started=false,paused=false,helpOpen=false,lastState=null,toastTimer=0;
 const send=(type,data={})=>frame.contentWindow.postMessage({source:'kart-controls',type,...data},location.origin);

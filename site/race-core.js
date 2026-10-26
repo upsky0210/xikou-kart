@@ -1,6 +1,6 @@
-import { ACTIVE_ROUTE } from './session-config.js?build=20261025-animals2';
-import { ROUTES, world } from './track-config.js?build=20261025-animals2';
-import { TRACK_ID } from './game-version.js?build=20261025-animals2';
+import { ACTIVE_ROUTE } from './session-config.js?build=20261026-soft-faces';
+import { ROUTES, world } from './track-config.js?build=20261026-soft-faces';
+import { TRACK_ID } from './game-version.js?build=20261026-soft-faces';
 
 export function makeGates(route=ACTIVE_ROUTE){
   return route.checkpoints.map((index,i)=>{
