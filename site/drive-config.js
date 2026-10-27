@@ -1,7 +1,7 @@
 export const DRIVE = Object.freeze({
   maxSpeed: 11, acceleration: 6.5, braking: 13, reverseSpeed: 3.5,
   reverseAcceleration: 4.5, rollingResistance: 0.65, drag: 0.027,
-  steeringLow: 0.58, steeringHigh: 0.30, steeringRate: 1.0,
+  steeringLow: 0.58, steeringHigh: 0.30, steeringRate: 1.8,
   steeringReturnRate: 6, counterSteeringRate: 4,
   yawRateLow: 2.2, yawRateHigh: 0.95, turnSpeed: 7.2, turnDeceleration: 5,
   wheelbase: 1.35, collisionRadius: 0.61, collisionOffset: 0.43,

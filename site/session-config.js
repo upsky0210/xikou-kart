@@ -5,4 +5,4 @@ export const ACTIVE_ROUTE=ROUTES[ROUTE_ID];
 export const LAPS=query.get('laps')==='1'?1:2;
 export const PREVIOUS_SESSION_SCOPE=ROUTE_ID==='field'&&LAPS===2?'':`.${ROUTE_ID==='campus'?'campus-stadium':ROUTE_ID}.laps${LAPS}`;
 
-export const SESSION_SCOPE=`.${ROUTE_ID}.${ROUTE_ID==='courtyard'?'elevation-v1':'friendly-v1'}.laps${LAPS}`;
+export const SESSION_SCOPE=`.${ROUTE_ID}.arcade-v2.laps${LAPS}`;

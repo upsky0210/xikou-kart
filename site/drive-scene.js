@@ -1,3 +1,5 @@
+import { RACERS } from './racer-catalog.js?build=20261026-courtyard6';
+import { Opponent, fleetPosition } from './opponent-core.js?build=20261026-courtyard6';
 import { ACTIVE_ROUTE, LAPS, ROUTE_ID } from './session-config.js?build=20261026-courtyard6';
 import { buildKart } from './kart-model.js?build=20261026-courtyard6';
 import { prepareStaticScene } from './scene-utils.js?build=20261026-courtyard6';
@@ -75,6 +77,7 @@ export function initScene(api){
   const grid=elevated?new ElevationGrid(obstacles,walls):new SpatialGrid(obstacles,walls),spawns=Object.fromEntries(Object.entries(SPAWNS).map(([k,v])=>{const[x,z]=world(v.pixel);return[k,{x,z,yaw:v.yaw}];}));
   if(elevated){spawns.north={...nearestOnCourtyard(...world([675,1100]))};spawns.east={...nearestOnCourtyard(...world([1100,825]))};}
   let spawnId='field',safe={...spawns.field},safeDistance=0,playing=false,paused=false,collisionUntil=0;
+  let duel=false,opponents=[],rivalModels=[];
   let mode='practice',race=null,finishSent=false,qaDriver=null,sessionName='訪客';
   let recorder=null,bestGhost=null,showGhost=true,previewOrbit=false,garage=false,garageStart=0;
   const gates=makeGates(),gateMarkers=gates.map(g=>{
@@ -125,13 +128,25 @@ export function initScene(api){
   }
   function setPause(value){paused=value;clearInputs();last=performance.now();send('pause',{paused});}
   function setSpawn(id){if(!spawns[id])return;spawnId=id;safe={...spawns[id]};safeDistance=0;reset(true);}
-  async function startSession(nextMode='race',name=sessionName,qa=false,ghost=bestGhost,qaSpeed=7.6){
+  async function startSession(nextMode='race',name=sessionName,qa=false,ghost=bestGhost,qaSpeed=7.6,withRival=false){
+    duel=!!withRival;opponents=[];for(const model of rivalModels)model.car.visible=false;
     mode=nextMode==='practice'?'practice':'race';sessionName=name;race=null;finishSent=false;qaDriver=null;recorder=null;bestGhost=validGhost(ghost,name);previewOrbit=false;garage=false;
     setSpawn(mode==='race'?'field':spawnId);
     if(mode==='race'){
       const id=`${Date.now()}-${Math.random().toString(36).slice(2)}`;
       race=new RaceSession({laps:LAPS,gates,name:sessionName,id}).begin();
       recorder=new GhostRecorder();
+      if(duel){
+        const racers=RACERS.filter(r=>r.id!==profile.id).slice(0,3);
+        for(let i=0;i<3;i++){
+          if(rivalModels[i]?.profile.id!==racers[i].id){
+            const old=rivalModels[i]?.car;if(old){old.removeFromParent();const gs=new Set(),ms=new Set();old.traverse(o=>{if(o.isMesh){gs.add(o.geometry);ms.add(o.material);}});for(const g of gs)g.dispose();for(const m of ms){m.map?.dispose();m.dispose();}}
+            rivalModels[i]=buildKart(T,racers[i].id);scene.add(rivalModels[i].car);
+          }
+          rivalModels[i].car.visible=true;
+          opponents.push(new Opponent({gates,laps:LAPS,grid,bounds,cfg,route,index:i}));
+        }
+      }
       state.x=gates[0].x-gates[0].fx*3;state.z=gates[0].z-gates[0].fz*3;state.yaw=Math.atan2(gates[0].fx,gates[0].fz);
       if(qa){const module=await import('./qa-driver.js?build=20261026-courtyard6');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
     }
@@ -142,7 +157,7 @@ export function initScene(api){
     if(e.repeat)return;
     if(e.code==='KeyR')reset();
     if(e.code==='Escape'||e.code==='KeyP')setPause(!paused);
-    if(e.code==='Enter'){if(paused)setPause(false);else startSession(mode,sessionName,!!qaDriver);}
+    if(e.code==='Enter'){if(paused)setPause(false);else startSession(mode,sessionName,!!qaDriver,bestGhost,7.6,duel);}
   });
   addEventListener('keyup',e=>{if(KEY_ACTION[e.code]){e.preventDefault();local.set(e.code,null);}});
   addEventListener('blur',clearInputs);
@@ -152,19 +167,19 @@ export function initScene(api){
     const m=e.data;
     if(m.type==='input')remote=playing&&!paused&&race?.phase!=='finished'?m.input:{};
     if(m.type==='racer'&&!playing)selectRacer(m.id,m.preview!==false);
-    if(m.type==='start'){selectRacer(m.racer||profile.id);showGhost=m.ghostVisible!==false;startSession(m.mode,m.name,!!m.qa,m.ghost,m.qaSpeed);}
+    if(m.type==='start'){selectRacer(m.racer||profile.id);showGhost=m.ghostVisible!==false;startSession(m.mode,m.name,!!m.qa,m.ghost,m.qaSpeed,m.duel);}
     if(m.type==='pause')setPause(!!m.paused);
     if(m.type==='reset')reset();
     if(m.type==='spawn'&&mode==='practice')setSpawn(m.id);
     if(m.type==='clear')clearInputs();
-    if(m.type==='restart')startSession(mode,sessionName,!!m.qa);
-    if(m.type==='menu'){playing=false;paused=false;state.speed=0;state.steering=0;race=null;qaDriver=null;recorder=null;bestGhost=null;clearInputs();send('menu');}
+    if(m.type==='restart')startSession(mode,sessionName,!!m.qa,bestGhost,7.6,duel);
+    if(m.type==='menu'){playing=false;paused=false;opponents=[];for(const model of rivalModels)model.car.visible=false;state.speed=0;state.steering=0;race=null;qaDriver=null;recorder=null;bestGhost=null;clearInputs();send('menu');}
     if(m.type==='ghostVisibility')showGhost=!!m.visible;
     if(m.type==='preview'){previewOrbit=!!m.active;garage=false;}
     if(m.type==='garage'){garage=true;garageStart=performance.now();previewOrbit=false;}
   });
 
-  let cameraSnap=true,last=performance.now(),lastSend=0,lastMetrics=0,samples=[];
+  let cameraSnap=true,last=performance.now(),lastSend=0,lastMetrics=0,samples=[],qualityFrames=0,qualityTime=0,qualityRatio=Math.min(devicePixelRatio,1.5);
   const target=new T.Vector3(),desired=new T.Vector3(),direction=new T.Vector3(),hit=new T.Vector3(),ray=new T.Ray();
   function constrainCamera(point){
     direction.copy(point).sub(target);const len=direction.length();if(len<.01)return point;
@@ -185,6 +200,7 @@ export function initScene(api){
   const data=document.createElement('script');data.type='application/json';data.id='drive-world';data.textContent=JSON.stringify(report);document.body.append(data);
   send('ready',{layout:D.layoutVersion,report});
   function advanceRace(seconds){
+    for(const opponent of opponents)opponent.advance(seconds);
     const previousPhase=race.phase;
     const span=race.advance(seconds);
     if(previousPhase==='countdown'&&race.phase==='racing')recorder?.record(0,state,false,true);
@@ -203,12 +219,13 @@ export function initScene(api){
         // embedded test tab is throttled. Normal player input retains M1's cap.
         if(qaDriver){let remaining=Math.min(elapsed,5);while(remaining>1e-8&&race.phase!=='finished'){const chunk=Math.min(remaining,DRIVE.maxFrameTime);advanceRace(chunk);remaining-=chunk;}}
         else advanceRace(elapsed);
-        if(race.phase==='finished'&&!finishSent){finishSent=true;const result=race.result();send('finished',{result,race:race.snapshot(),recording:recorder?.finish(result,state),qa:!!qaDriver});}
+        if(race.phase==='finished'&&!finishSent){finishSent=true;const result=race.result();send('finished',{result,race:race.snapshot(),recording:recorder?.finish(result,state),qa:!!qaDriver,competition:opponents.length?{position:fleetPosition(race,state,opponents),total:opponents.length+1}:null});}
       }else simulation.advance(elapsed,input());
       if(state.collisionPulse>0)collisionUntil=now+220;
       if(state.distance-safeDistance>DRIVE.resetDistance&&!state.collisionPulse&&!contacts(state,grid,cfg).length){safe={x:state.x,z:state.z,yaw:state.yaw};safeDistance=state.distance;}
     }else simulation.clear();
     gateMarkers.forEach((mesh,i)=>{mesh.visible=playing&&mode==='race'&&race?.phase!=='finished'&&i===(race?.expected??0)%gates.length;});
+    for(let i=0;i<opponents.length;i++){const rivalModel=rivalModels[i],r=opponents[i].state,y=heightAt(r.x,r.z),fx=Math.sin(r.yaw),fz=Math.cos(r.yaw);rivalModel.car.position.set(r.x,y+.075,r.z);rivalModel.car.rotation.set(-Math.atan2(heightAt(r.x+fx*.1,r.z+fz*.1)-y,.1),r.yaw,Math.atan2(heightAt(r.x+fz*.1,r.z-fx*.1)-y,.1),'YXZ');for(const w of rivalModel.wheels){w.pivot.rotation.y=w.front?r.steering:0;w.tire.rotation.x+=r.speed*Math.min(elapsed,.1)/.27;w.hub.rotation.x=w.tire.rotation.x;}}
     const floorY=heightAt(state.x,state.z);state.groundHeight=floorY;
     car.position.set(state.x,floorY+.075,state.z);car.rotation.set(0,state.yaw,0,'YXZ');
     if(elevated){const fx=Math.sin(state.yaw),fz=Math.cos(state.yaw);car.rotation.x=-Math.atan2(heightAt(state.x+fx*.1,state.z+fz*.1)-floorY,.1);car.rotation.z=Math.atan2(heightAt(state.x+fz*.1,state.z-fx*.1)-floorY,.1);}
@@ -224,9 +241,12 @@ export function initScene(api){
     steeringWheel.rotation.z=-state.steering;driver.rotation.z=-state.steering*Math.min(1,Math.abs(state.speed)/8)*.12;head.rotation.y=!playing&&garage?Math.sin(now*.0014)*.045:0;
     if(playing)updateCamera(Math.min(elapsed,.1));else if(garage){car.rotation.y=(now-garageStart)*.00035;camera.position.set(state.x+3.1,floorY+2.2,state.z+3.5);camera.lookAt(state.x-.8,floorY+.85,state.z);shadow.rotation.z=-car.rotation.y;}else {if(previewOrbit){const a=now*.00009;camera.position.set(Math.cos(a)*85,62,35+Math.sin(a)*85);}else camera.position.set(-50,55,100);camera.lookAt(-.5,0,40);}
     renderer.render(scene,camera);
+    // Reduce fill cost on slower devices without changing physics or input rate.
+    qualityFrames++;qualityTime+=Math.min(elapsed,1);
+    if(qualityTime>=2){if(qualityFrames/qualityTime<28&&qualityRatio>.65){qualityRatio=Math.max(.65,qualityRatio-.25);renderer.setPixelRatio(qualityRatio);renderer.setSize(innerWidth,innerHeight);}qualityFrames=0;qualityTime=0;}
     if(elapsed>0)samples.push(elapsed);if(samples.length>180)samples.shift();
     if(now-lastSend>75){
-      const status={...state,racer:profile.id,faceStyle:head.userData.faceStyle??'painted',track:ROUTE_ID,playing,paused,mode,race:race?.snapshot()??null,ghostAvailable:!!bestGhost,ghostVisible:!!ghost,ghostFinished:ghost?.finished??false,ghostBestMs:bestGhost?.totalMs??null,qa:!!qaDriver,input:input(),spawn:spawnId,layout:D.layoutVersion,contactCount:contacts(state,grid,cfg).filter(c=>c.depth>.005).length,camera:[camera.position.x,camera.position.y,camera.position.z]};
+      const status={...state,competition:opponents.length&&race?{position:fleetPosition(race,state,opponents),total:opponents.length+1,opponents:opponents.map((o,i)=>({x:o.state.x,z:o.state.z,phase:o.race.phase,racer:rivalModels[i].profile.id,color:rivalModels[i].profile.paint}))}:null,racer:profile.id,faceStyle:head.userData.faceStyle??'painted',track:ROUTE_ID,playing,paused,mode,race:race?.snapshot()??null,ghostAvailable:!!bestGhost,ghostVisible:!!ghost,ghostFinished:ghost?.finished??false,ghostBestMs:bestGhost?.totalMs??null,qa:!!qaDriver,input:input(),spawn:spawnId,layout:D.layoutVersion,contactCount:contacts(state,grid,cfg).filter(c=>c.depth>.005).length,camera:[camera.position.x,camera.position.y,camera.position.z]};
       send('state',{state:status});lastSend=now;
       let pre=document.getElementById('drive-state');if(!pre){pre=document.createElement('script');pre.id='drive-state';pre.type='application/json';document.body.append(pre);}pre.textContent=JSON.stringify(status);
     }

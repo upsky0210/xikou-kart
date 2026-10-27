@@ -1,5 +1,4 @@
-// Developer-only regression controller, activated solely by the ?qa=1 test UI.
-// No AI opponent or autoplay control is exposed in the normal game.
+// Shared route-following driver for the computer rival and developer regression runs.
 import { ROUTES, world, pointAt, lengthMetres } from './track-config.js?build=20261026-courtyard6';
 const paths=new Map();
 import { courtyardSlowAt } from './courtyard-route.js?build=20261026-courtyard6';

@@ -35,10 +35,10 @@ check('the continuous route and its full-width rails have no crossing or reverse
   const cross=(a,b,c)=>(b.x-a.x)*(c.z-a.z)-(b.z-a.z)*(c.x-a.x);
   for(let i=0;i<COURTYARD_RAILS.length;i++)for(let j=i+1;j<COURTYARD_RAILS.length;j++){const w=COURTYARD_RAILS[i],v=COURTYARD_RAILS[j];if(Math.max(w.ax,w.bx)<Math.min(v.ax,v.bx)||Math.min(w.ax,w.bx)>Math.max(v.ax,v.bx)||Math.max(w.az,w.bz)<Math.min(v.az,v.bz)||Math.min(w.az,w.bz)>Math.max(v.az,v.bz))continue;const a={x:w.ax,z:w.az},b={x:w.bx,z:w.bz},c={x:v.ax,z:v.az},d={x:v.bx,z:v.bz};assert.ok(!(cross(a,b,c)*cross(a,b,d)<-1e-10&&cross(c,d,a)*cross(c,d,b)<-1e-10),`crossing rail ${i},${j}`);}
 });
-check('slow driving begins before the stadium exit corner and covers every ramp and corridor',()=>{
-  for(const p of COURTYARD_SAMPLES)if(p.y>.02){assert.ok(courtyardSlowAt(p.x,p.z));assert.equal(courtyardConfigAt(p).maxSpeed,4.5);}
-  assert.equal(courtyardConfigAt({x:(475-1100)/18,z:(1500-700)/18}).maxSpeed,4.5);
-  assert.equal(courtyardConfigAt({x:(1250-1100)/18,z:(1335-700)/18}).maxSpeed,11);
+check('corridors and ramps retain full speed, acceleration and drift',()=>{
+  for(const p of COURTYARD_SAMPLES){const cfg=courtyardConfigAt(p);assert.equal(cfg.maxSpeed,11);assert.equal(cfg.acceleration,6.5);assert.equal(cfg.driftMinSpeed,4);}
+  const p=COURTYARD_SAMPLES.find(p=>p.y>1),s=createState(p),empty=new ElevationGrid([],[]);s.speed=8;
+  step(s,{throttle:true},1/120,empty,null,courtyardConfigAt(s));assert.ok(s.speed>8,'entering a corridor must not clamp speed');
 });
 const T=await import('../site/campus/vendor/three/build/three.module.js'),{buildKart}=await import('../site/kart-model.js'),{RACERS}=await import('../site/racer-catalog.js');
 check('all eight complete racer models fit the actual ceiling and arch clearance',()=>{
@@ -54,8 +54,33 @@ check('two laps complete all 28 gates with the real physics, ramps, ceilings and
 });
 check('elevated ghost playback, result storage and resets preserve old routes and independent profiles',()=>{
   const map=new Map([['xikou-kart.leaderboard.v2.campus.friendly-v1.laps2','old-campus-untouched']]),storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)};
-  assert.ok(validGhost(recording,'走廊驗證'));assert.ok(saveGhost(storage,recording).saved);assert.ok(readGhost(storage,'走廊驗證'));const key=CURRENT_LEADERBOARD_KEY+SESSION_SCOPE;assert.ok(saveResult(storage,result,[],key).saved);assert.equal(readLeaderboard(storage,key).rows[0].track,'courtyard-elevation-v1-laps2');assert.equal(map.get('xikou-kart.leaderboard.v2.campus.friendly-v1.laps2'),'old-campus-untouched');
+  assert.ok(validGhost(recording,'走廊驗證'));assert.ok(saveGhost(storage,recording).saved);assert.ok(readGhost(storage,'走廊驗證'));const key=CURRENT_LEADERBOARD_KEY+SESSION_SCOPE;assert.ok(saveResult(storage,result,[],key).saved);assert.equal(readLeaderboard(storage,key).rows[0].track,'courtyard-arcade-v2-laps2');assert.equal(map.get('xikou-kart.leaderboard.v2.campus.friendly-v1.laps2'),'old-campus-untouched');
   let raised=0;for(let t=0;t<result.totalMs/1000;t+=.3){const p=ghostPose(recording,t);assert.ok(p&&Number.isFinite(p.x));const y=courtyardHeightAt(p.x,p.z);assert.ok(y>=0&&y<=1.2+1e-8);if(y>.95)raised++;}assert.ok(raised>20);
   const p=courtyardPoseAt(COURTYARD_LENGTH*.7),s=createState(p);s.speed=4;resetState(s,nearestOnCourtyard(s.x+.15,s.z));assert.equal(s.speed,0);assert.equal(contacts(s,grid,COURTYARD_DRIVE).length,0);
+});
+check('steering responds within 150 ms and releases promptly',()=>{
+  const s=createState({x:0,z:0,yaw:0}),empty=new ElevationGrid([],[]);s.speed=5;
+  for(let i=0;i<18;i++)step(s,{left:true,throttle:true},1/120,empty,null,COURTYARD_DRIVE);
+  assert.ok(s.steering>.25);assert.ok(s.yaw>0);
+  for(let i=0;i<12;i++)step(s,{throttle:true},1/120,empty,null,COURTYARD_DRIVE);
+  assert.equal(s.steering,0);
+});
+const {Opponent,racePosition,fleetPosition}=await import('../site/opponent-core.js');
+check('three computer rivals complete two laps and rank all four cars',()=>{
+  const gates=makeGates(ROUTES.courtyard),opponents=Array.from({length:3},(_,index)=>new Opponent({gates,laps:2,grid,bounds:fixture.bounds,cfg:COURTYARD_DRIVE,route:ROUTES.courtyard,index}));
+  const player=new RaceSession({gates,laps:2}).begin(),g=gates[0],pose={x:g.x-g.fx*3,z:g.z-g.fz*3};
+  assert.equal(fleetPosition(player,pose,opponents),1);
+  for(const opponent of opponents){
+    assert.equal(contacts(opponent.state,grid,COURTYARD_DRIVE).length,0);
+    opponent.advance(3);assert.equal(opponent.race.phase,'racing');assert.equal(opponent.state.distance,0);
+    for(let i=0;i<120*400&&opponent.race.phase!=='finished';i++)opponent.advance(1/120);
+    assert.equal(opponent.race.phase,'finished');assert.equal(opponent.race.invalidLaps,0);assert.equal(opponent.state.collisions,0);assert.equal(opponent.race.lapTimes.length,2);
+  }
+  assert.equal(fleetPosition(player,pose,opponents),4);
+  const times=opponents.map(o=>o.race.elapsed).sort((a,b)=>a-b);
+  player.phase='finished';player.elapsed=times[0]-1;assert.equal(fleetPosition(player,pose,opponents),1);
+  player.elapsed=times[2]+1;assert.equal(fleetPosition(player,pose,opponents),4);
+  for(let i=0;i<2;i++){player.elapsed=(times[i]+times[i+1])/2;assert.equal(fleetPosition(player,pose,opponents),i+2);}
+  const lagged=new Opponent({gates,laps:1,grid,bounds:fixture.bounds,cfg:COURTYARD_DRIVE,route:ROUTES.courtyard});lagged.advance(4);assert.equal(lagged.race.elapsed,1);
 });
 console.log(JSON.stringify({checks,length:COURTYARD_LENGTH,minClearance,maxGrade,race:raceEvidence,ghostSamples:recording.samples.length},null,2));
