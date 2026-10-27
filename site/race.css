@@ -2,3 +2,31 @@
 @media(max-width:900px){.race-hud{top:91px;width:245px;padding:12px 14px}.race-time{font-size:29px}.race-topline{font-size:9px}.race-hud>p{font-size:8px}.start-card h1{font-size:43px}.result-main{padding:28px}.result-board{padding:30px 20px}.result-total{font-size:39px}.result-main h2{font-size:29px}}
 @media(max-width:600px){.race-hud{top:154px;left:15px;transform:none;width:185px;padding:10px 12px}.race-time{font-size:26px;margin:5px 0}.race-topline{font-size:8px;gap:4px}.lap-detail{font-size:7px}.lap-detail b{font-size:9px}.race-hud>p{font-size:8px;min-height:12px}.checkpoint-track{margin-top:9px}.start-card{max-height:calc(100dvh - 110px);margin-top:45px;padding-right:5px}.start-card h1{font-size:38px}.start-card>p{font-size:10px}.name-field{margin:12px 0}.name-field input{padding:10px;font-size:16px}.mode-picker{margin:12px 0}.mode-picker button{padding:9px 7px;font-size:10px}.result-dialog{display:block;max-width:460px}.result-main{padding:25px}.result-board{padding:23px 25px}.result-total{font-size:42px}.result-board h3{font-size:18px;margin-bottom:15px}.countdown b{font-size:125px}.countdown.go b{font-size:95px}.qa-banner{font-size:8px;gap:6px;white-space:normal}.qa-banner button{font-size:8px;white-space:nowrap}}
 @media(max-height:550px) and (orientation:landscape){.race-hud{top:62px;left:50%;transform:translateX(-50%);width:230px;padding:8px 12px}.race-time{font-size:24px;margin:3px 0}.race-topline{font-size:8px}.lap-detail{font-size:7px}.lap-detail b{font-size:9px}.checkpoint-track{margin-top:7px}.race-hud>p{font-size:8px;margin-top:4px}.start-card{margin-top:25px;max-height:calc(100dvh - 55px);padding-top:20px;width:390px}.start-card h1{font-size:28px;margin:7px 0}.start-card>p{font-size:9px;margin:6px 0}.mode-picker{margin:8px 0;padding:3px}.mode-picker button{padding:7px}.name-field{margin:9px 0;font-size:9px}.name-field input{padding:7px 10px;font-size:12px;margin-top:5px}.board-link{font-size:9px;margin-top:4px;padding:7px}.start-card>small{font-size:8px;margin-top:4px}.countdown b{font-size:100px}.countdown.go b{font-size:80px}.result-dialog{display:grid;grid-template-columns:1.1fr 1fr;max-width:800px;max-height:93dvh}.result-main{padding:22px}.result-main h2{font-size:25px;margin:6px 0}.result-label{margin-top:14px}.result-total{font-size:33px;margin-bottom:12px}.result-laps{padding:10px 0}.result-main .save-status{margin:10px 0;min-height:14px}.result-board{padding:24px 20px}.result-board h3{font-size:18px;margin:8px 0 12px}.leaderboard li{padding:8px}.leaderboard .record-time{font-size:14px}}
+
+/* Keep race information beside the driving view, including short landscape screens. */
+.race-hud{top:180px;left:28px;transform:none;width:230px;padding:10px 12px 9px}
+.race-hud #positionLabel{font-size:20px!important;line-height:1.2;margin-bottom:5px}
+.race-time{font-size:30px;margin:5px 0}
+.checkpoint-track{margin-top:8px}
+@media(max-width:900px){
+ .race-hud{top:158px;left:18px;transform:none;width:205px;padding:9px 11px}
+ .race-time{font-size:27px}
+}
+@media(max-width:600px){
+ .race-hud{top:158px;left:12px;width:min(152px,40vw);padding:8px 9px}
+ .race-hud #positionLabel{font-size:17px!important;margin-bottom:4px}
+ .race-time{font-size:23px;letter-spacing:0;margin:4px 0}
+ .race-topline{font-size:7px;gap:4px;letter-spacing:0}
+ .lap-detail{gap:5px;font-size:7px}
+ .lap-detail b{font-size:9px}
+ .race-hud>p{font-size:8px;line-height:1.4;min-height:0}
+}
+@media(max-height:550px) and (orientation:landscape){
+ body.in-race .area-chip{display:none}
+ .race-hud{top:58px;left:14px;transform:none;width:175px;padding:7px 9px}
+ .race-hud #positionLabel{font-size:16px!important;line-height:1.1;margin-bottom:2px}
+ .race-time{font-size:22px;line-height:1.1;margin:2px 0}
+ .race-topline{font-size:8px;line-height:1.1;letter-spacing:0}
+ .race-hud .lap-detail,.race-hud>p{display:none}
+ .checkpoint-track{margin-top:4px}
+}
