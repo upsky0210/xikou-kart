@@ -1,4 +1,4 @@
-import { buildToonRacer } from './toon-racer.js?build=20261026-courtyard6';
+import { buildToonRacer } from './toon-racer.js?build=premium-cat-race1';
 // High-detail studio sample. Opt-in only; race models stay at their existing cost.
 export function buildPremiumCat(T,p){
   const base=buildToonRacer(T,p),{driver}=base,old=base.head;old.removeFromParent();old.traverse(o=>{if(o.isMesh)o.geometry.dispose();});

@@ -1,14 +1,14 @@
-import { installControlMode } from './control-mode.js?build=20261026-courtyard6';
-import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=20261026-courtyard6';
-import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE } from './session-config.js?build=20261026-courtyard6';
-import { InputState, KEY_ACTION } from './drive-core.js?build=20261026-courtyard6';
-import { DRIVE } from './drive-config.js?build=20261026-courtyard6';
-import { cleanName, formatTime, makeGates } from './race-core.js?build=20261026-courtyard6';
-import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=20261026-courtyard6';
-import { drawMap } from './minimap.js?build=20261026-courtyard6';
-import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=20261026-courtyard6';
-import { GameSound } from './sound.js?build=20261026-courtyard6';
-import { RULES_LABEL } from './game-version.js?build=20261026-courtyard6';
+import { installControlMode } from './control-mode.js?build=premium-cat-race1';
+import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=premium-cat-race1';
+import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE } from './session-config.js?build=premium-cat-race1';
+import { InputState, KEY_ACTION } from './drive-core.js?build=premium-cat-race1';
+import { DRIVE } from './drive-config.js?build=premium-cat-race1';
+import { cleanName, formatTime, makeGates } from './race-core.js?build=premium-cat-race1';
+import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=premium-cat-race1';
+import { drawMap } from './minimap.js?build=premium-cat-race1';
+import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=premium-cat-race1';
+import { GameSound } from './sound.js?build=premium-cat-race1';
+import { RULES_LABEL } from './game-version.js?build=premium-cat-race1';
 
 const $=s=>document.querySelector(s),frame=$('#world'),inputs=new InputState(),gates=makeGates();
 const QA=new URLSearchParams(location.search).get('qa')==='1';
@@ -100,7 +100,7 @@ if(ROUTE_ID==='courtyard'){$('[data-spawn=north]').textContent='走廊試駕';$(
 for(const id of ['trackSelect','lapSelect'])$('#'+id).onchange=()=>{const u=new URL(location.href);u.searchParams.set('track',$('#trackSelect').value);u.searchParams.set('laps',$('#lapSelect').value);location.href=u.href;};
 $('.board-dialog>p').textContent=`${ACTIVE_ROUTE.short} · ${LAPS} 圈 · 依總時間排序`;
 try{$('#playerName').value=QA?'驗證車手':storage?.getItem('xikou-kart.playerName')||'';}catch{}
-function chooseRacer(id,preview=true){selectedRacer=getRacer(id).id;const r=getRacer(id);for(const button of document.querySelectorAll('[data-racer]'))button.setAttribute('aria-pressed',String(button.dataset.racer===r.id));$('#racerName').textContent=`${r.nickname} · ${r.name}`;$('#racerNote').textContent=r.note;try{storage?.setItem('xikou-kart.racer',r.id);}catch{}if(ready)send('racer',{id:r.id,preview});}
+function chooseRacer(id,preview=true){selectedRacer=getRacer(id).id;const r=getRacer(id);for(const button of document.querySelectorAll('[data-racer]'))button.setAttribute('aria-pressed',String(button.dataset.racer===r.id));$('#racerName').textContent=`${r.nickname} · ${r.name}`;$('#racerNote').textContent=r.id==='cat'?'高精細橘貓測試版 · 短毛與立體臉型':r.note;try{storage?.setItem('xikou-kart.racer',r.id);}catch{}if(ready)send('racer',{id:r.id,preview});}
 for(const r of RACERS){const b=document.createElement('button');b.type='button';b.className='racer-choice';b.dataset.racer=r.id;b.setAttribute('aria-label',`${r.name} ${r.nickname}`);b.innerHTML=racerPortrait(r)+`<span>${r.name}</span>`;b.onclick=()=>chooseRacer(r.id);$('#racerGrid').append(b);}chooseRacer(selectedRacer,false);
 $('#playerName').addEventListener('input',()=>{ghostSummary();try{if(!QA)storage?.setItem('xikou-kart.playerName',cleanName($('#playerName').value));}catch{}});
 $('#mute').onclick=()=>{muted=!muted;sound.unlock();updateSettings();try{storage?.setItem('xikou-kart.muted',muted?'1':'0');}catch{}};

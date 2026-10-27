@@ -1,6 +1,6 @@
-import { InputState, KEY_ACTION } from './drive-core.js?build=20261026-courtyard6';
-import { ROUTES, ORIGIN, SCALE } from './track-config.js?build=20261026-courtyard6';
-import { DRIVE } from './drive-config.js?build=20261026-courtyard6';
+import { InputState, KEY_ACTION } from './drive-core.js?build=premium-cat-race1';
+import { ROUTES, ORIGIN, SCALE } from './track-config.js?build=premium-cat-race1';
+import { DRIVE } from './drive-config.js?build=premium-cat-race1';
 const $=s=>document.querySelector(s),frame=$('#world'),inputs=new InputState();
 let ready=false,started=false,paused=false,helpOpen=false,lastState=null,toastTimer=0;
 const send=(type,data={})=>frame.contentWindow.postMessage({source:'kart-controls',type,...data},location.origin);

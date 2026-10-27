@@ -1,5 +1,5 @@
-import { world } from './track-config.js?build=20261026-courtyard6';
-import { DRIVE } from './drive-config.js?build=20261026-courtyard6';
+import { world } from './track-config.js?build=premium-cat-race1';
+import { DRIVE } from './drive-config.js?build=premium-cat-race1';
 // A local greybox study of D's west corridor and the courtyard. Plan scale: 18 px/m.
 export const LAB_DRIVE=Object.freeze({...DRIVE,maxSpeed:4.5,acceleration:3,reverseSpeed:2,turnSpeed:2.8,turnDeceleration:6,driftMinSpeed:99});
 const controls=[[675,740],[1000,740],[1000,960],[675,960]];

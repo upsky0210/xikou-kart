@@ -1,5 +1,5 @@
-import { buildAnimal } from './animal-model.js?build=premium-cat1';
-import { getRacer } from './racer-catalog.js?build=20261026-courtyard6';
+import { buildAnimal } from './animal-model.js?build=premium-cat-race1';
+import { getRacer } from './racer-catalog.js?build=premium-cat-race1';
 // Original geometry, shared by the player and the non-colliding ghost.
 export function buildKart(T,racerId='cat',options={}){
   const profile=getRacer(racerId);

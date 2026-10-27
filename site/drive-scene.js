@@ -1,17 +1,17 @@
-import { RACERS } from './racer-catalog.js?build=20261026-courtyard6';
-import { Opponent, fleetPosition } from './opponent-core.js?build=20261026-courtyard6';
-import { ACTIVE_ROUTE, LAPS, ROUTE_ID } from './session-config.js?build=20261026-courtyard6';
-import { buildKart } from './kart-model.js?build=20261026-courtyard6';
-import { prepareStaticScene } from './scene-utils.js?build=20261026-courtyard6';
-import { DRIVE, SPAWNS } from './drive-config.js?build=20261026-courtyard6';
-import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=20261026-courtyard6';
-import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=20261026-courtyard6';
-import { RaceSession, makeGates } from './race-core.js?build=20261026-courtyard6';
-import { buildRaceDecor } from './race-decor.js?build=20261026-courtyard6';
-import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=20261026-courtyard6';
-import { cancelDrift } from './effects-core.js?build=20261026-courtyard6';
-import { courtyardHeightAt,COURTYARD_RAILS,nearestOnCourtyard } from './courtyard-route.js?build=20261026-courtyard6';
-import { COURTYARD_DRIVE,ElevationGrid,wallHeight,addCourtyardRails } from './courtyard-world.js?build=20261026-courtyard6';
+import { RACERS } from './racer-catalog.js?build=premium-cat-race1';
+import { Opponent, fleetPosition } from './opponent-core.js?build=premium-cat-race1';
+import { ACTIVE_ROUTE, LAPS, ROUTE_ID } from './session-config.js?build=premium-cat-race1';
+import { buildKart } from './kart-model.js?build=premium-cat-race1';
+import { prepareStaticScene } from './scene-utils.js?build=premium-cat-race1';
+import { DRIVE, SPAWNS } from './drive-config.js?build=premium-cat-race1';
+import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=premium-cat-race1';
+import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=premium-cat-race1';
+import { RaceSession, makeGates } from './race-core.js?build=premium-cat-race1';
+import { buildRaceDecor } from './race-decor.js?build=premium-cat-race1';
+import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=premium-cat-race1';
+import { cancelDrift } from './effects-core.js?build=premium-cat-race1';
+import { courtyardHeightAt,COURTYARD_RAILS,nearestOnCourtyard } from './courtyard-route.js?build=premium-cat-race1';
+import { COURTYARD_DRIVE,ElevationGrid,wallHeight,addCourtyardRails } from './courtyard-world.js?build=premium-cat-race1';
 
 export function initScene(api){
   const {THREE:T,scene,renderer,camera,orbit,floors,rooms}=api;
@@ -91,7 +91,7 @@ export function initScene(api){
     mesh.rotation.y=Math.atan2(g.fx,g.fz);mesh.position.set(g.x,heightAt(g.x,g.z),g.z);mesh.visible=false;scene.add(mesh);return mesh;
   });
   const state=createState(spawns.field),simulation=new FixedSimulation(state,grid,bounds,cfg),local=new InputState();let remote={};
-  let {car,body,wheels,steeringWheel,driver,head,profile}=buildKart(T);scene.add(car);
+  let {car,body,wheels,steeringWheel,driver,head,profile}=buildKart(T,'cat',{faceStyle:'premium'});scene.add(car);
   const shadow=new T.Mesh(new T.CircleGeometry(.90,32),new T.MeshBasicMaterial({color:'#1b2e37',transparent:true,opacity:.19,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.125;shadow.scale.set(.85,1.25,1);scene.add(shadow);
   let ghostModel=car.clone(true);const ghostMaterial=new T.MeshBasicMaterial({color:'#75e9ec',transparent:true,opacity:.28,depthWrite:false});
   ghostModel.traverse(o=>{if(o.isMesh)o.material=ghostMaterial;});ghostModel.visible=false;scene.add(ghostModel);
@@ -102,7 +102,7 @@ export function initScene(api){
       const old=car;for(const f of flames)old.remove(f);old.removeFromParent();ghostModel.removeFromParent();
       const geometries=new Set(),materials=new Set();old.traverse(o=>{if(o.isMesh){geometries.add(o.geometry);materials.add(o.material);}});
       for(const g of geometries)g.dispose();for(const m of materials){m.map?.dispose();m.dispose();}
-      ({car,body,wheels,steeringWheel,driver,head,profile}=buildKart(T,id));scene.add(car);for(const f of flames)car.add(f);
+      ({car,body,wheels,steeringWheel,driver,head,profile}=buildKart(T,id,id==='cat'?{faceStyle:'premium'}:{}));scene.add(car);for(const f of flames)car.add(f);
       ghostModel=car.clone(true);for(const o of [...ghostModel.children])if(o.name==='boost-flame')o.removeFromParent();
       ghostModel.traverse(o=>{if(o.isMesh)o.material=ghostMaterial;});ghostModel.visible=false;scene.add(ghostModel);
     }
@@ -148,7 +148,7 @@ export function initScene(api){
         }
       }
       state.x=gates[0].x-gates[0].fx*3;state.z=gates[0].z-gates[0].fz*3;state.yaw=Math.atan2(gates[0].fx,gates[0].fz);
-      if(qa){const module=await import('./qa-driver.js?build=20261026-courtyard6');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
+      if(qa){const module=await import('./qa-driver.js?build=premium-cat-race1');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
     }
     playing=true;cameraSnap=true;setPause(false);send('started',{mode});
   }

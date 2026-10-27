@@ -1,8 +1,8 @@
-import { buildPremiumCat } from './premium-cat.js?build=20261026-courtyard6';
-import { buildToonRacer } from './toon-racer.js?build=20261026-courtyard6';
-import { makeAnimalFace } from './animal-face.js?build=20261026-courtyard6';
-import { getRacer } from './racer-catalog.js?build=20261026-courtyard6';
-import { addSculptedFace } from './sculpted-face.js?build=20261026-courtyard6';
+import { buildPremiumCat } from './premium-cat.js?build=premium-cat-race1';
+import { buildToonRacer } from './toon-racer.js?build=premium-cat-race1';
+import { makeAnimalFace } from './animal-face.js?build=premium-cat-race1';
+import { getRacer } from './racer-catalog.js?build=premium-cat-race1';
+import { addSculptedFace } from './sculpted-face.js?build=premium-cat-race1';
 export function buildAnimal(T,id,options={}){
   if(id==='cat'&&options.faceStyle==='premium')return buildPremiumCat(T,getRacer(id));
   if(!options.faceStyle||options.faceStyle==='toon')return buildToonRacer(T,getRacer(id));

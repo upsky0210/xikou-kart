@@ -1,9 +1,9 @@
 import * as T from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { buildKart } from './kart-model.js?build=20261026-courtyard6';
-import { SpatialGrid,createState,resetState,FixedSimulation,InputState,KEY_ACTION } from './drive-core.js?build=20261026-courtyard6';
-import { world } from './track-config.js?build=20261026-courtyard6';
-import { LAB_DRIVE,LENGTH,SAMPLES,BARRIERS,edge,heightAt,poseAt,nearestPose,demoInput } from './lab-course.js?build=20261026-courtyard6';
+import { buildKart } from './kart-model.js?build=premium-cat-race1';
+import { SpatialGrid,createState,resetState,FixedSimulation,InputState,KEY_ACTION } from './drive-core.js?build=premium-cat-race1';
+import { world } from './track-config.js?build=premium-cat-race1';
+import { LAB_DRIVE,LENGTH,SAMPLES,BARRIERS,edge,heightAt,poseAt,nearestPose,demoInput } from './lab-course.js?build=premium-cat-race1';
 
 const $=q=>document.querySelector(q),canvas=$('#scene'),renderer=new T.WebGLRenderer({canvas,antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.setClearColor('#d8e8e6');
