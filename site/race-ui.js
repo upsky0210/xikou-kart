@@ -1,15 +1,15 @@
-import { getDifficulty } from './difficulty-config.js?build=grand-difficulty2';
-import { installControlMode } from './control-mode.js?build=grand-difficulty2';
-import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=grand-difficulty2';
-import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE } from './session-config.js?build=grand-difficulty2';
-import { InputState, KEY_ACTION } from './drive-core.js?build=grand-difficulty2';
-import { DRIVE } from './drive-config.js?build=grand-difficulty2';
-import { cleanName, formatTime, makeGates } from './race-core.js?build=grand-difficulty2';
-import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=grand-difficulty2';
-import { drawMap } from './minimap.js?build=grand-difficulty2';
-import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=grand-difficulty2';
-import { GameSound } from './sound.js?build=grand-difficulty2';
-import { RULES_LABEL } from './game-version.js?build=grand-difficulty2';
+import { getDifficulty } from './difficulty-config.js?build=sculpted-crew4';
+import { installControlMode } from './control-mode.js?build=sculpted-crew4';
+import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=sculpted-crew4';
+import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE } from './session-config.js?build=sculpted-crew4';
+import { InputState, KEY_ACTION } from './drive-core.js?build=sculpted-crew4';
+import { DRIVE } from './drive-config.js?build=sculpted-crew4';
+import { cleanName, formatTime, makeGates } from './race-core.js?build=sculpted-crew4';
+import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=sculpted-crew4';
+import { drawMap } from './minimap.js?build=sculpted-crew4';
+import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=sculpted-crew4';
+import { GameSound } from './sound.js?build=sculpted-crew4';
+import { RULES_LABEL } from './game-version.js?build=sculpted-crew4';
 
 const $=s=>document.querySelector(s),frame=$('#world'),inputs=new InputState(),gates=makeGates();
 const QA=new URLSearchParams(location.search).get('qa')==='1';

@@ -1,6 +1,6 @@
-import { ACTIVE_ROUTE } from './session-config.js?build=grand-difficulty2';
-import { ROUTES, world } from './track-config.js?build=grand-difficulty2';
-import { TRACK_ID } from './game-version.js?build=grand-difficulty2';
+import { ACTIVE_ROUTE } from './session-config.js?build=sculpted-crew4';
+import { ROUTES, world } from './track-config.js?build=sculpted-crew4';
+import { TRACK_ID } from './game-version.js?build=sculpted-crew4';
 
 export function makeGates(route=ACTIVE_ROUTE){
   return route.checkpoints.map((index,i)=>{

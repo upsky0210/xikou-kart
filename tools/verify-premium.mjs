@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import * as T from '../site/campus/vendor/three/build/three.module.js';
 import {buildKart} from '../site/kart-model.js';
@@ -18,5 +20,9 @@ assert.ok(high.head.getObjectByName('iris').material.map);assert.ok(high.head.ge
 const {RACERS,getRacer}=await import('../site/racer-catalog.js');
 assert.equal(RACERS.length,8);assert.equal(getRacer('bunny').nickname,'邦妮');assert.equal(getRacer('meerkat').id,'bunny');
 const evidence=[];
-for(const racer of RACERS){const m=buildKart(T,racer.id),basic=buildKart(T,racer.id,{faceStyle:'toon'});assert.equal(m.head.userData.faceStyle,`premium-${racer.id}-v1`);const triangles=inspect(m);assert.ok(triangles>inspect(basic));assert.ok(triangles<300000);assert.ok(m.head.getObjectByName('instanced-short-fur'));const height=new T.Box3().setFromObject(m.car).max.y;assert.ok(height<2.3,`${racer.id} too tall`);evidence.push({id:racer.id,triangles,height});}
+for(const racer of RACERS){const m=buildKart(T,racer.id),basic=buildKart(T,racer.id,{faceStyle:'toon'});assert.equal(m.head.userData.faceStyle,`premium-${racer.id}-${racer.id==='cat'?'v1':'v2'}`);const triangles=inspect(m);assert.ok(triangles>inspect(basic));assert.ok(triangles<300000);assert.ok(m.head.getObjectByName('instanced-short-fur'));const skin=m.head.getObjectByName('continuous-sculpted-skull');assert.ok(skin,'all racers must use a continuous sculpted skull');assert.ok(skin.geometry.attributes.position.count>10000);if(racer.id!=='cat'){assert.equal(m.head.userData.sculptRevision,2);assert.ok(m.head.userData.anatomy.muzzle>0);skin.geometry.computeBoundingBox();assert.ok(skin.geometry.boundingBox.max.z>m.head.userData.anatomy.d+m.head.userData.anatomy.muzzle*.4,'muzzle must be sculpted into the actual mesh');assert.equal(m.head.children.filter(o=>o.name==='iris').length,2);}
+const height=new T.Box3().setFromObject(m.car).max.y;assert.ok(height<2.3,`${racer.id} too tall`);evidence.push({id:racer.id,triangles,height});}
+const portraitManifest=JSON.parse(fs.readFileSync(new URL('../site/portraits/manifest.json',import.meta.url)));
+for(const [path,hash]of Object.entries(portraitManifest.sourceHashes)){const source=fs.readFileSync(new URL('../'+path,import.meta.url),'utf8').replace(/\r\n/g,'\n').replace(/\?build=[A-Za-z0-9-]+/g,'');assert.equal(createHash('sha256').update(source).digest('hex'),hash,`Regenerate portraits after changing ${path}`);}
+for(const racer of RACERS){const png=fs.readFileSync(new URL(`../site/portraits/${racer.id}.png`,import.meta.url));assert.equal(png.subarray(1,4).toString(),'PNG');assert.equal(png.readUInt32BE(16),384);assert.equal(png.readUInt32BE(20),384);}
 console.log(JSON.stringify({passed:true,racers:evidence}));

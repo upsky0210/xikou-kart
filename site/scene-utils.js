@@ -1,4 +1,4 @@
-import { mergeGeometries } from './campus/vendor/three/examples/jsm/utils/BufferGeometryUtils.js?build=grand-difficulty2';
+import { mergeGeometries } from './campus/vendor/three/examples/jsm/utils/BufferGeometryUtils.js?build=sculpted-crew4';
 export function prepareStaticScene(T,scene) {
   // M0 freezes the inherited scene. Batch visible opaque meshes by material,
   // applying world transforms before moving them out of their original parents.

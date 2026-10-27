@@ -1,4 +1,4 @@
-import { ROUTES } from './track-config.js?build=grand-difficulty2';
+import { ROUTES } from './track-config.js?build=sculpted-crew4';
 const query=new URLSearchParams(typeof location==='undefined'?'':location.search);
 export const ROUTE_ID=['campus','courtyard','grand'].includes(query.get('track'))?query.get('track'):'field';
 export const ACTIVE_ROUTE=ROUTES[ROUTE_ID];

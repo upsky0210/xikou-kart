@@ -14,15 +14,15 @@ check('two sample heads have a continuous sculpted skull and shallow conforming 
     skin.geometry.computeBoundingBox();assert.ok(skin.geometry.boundingBox.max.z>.37/.36,'skull has an actual sculpted nose/muzzle transition');
   }
   assert.equal(buildKart(T,'cat').head.userData.faceStyle,'premium-cat-v1','formal game uses expressive species models');
-  assert.equal(buildKart(T,'beagle').head.userData.faceStyle,'premium-beagle-v1');
-  assert.equal(buildKart(T,'hamster').head.userData.faceStyle,'premium-hamster-v1');
+  assert.equal(buildKart(T,'beagle').head.userData.faceStyle,'premium-beagle-v2');
+  assert.equal(buildKart(T,'hamster').head.userData.faceStyle,'premium-hamster-v2');
 });
 check('eight expressive racers have different silhouettes and batched 3D faces',()=>{
   const silhouettes=new Set();
   for(const id of ['cat','bunny','hamster','beagle','macaque','horse','sheep','boar']){
-    const {car,head}=buildKart(T,id);assert.equal(head.userData.faceStyle,`premium-${id}-v1`);
+    const {car,head}=buildKart(T,id);assert.equal(head.userData.faceStyle,`premium-${id}-${id==='cat'?'v1':'v2'}`);
     car.updateMatrixWorld(true);const bounds=new T.Box3().setFromObject(head);silhouettes.add([bounds.min.x,bounds.max.x,bounds.min.y,bounds.max.y,bounds.min.z,bounds.max.z].map(n=>n.toFixed(3)).join(','));
-    assert.ok(head.children.length<=(id==='cat'?80:14),'batch facial geometry for four-car rendering');
+    assert.ok(head.children.length<=80,'batch facial geometry for four-car rendering');
     assert.ok(head.children.every(o=>o.geometry.attributes.position.count>0));
   }
   assert.equal(silhouettes.size,8,'each species has a distinct actual head silhouette');

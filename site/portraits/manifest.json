@@ -1,0 +1,19 @@
+{
+  "origin": "Rendered from actual buildKart model by portrait-export.html",
+  "sourceHashes": {
+    "site/sculpted-racers.js": "12c11444a5c8cab7375d6250647452cc77c7391bcc06edfa2a8ff0f2059d7451",
+    "site/premium-cat.js": "b54443e109af5234bfbdad37f7e8d27e9c6f8aaeb59e7278bfe84f7099ba2018",
+    "site/toon-racer.js": "be1a3a566154c35b66ea345cd199ec29765ed6cb6f9ac338ca6179124b122001",
+    "site/portrait-export.js": "622b3fbb4a749ea32f4443a1aec7ad8599318cfd9e377d8f011295659f305329"
+  },
+  "ids": [
+    "cat",
+    "bunny",
+    "hamster",
+    "beagle",
+    "macaque",
+    "horse",
+    "sheep",
+    "boar"
+  ]
+}

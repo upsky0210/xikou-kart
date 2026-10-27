@@ -1,5 +1,5 @@
-import { world,pointAt,lengthMetres } from './track-config.js?build=grand-difficulty2';
-import {getDifficulty} from './difficulty-config.js?build=grand-difficulty2';
+import { world,pointAt,lengthMetres } from './track-config.js?build=sculpted-crew4';
+import {getDifficulty} from './difficulty-config.js?build=sculpted-crew4';
 const cache=new Map(),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 function path(route){if(cache.has(route.id))return cache.get(route.id);const length=lengthMetres(route.points),count=Math.ceil(length/.18),poses=Array.from({length:count},(_,i)=>world(pointAt(route.points,i/count))),cumulative=[0];for(let i=1;i<route.points.length;i++)cumulative.push(cumulative.at(-1)+Math.hypot(...route.points[i].map((x,j)=>(x-route.points[i-1][j])/18)));const data={length,count,poses,gateSamples:route.checkpoints.map(i=>Math.round(cumulative[i]/length*count)%count)};cache.set(route.id,data);return data;}
 export function createRouteDriver(route,difficulty='normal'){

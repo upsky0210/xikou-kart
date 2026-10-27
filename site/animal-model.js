@@ -1,11 +1,12 @@
-import { buildPremiumCat } from './premium-cat.js?build=grand-difficulty2';
-import { buildToonRacer } from './toon-racer.js?build=grand-difficulty2';
-import { makeAnimalFace } from './animal-face.js?build=grand-difficulty2';
-import { getRacer } from './racer-catalog.js?build=grand-difficulty2';
-import { addSculptedFace } from './sculpted-face.js?build=grand-difficulty2';
+import { buildSculptedRacer } from './sculpted-racers.js?build=sculpted-crew4';
+import { buildPremiumCat } from './premium-cat.js?build=sculpted-crew4';
+import { buildToonRacer } from './toon-racer.js?build=sculpted-crew4';
+import { makeAnimalFace } from './animal-face.js?build=sculpted-crew4';
+import { getRacer } from './racer-catalog.js?build=sculpted-crew4';
+import { addSculptedFace } from './sculpted-face.js?build=sculpted-crew4';
 export function buildAnimal(T,id,options={}){
   const profile=getRacer(id);
-  if(!options.faceStyle||options.faceStyle==='premium')return profile.id==='cat'?buildPremiumCat(T,profile):buildToonRacer(T,profile,{detail:true});
+  if(!options.faceStyle||options.faceStyle==='premium')return profile.id==='cat'?buildPremiumCat(T,profile):buildSculptedRacer(T,profile);
   if(options.faceStyle==='toon')return buildToonRacer(T,profile);
   const p=getRacer(id),driver=new T.Group(),head=new T.Group();driver.name=`racer-${p.id}`;head.name='animal-head';head.position.set(0,1.49,-.12);driver.add(head);driver.userData.racer=p.id;
   const mat=c=>new T.MeshStandardMaterial({color:c,roughness:.7});

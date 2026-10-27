@@ -1,19 +1,19 @@
-import { createRouteDriver } from './route-driver.js?build=grand-difficulty2';
-import { getDifficulty } from './difficulty-config.js?build=grand-difficulty2';
-import { RACERS } from './racer-catalog.js?build=grand-difficulty2';
-import { Opponent, fleetPosition } from './opponent-core.js?build=grand-difficulty2';
-import { ACTIVE_ROUTE, LAPS, ROUTE_ID } from './session-config.js?build=grand-difficulty2';
-import { buildKart } from './kart-model.js?build=grand-difficulty2';
-import { prepareStaticScene } from './scene-utils.js?build=grand-difficulty2';
-import { DRIVE, SPAWNS } from './drive-config.js?build=grand-difficulty2';
-import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=grand-difficulty2';
-import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=grand-difficulty2';
-import { RaceSession, makeGates } from './race-core.js?build=grand-difficulty2';
-import { buildRaceDecor } from './race-decor.js?build=grand-difficulty2';
-import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=grand-difficulty2';
-import { cancelDrift } from './effects-core.js?build=grand-difficulty2';
-import { courtyardHeightAt,nearestOnCourtyard } from './courtyard-route.js?build=grand-difficulty2';
-import { COURTYARD_DRIVE,ElevationGrid,wallHeight,addCourtyardSurface } from './courtyard-world.js?build=grand-difficulty2';
+import { createRouteDriver } from './route-driver.js?build=sculpted-crew4';
+import { getDifficulty } from './difficulty-config.js?build=sculpted-crew4';
+import { RACERS } from './racer-catalog.js?build=sculpted-crew4';
+import { Opponent, fleetPosition } from './opponent-core.js?build=sculpted-crew4';
+import { ACTIVE_ROUTE, LAPS, ROUTE_ID } from './session-config.js?build=sculpted-crew4';
+import { buildKart } from './kart-model.js?build=sculpted-crew4';
+import { prepareStaticScene } from './scene-utils.js?build=sculpted-crew4';
+import { DRIVE, SPAWNS } from './drive-config.js?build=sculpted-crew4';
+import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=sculpted-crew4';
+import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=sculpted-crew4';
+import { RaceSession, makeGates } from './race-core.js?build=sculpted-crew4';
+import { buildRaceDecor } from './race-decor.js?build=sculpted-crew4';
+import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=sculpted-crew4';
+import { cancelDrift } from './effects-core.js?build=sculpted-crew4';
+import { courtyardHeightAt,nearestOnCourtyard } from './courtyard-route.js?build=sculpted-crew4';
+import { COURTYARD_DRIVE,ElevationGrid,wallHeight,addCourtyardSurface } from './courtyard-world.js?build=sculpted-crew4';
 
 export function initScene(api){
   const {THREE:T,scene,renderer,camera,orbit,floors,rooms}=api;
@@ -152,7 +152,7 @@ export function initScene(api){
       }
       state.x=gates[0].x-gates[0].fx*3;state.z=gates[0].z-gates[0].fz*3;state.yaw=Math.atan2(gates[0].fx,gates[0].fz);
       if(qa&&ROUTE_ID==='grand'){const controller=createRouteDriver(route,difficulty);qaDriver=s=>controller(s,race);}
-      else if(qa){const module=await import('./qa-driver.js?build=grand-difficulty2');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
+      else if(qa){const module=await import('./qa-driver.js?build=sculpted-crew4');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
     }
     playing=true;cameraSnap=true;setPause(false);send('started',{mode});
   }

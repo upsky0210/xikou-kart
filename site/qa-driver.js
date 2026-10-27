@@ -1,7 +1,7 @@
 // Shared route-following driver for the computer rival and developer regression runs.
-import { ROUTES, world, pointAt, lengthMetres } from './track-config.js?build=grand-difficulty2';
+import { ROUTES, world, pointAt, lengthMetres } from './track-config.js?build=sculpted-crew4';
 const paths=new Map();
-import { courtyardSlowAt } from './courtyard-route.js?build=grand-difficulty2';
+import { courtyardSlowAt } from './courtyard-route.js?build=sculpted-crew4';
 function path(route){if(!paths.has(route.id)){const count=1800;paths.set(route.id,{count,length:lengthMetres(route.points),poses:Array.from({length:count},(_,i)=>world(pointAt(route.points,i/count)))});}return paths.get(route.id);}
 export function regressionInput(state,targetSpeed=7.6,route=ROUTES.field){
   const {poses,count,length}=path(route);

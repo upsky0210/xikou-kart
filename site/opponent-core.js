@@ -1,7 +1,7 @@
-import { createState, FixedSimulation } from './drive-core.js?build=grand-difficulty2';
-import { RaceSession } from './race-core.js?build=grand-difficulty2';
-import { createRouteDriver } from './route-driver.js?build=grand-difficulty2';
-import { getDifficulty } from './difficulty-config.js?build=grand-difficulty2';
+import { createState, FixedSimulation } from './drive-core.js?build=sculpted-crew4';
+import { RaceSession } from './race-core.js?build=sculpted-crew4';
+import { createRouteDriver } from './route-driver.js?build=sculpted-crew4';
+import { getDifficulty } from './difficulty-config.js?build=sculpted-crew4';
 
 // A physical driver: walls, gates and countdown use the same rules as the player.
 // Cars do not collide with each other, so a narrow corridor cannot be blocked.
