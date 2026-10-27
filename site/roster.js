@@ -1,0 +1,9 @@
+import * as T from 'three';
+import {buildKart} from './kart-model.js?build=20261026-courtyard6';
+import {RACERS} from './racer-catalog.js?build=20261026-courtyard6';
+const renderer=new T.WebGLRenderer({alpha:true,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setClearColor(0,0);document.body.append(renderer.domElement);
+const notes=['尖耳・虎斑・翹尾','修長臉・深眼罩','圓頰・門牙・小圓耳','垂耳・白鼻樑・白尾尖','大側耳・面罩・捲尾','長口鼻・鬃毛・直耳','蓬鬆羊毛・蝴蝶結','寬鼻盤・獠牙・鬃冠'];
+const entries=RACERS.map((r,i)=>{const card=document.createElement('div');card.className='card';card.innerHTML=`<div class="view"></div><div class="caption">${r.name} · ${r.nickname}<small>${notes[i]}</small></div>`;document.querySelector('#grid').append(card);const scene=new T.Scene(),model=buildKart(T,r.id);scene.add(model.car);scene.add(new T.HemisphereLight('#fff5df','#718c93',2.5));const key=new T.DirectionalLight('#ffffff',3);key.position.set(-3,5,6);scene.add(key);const rim=new T.DirectionalLight('#b2dedc',1.5);rim.position.set(3,2,-4);scene.add(rim);return{scene,view:card.querySelector('.view'),model};});
+let angle='front';
+function render(){renderer.setSize(innerWidth,innerHeight);renderer.setScissorTest(false);renderer.clear();renderer.setScissorTest(true);for(const e of entries){const b=e.view.getBoundingClientRect();if(b.bottom<0||b.top>innerHeight)continue;const camera=new T.PerspectiveCamera(34,b.width/b.height,.1,30);camera.position.set(...(angle==='back'?[2.3,2.6,-4.7]:angle==='side'?[4.7,2.5,.4]:[1.0,2.4,4.9]));camera.lookAt(0,1.04,0);renderer.setViewport(b.left,innerHeight-b.bottom,b.width,b.height);renderer.setScissor(b.left,innerHeight-b.bottom,b.width,b.height);renderer.render(e.scene,camera);}}
+for(const b of document.querySelectorAll('[data-view]'))b.onclick=()=>{angle=b.dataset.view;render();};addEventListener('resize',render);addEventListener('scroll',render);render();document.body.dataset.ready='true';

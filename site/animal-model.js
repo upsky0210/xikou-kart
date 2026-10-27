@@ -1,7 +1,9 @@
+import { buildToonRacer } from './toon-racer.js?build=20261026-courtyard6';
 import { makeAnimalFace } from './animal-face.js?build=20261026-courtyard6';
 import { getRacer } from './racer-catalog.js?build=20261026-courtyard6';
 import { addSculptedFace } from './sculpted-face.js?build=20261026-courtyard6';
 export function buildAnimal(T,id,options={}){
+  if(!options.faceStyle||options.faceStyle==='toon')return buildToonRacer(T,getRacer(id));
   const p=getRacer(id),driver=new T.Group(),head=new T.Group();driver.name=`racer-${p.id}`;head.name='animal-head';head.position.set(0,1.49,-.12);driver.add(head);driver.userData.racer=p.id;
   const mat=c=>new T.MeshStandardMaterial({color:c,roughness:.7});
   const fur=mat(p.fur),light=mat(p.light),dark=mat(p.dark),suit=mat(p.suit),white=mat('#fffaf0'),ink=mat('#292a30'),pink=mat('#edb0a4'),accent=mat(p.accent);

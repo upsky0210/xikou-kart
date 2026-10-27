@@ -13,9 +13,19 @@ check('two sample heads have a continuous sculpted skull and shallow conforming 
     assert.equal(eyeCount,2);assert.ok(skin.geometry.attributes.position.count>3000);
     skin.geometry.computeBoundingBox();assert.ok(skin.geometry.boundingBox.max.z>.37/.36,'skull has an actual sculpted nose/muzzle transition');
   }
-  assert.equal(buildKart(T,'cat').head.userData.faceStyle,'sculpted-v1','approved cat face is used by the formal game');
-  assert.equal(buildKart(T,'beagle').head.userData.faceStyle,'sculpted-v1','approved beagle face is used by the formal game');
-  assert.equal(buildKart(T,'hamster').head.userData.faceStyle,undefined,'other six racers keep their existing faces');
+  assert.equal(buildKart(T,'cat').head.userData.faceStyle,'toon-v2','formal game uses expressive species models');
+  assert.equal(buildKart(T,'beagle').head.userData.faceStyle,'toon-v2');
+  assert.equal(buildKart(T,'hamster').head.userData.faceStyle,'toon-v2');
+});
+check('eight expressive racers have different silhouettes and batched 3D faces',()=>{
+  const silhouettes=new Set();
+  for(const id of ['cat','meerkat','hamster','beagle','macaque','horse','sheep','boar']){
+    const {car,head}=buildKart(T,id);assert.equal(head.userData.faceStyle,'toon-v2');
+    car.updateMatrixWorld(true);const bounds=new T.Box3().setFromObject(head);silhouettes.add([bounds.min.x,bounds.max.x,bounds.min.y,bounds.max.y,bounds.min.z,bounds.max.z].map(n=>n.toFixed(3)).join(','));
+    assert.ok(head.children.length<=12,'batch facial geometry for four-car rendering');
+    assert.ok(head.children.every(o=>o.geometry.attributes.position.count>0));
+  }
+  assert.equal(silhouettes.size,8,'each species has a distinct actual head silhouette');
 });
 check('loop is continuous, its 1.2 m ramps are at most 11.1 percent, and its spawn/reset poses clear rails',()=>{
   assert.ok(LENGTH>50&&LENGTH<65);assert.equal(heightAt((705-1100)/18),1.2);assert.equal(heightAt((900-1100)/18),0);
