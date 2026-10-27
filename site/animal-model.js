@@ -1,11 +1,12 @@
-import { buildPremiumCat } from './premium-cat.js?build=premium-cat-race1';
-import { buildToonRacer } from './toon-racer.js?build=premium-cat-race1';
-import { makeAnimalFace } from './animal-face.js?build=premium-cat-race1';
-import { getRacer } from './racer-catalog.js?build=premium-cat-race1';
-import { addSculptedFace } from './sculpted-face.js?build=premium-cat-race1';
+import { buildPremiumCat } from './premium-cat.js?build=premium-roster-open1';
+import { buildToonRacer } from './toon-racer.js?build=premium-roster-open1';
+import { makeAnimalFace } from './animal-face.js?build=premium-roster-open1';
+import { getRacer } from './racer-catalog.js?build=premium-roster-open1';
+import { addSculptedFace } from './sculpted-face.js?build=premium-roster-open1';
 export function buildAnimal(T,id,options={}){
-  if(id==='cat'&&options.faceStyle==='premium')return buildPremiumCat(T,getRacer(id));
-  if(!options.faceStyle||options.faceStyle==='toon')return buildToonRacer(T,getRacer(id));
+  const profile=getRacer(id);
+  if(!options.faceStyle||options.faceStyle==='premium')return profile.id==='cat'?buildPremiumCat(T,profile):buildToonRacer(T,profile,{detail:true});
+  if(options.faceStyle==='toon')return buildToonRacer(T,profile);
   const p=getRacer(id),driver=new T.Group(),head=new T.Group();driver.name=`racer-${p.id}`;head.name='animal-head';head.position.set(0,1.49,-.12);driver.add(head);driver.userData.racer=p.id;
   const mat=c=>new T.MeshStandardMaterial({color:c,roughness:.7});
   const fur=mat(p.fur),light=mat(p.light),dark=mat(p.dark),suit=mat(p.suit),white=mat('#fffaf0'),ink=mat('#292a30'),pink=mat('#edb0a4'),accent=mat(p.accent);

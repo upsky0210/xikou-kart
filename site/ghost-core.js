@@ -1,8 +1,8 @@
-import { SESSION_SCOPE, ROUTE_ID, ACTIVE_ROUTE } from './session-config.js?build=premium-cat-race1';
-import { DRIVE } from './drive-config.js?build=premium-cat-race1';
-import { BOOST_PADS } from './effects-config.js?build=premium-cat-race1';
-import { TRACK_ID } from './game-version.js?build=premium-cat-race1';
-import { cleanName } from './race-core.js?build=premium-cat-race1';
+import { SESSION_SCOPE, ROUTE_ID, ACTIVE_ROUTE } from './session-config.js?build=premium-roster-open1';
+import { DRIVE } from './drive-config.js?build=premium-roster-open1';
+import { BOOST_PADS } from './effects-config.js?build=premium-roster-open1';
+import { TRACK_ID } from './game-version.js?build=premium-roster-open1';
+import { cleanName } from './race-core.js?build=premium-roster-open1';
 export const GHOST_KEY='xikou-kart.ghost.v1';
 function fingerprint(text){let h=2166136261;for(const c of text){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return(h>>>0).toString(16);}
 export const GHOST_SIGNATURE=`${TRACK_ID}:${fingerprint(JSON.stringify([DRIVE,BOOST_PADS,...(ROUTE_ID==='campus'?[ACTIVE_ROUTE.points]:[])]))}`;

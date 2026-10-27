@@ -1,7 +1,7 @@
 const KART_CAMPUS=new URLSearchParams(location.search).get('drive')==='1'&&['campus','courtyard'].includes(new URLSearchParams(location.search).get('track'));
 const KART_COURTYARD=new URLSearchParams(location.search).get('drive')==='1'&&new URLSearchParams(location.search).get('track')==='courtyard';
 import * as THREE from 'three';
-import { Batch, mat, SPOTS } from './blocks.js?build=premium-cat-race1';
+import { Batch, mat, SPOTS } from './blocks.js?build=premium-roster-open1';
 
 /* =========================================================
  * 操場一帶（依 2026-10-12 使用者照片）

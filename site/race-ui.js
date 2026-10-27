@@ -1,14 +1,14 @@
-import { installControlMode } from './control-mode.js?build=premium-cat-race1';
-import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=premium-cat-race1';
-import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE } from './session-config.js?build=premium-cat-race1';
-import { InputState, KEY_ACTION } from './drive-core.js?build=premium-cat-race1';
-import { DRIVE } from './drive-config.js?build=premium-cat-race1';
-import { cleanName, formatTime, makeGates } from './race-core.js?build=premium-cat-race1';
-import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=premium-cat-race1';
-import { drawMap } from './minimap.js?build=premium-cat-race1';
-import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=premium-cat-race1';
-import { GameSound } from './sound.js?build=premium-cat-race1';
-import { RULES_LABEL } from './game-version.js?build=premium-cat-race1';
+import { installControlMode } from './control-mode.js?build=premium-roster-open1';
+import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=premium-roster-open1';
+import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE } from './session-config.js?build=premium-roster-open1';
+import { InputState, KEY_ACTION } from './drive-core.js?build=premium-roster-open1';
+import { DRIVE } from './drive-config.js?build=premium-roster-open1';
+import { cleanName, formatTime, makeGates } from './race-core.js?build=premium-roster-open1';
+import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=premium-roster-open1';
+import { drawMap } from './minimap.js?build=premium-roster-open1';
+import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=premium-roster-open1';
+import { GameSound } from './sound.js?build=premium-roster-open1';
+import { RULES_LABEL } from './game-version.js?build=premium-roster-open1';
 
 const $=s=>document.querySelector(s),frame=$('#world'),inputs=new InputState(),gates=makeGates();
 const QA=new URLSearchParams(location.search).get('qa')==='1';
@@ -60,7 +60,7 @@ function renderList(element,rows,currentId=''){
     element.append(li);
   });
 }
-function renderBoards(){const edition=$('#boardEdition').value,legacy=edition==='legacy',oldCampus=edition==='campus-old',previous=edition==='previous',menuBoard=previous?readLeaderboard(storage,CURRENT_LEADERBOARD_KEY+`.${ROUTE_ID}.${ROUTE_ID==='courtyard'?'elevation-v1':'friendly-v1'}.laps${LAPS}`+(QA?'.qa':'')):legacy?readLeaderboard(storage,legacyBoardKey):oldCampus?readLeaderboard(storage,CURRENT_LEADERBOARD_KEY+`.campus.laps${LAPS}`+(QA?'.qa':'')):board;renderList($('#menuLeaderboard'),menuBoard.rows);renderList($('#resultLeaderboard'),board.rows,result?.id);$('#boardStatus').textContent=previous?'先前限速與操控版本的紀錄，另存保留。':oldCampus?'舊全校外圈路線紀錄，與新串聯路線分開。':legacy?'保留的 M2 舊版成績，與加速版分開比較。':QA?'自動驗證專用排行榜，與正式紀錄分開。':board.available?'只存在目前瀏覽器，清除網站資料後會消失。':'目前瀏覽器無法使用本機儲存；遊戲仍可進行。';}
+function renderBoards(){const edition=$('#boardEdition').value,legacy=edition==='legacy',oldCampus=edition==='campus-old',previous=edition==='previous',menuBoard=previous?readLeaderboard(storage,CURRENT_LEADERBOARD_KEY+`.${ROUTE_ID}.${ROUTE_ID==='courtyard'?'arcade-v2':'friendly-v1'}.laps${LAPS}`+(QA?'.qa':'')):legacy?readLeaderboard(storage,legacyBoardKey):oldCampus?readLeaderboard(storage,CURRENT_LEADERBOARD_KEY+`.campus.laps${LAPS}`+(QA?'.qa':'')):board;renderList($('#menuLeaderboard'),menuBoard.rows);renderList($('#resultLeaderboard'),board.rows,result?.id);$('#boardStatus').textContent=previous?'先前限速與操控版本的紀錄，另存保留。':oldCampus?'舊全校外圈路線紀錄，與新串聯路線分開。':legacy?'保留的 M2 舊版成績，與加速版分開比較。':QA?'自動驗證專用排行榜，與正式紀錄分開。':board.available?'只存在目前瀏覽器，清除網站資料後會消失。':'目前瀏覽器無法使用本機儲存；遊戲仍可進行。';}
 function getPersonalGhost(name=cleanName($('#playerName').value)){return ghostMemory.get(name)||readGhost(storage,name,QA);}
 function ghostSummary(){const ghost=getPersonalGhost();$('#ghostSummary').textContent=ghost?`你的最佳 ${formatTime(ghost.totalMs/1000)} · 下一場挑戰幽靈車`:'完成本賽道與圈數的第一場，建立個人最佳幽靈車。';}
 function updateSettings(){sound.setMuted(muted);$('#mute').textContent=muted?'🔇':'🔊';$('#mute').setAttribute('aria-label',muted?'開啟音效':'靜音');$('#muteSetting').checked=muted;$('#ghostSetting').checked=ghostEnabled;}
@@ -100,7 +100,7 @@ if(ROUTE_ID==='courtyard'){$('[data-spawn=north]').textContent='走廊試駕';$(
 for(const id of ['trackSelect','lapSelect'])$('#'+id).onchange=()=>{const u=new URL(location.href);u.searchParams.set('track',$('#trackSelect').value);u.searchParams.set('laps',$('#lapSelect').value);location.href=u.href;};
 $('.board-dialog>p').textContent=`${ACTIVE_ROUTE.short} · ${LAPS} 圈 · 依總時間排序`;
 try{$('#playerName').value=QA?'驗證車手':storage?.getItem('xikou-kart.playerName')||'';}catch{}
-function chooseRacer(id,preview=true){selectedRacer=getRacer(id).id;const r=getRacer(id);for(const button of document.querySelectorAll('[data-racer]'))button.setAttribute('aria-pressed',String(button.dataset.racer===r.id));$('#racerName').textContent=`${r.nickname} · ${r.name}`;$('#racerNote').textContent=r.id==='cat'?'高精細橘貓測試版 · 短毛與立體臉型':r.note;try{storage?.setItem('xikou-kart.racer',r.id);}catch{}if(ready)send('racer',{id:r.id,preview});}
+function chooseRacer(id,preview=true){selectedRacer=getRacer(id).id;const r=getRacer(id);for(const button of document.querySelectorAll('[data-racer]'))button.setAttribute('aria-pressed',String(button.dataset.racer===r.id));$('#racerName').textContent=`${r.nickname} · ${r.name}`;$('#racerNote').textContent='高精細車手 · '+r.note;try{storage?.setItem('xikou-kart.racer',r.id);}catch{}if(ready)send('racer',{id:r.id,preview});}
 for(const r of RACERS){const b=document.createElement('button');b.type='button';b.className='racer-choice';b.dataset.racer=r.id;b.setAttribute('aria-label',`${r.name} ${r.nickname}`);b.innerHTML=racerPortrait(r)+`<span>${r.name}</span>`;b.onclick=()=>chooseRacer(r.id);$('#racerGrid').append(b);}chooseRacer(selectedRacer,false);
 $('#playerName').addEventListener('input',()=>{ghostSummary();try{if(!QA)storage?.setItem('xikou-kart.playerName',cleanName($('#playerName').value));}catch{}});
 $('#mute').onclick=()=>{muted=!muted;sound.unlock();updateSettings();try{storage?.setItem('xikou-kart.muted',muted?'1':'0');}catch{}};

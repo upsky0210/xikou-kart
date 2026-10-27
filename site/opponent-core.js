@@ -1,6 +1,6 @@
-import { createState, FixedSimulation } from './drive-core.js?build=premium-cat-race1';
-import { RaceSession } from './race-core.js?build=premium-cat-race1';
-import { regressionInput } from './qa-driver.js?build=premium-cat-race1';
+import { createState, FixedSimulation } from './drive-core.js?build=premium-roster-open1';
+import { RaceSession } from './race-core.js?build=premium-roster-open1';
+import { regressionInput } from './qa-driver.js?build=premium-roster-open1';
 
 // A physical driver: walls, gates and countdown use the same rules as the player.
 // Cars do not collide with each other, so a narrow corridor cannot be blocked.

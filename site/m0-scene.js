@@ -1,5 +1,5 @@
-import { ROUTES, ISSUES, world, pointAt, auditRoute } from './track-config.js?build=premium-cat-race1';
-import { mergeGeometries } from './campus/vendor/three/examples/jsm/utils/BufferGeometryUtils.js?build=premium-cat-race1';
+import { ROUTES, ISSUES, world, pointAt, auditRoute } from './track-config.js?build=premium-roster-open1';
+import { mergeGeometries } from './campus/vendor/three/examples/jsm/utils/BufferGeometryUtils.js?build=premium-roster-open1';
 
 export function initScene(api) {
   const { THREE: T, scene, camera, renderer, orbit, floors, rooms, raised } = api;

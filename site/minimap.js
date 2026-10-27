@@ -1,5 +1,5 @@
-import { ACTIVE_ROUTE } from './session-config.js?build=premium-cat-race1';
-import { ROUTES, ORIGIN, SCALE } from './track-config.js?build=premium-cat-race1';
+import { ACTIVE_ROUTE } from './session-config.js?build=premium-roster-open1';
+import { ROUTES, ORIGIN, SCALE } from './track-config.js?build=premium-roster-open1';
 const $=s=>document.querySelector(s);
 const W=window.CAMPUS.outdoor.wall.x2-300,H=window.CAMPUS.outdoor.wall.y2-40;
 const canvas=$('#minimap'),ctx=canvas.getContext('2d'),bg=document.createElement('canvas');bg.width=400;bg.height=440;

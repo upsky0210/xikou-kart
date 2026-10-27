@@ -12,7 +12,7 @@ const {GhostRecorder,validGhost,ghostPose,saveGhost,readGhost}=await import('../
 const {saveResult,readLeaderboard,CURRENT_LEADERBOARD_KEY}=await import('../site/leaderboard.js');
 const {SESSION_SCOPE}=await import('../site/session-config.js');
 const fixture=JSON.parse(fs.readFileSync(new URL('./fixtures/courtyard-collisions.json',import.meta.url))),checks=[];
-const grid=new ElevationGrid(fixture.obstacles,[...fixture.walls,...COURTYARD_RAILS]);
+const grid=new ElevationGrid(fixture.obstacles,fixture.walls);
 const check=(name,fn)=>{fn();checks.push(name);console.log('PASS',name);};
 check('collision evidence is from the complete current campus rather than the greybox',()=>{
   assert.ok(fixture.sourceBoxCount>3000);assert.ok(fixture.obstacles.length>2500);assert.ok(fixture.walls.length>=214);assert.ok(fixture.ceilings.length>20);
@@ -31,9 +31,10 @@ check('all route width, spawn and checkpoint reset poses clear the real 3D obsta
   for(const p of Object.values(fixture.spawns))assert.equal(contacts(createState(p),grid,COURTYARD_DRIVE).length,0);
   const gates=makeGates(ROUTES.courtyard);for(let i=0;i<gates.length;i++){const race=new RaceSession({gates});race.expected=i+1;const p=race.resetPose();assert.equal(contacts(createState(p),grid,COURTYARD_DRIVE).length,0);assert.ok(courtyardHeightAt(p.x,p.z)>=0);}
 });
-check('the continuous route and its full-width rails have no crossing or reversed corner',()=>{
-  const cross=(a,b,c)=>(b.x-a.x)*(c.z-a.z)-(b.z-a.z)*(c.x-a.x);
-  for(let i=0;i<COURTYARD_RAILS.length;i++)for(let j=i+1;j<COURTYARD_RAILS.length;j++){const w=COURTYARD_RAILS[i],v=COURTYARD_RAILS[j];if(Math.max(w.ax,w.bx)<Math.min(v.ax,v.bx)||Math.min(w.ax,w.bx)>Math.max(v.ax,v.bx)||Math.max(w.az,w.bz)<Math.min(v.az,v.bz)||Math.min(w.az,w.bz)>Math.max(v.az,v.bz))continue;const a={x:w.ax,z:w.az},b={x:w.bx,z:w.bz},c={x:v.ax,z:v.az},d={x:v.bx,z:v.bz};assert.ok(!(cross(a,b,c)*cross(a,b,d)<-1e-10&&cross(c,d,a)*cross(c,d,b)<-1e-10),`crossing rail ${i},${j}`);}
+check('route rails are absent from both rendering and collision evidence',()=>{
+  assert.equal(fixture.routeRailCount,0);assert.ok(!fixture.walls.some(w=>w.kind==='route-rail'));
+  const source=fs.readFileSync(new URL('../site/drive-scene.js',import.meta.url),'utf8');assert.ok(!source.includes('walls.push(...COURTYARD_RAILS)'));
+  const worldSource=fs.readFileSync(new URL('../site/courtyard-world.js',import.meta.url),'utf8');assert.ok(!worldSource.includes('CylinderGeometry'));
 });
 check('corridors and ramps retain full speed, acceleration and drift',()=>{
   for(const p of COURTYARD_SAMPLES){const cfg=courtyardConfigAt(p);assert.equal(cfg.maxSpeed,11);assert.equal(cfg.acceleration,6.5);assert.equal(cfg.driftMinSpeed,4);}
@@ -42,7 +43,7 @@ check('corridors and ramps retain full speed, acceleration and drift',()=>{
 });
 const T=await import('../site/campus/vendor/three/build/three.module.js'),{buildKart}=await import('../site/kart-model.js'),{RACERS}=await import('../site/racer-catalog.js');
 check('all eight complete racer models fit the actual ceiling and arch clearance',()=>{
-  globalThis.document={createElement(){return{width:0,height:0,getContext(){return new Proxy({},{get:(o,k)=>o[k]??(()=>{}),set:(o,k,v)=>(o[k]=v,true)});}};}};
+  globalThis.document={createElement(){return{width:0,height:0,getContext(){return new Proxy({createRadialGradient:()=>({addColorStop(){}})},{get:(o,k)=>o[k]??(()=>{}),set:(o,k,v)=>(o[k]=v,true)});}};}};
   const poses=COURTYARD_SAMPLES.filter((p,i)=>p.y>.02&&i%35===0);
   for(const racer of RACERS){const {car}=buildKart(T,racer.id);for(const p of poses){const fx=Math.sin(p.yaw),fz=Math.cos(p.yaw);car.position.set(p.x,p.y+.075,p.z);car.rotation.set(-Math.atan2(courtyardHeightAt(p.x+fx*.1,p.z+fz*.1)-p.y,.1),p.yaw,Math.atan2(courtyardHeightAt(p.x+fz*.1,p.z-fx*.1)-p.y,.1),'YXZ');const bounds=new T.Box3().setFromObject(car);assert.ok(bounds.max.y-p.y<COURTYARD_DRIVE.carHeight,`${racer.id} height exceeds collision envelope`);}}
 });
@@ -54,7 +55,7 @@ check('two laps complete all 28 gates with the real physics, ramps, ceilings and
 });
 check('elevated ghost playback, result storage and resets preserve old routes and independent profiles',()=>{
   const map=new Map([['xikou-kart.leaderboard.v2.campus.friendly-v1.laps2','old-campus-untouched']]),storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)};
-  assert.ok(validGhost(recording,'走廊驗證'));assert.ok(saveGhost(storage,recording).saved);assert.ok(readGhost(storage,'走廊驗證'));const key=CURRENT_LEADERBOARD_KEY+SESSION_SCOPE;assert.ok(saveResult(storage,result,[],key).saved);assert.equal(readLeaderboard(storage,key).rows[0].track,'courtyard-arcade-v2-laps2');assert.equal(map.get('xikou-kart.leaderboard.v2.campus.friendly-v1.laps2'),'old-campus-untouched');
+  assert.ok(validGhost(recording,'走廊驗證'));assert.ok(saveGhost(storage,recording).saved);assert.ok(readGhost(storage,'走廊驗證'));const key=CURRENT_LEADERBOARD_KEY+SESSION_SCOPE;assert.ok(saveResult(storage,result,[],key).saved);assert.equal(readLeaderboard(storage,key).rows[0].track,'courtyard-arcade-open-v1-laps2');assert.equal(map.get('xikou-kart.leaderboard.v2.campus.friendly-v1.laps2'),'old-campus-untouched');
   let raised=0;for(let t=0;t<result.totalMs/1000;t+=.3){const p=ghostPose(recording,t);assert.ok(p&&Number.isFinite(p.x));const y=courtyardHeightAt(p.x,p.z);assert.ok(y>=0&&y<=1.2+1e-8);if(y>.95)raised++;}assert.ok(raised>20);
   const p=courtyardPoseAt(COURTYARD_LENGTH*.7),s=createState(p);s.speed=4;resetState(s,nearestOnCourtyard(s.x+.15,s.z));assert.equal(s.speed,0);assert.equal(contacts(s,grid,COURTYARD_DRIVE).length,0);
 });

@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { PanoViewer } from './pano.js?build=premium-cat-race1';
-import { furnishFloor, ROOM_EN } from './furniture.js?build=premium-cat-race1';
-import { poolWallMat, poolStripeMat, poolStripeGeo, poolDoor, poolSideDoor, POOL_SIDE_DOOR_H, poolWater, buildPool, buildPoolPlayground, buildElevator, makeCat, makeGlider, makeTurtle, makeHamster } from './extras.js?build=premium-cat-race1';
-import { buildField, buildStage, buildFacadeC, buildMuralBlock, buildCourtyard, buildParking, buildFrontYard, buildGuardHouse } from './field.js?build=premium-cat-race1';
-import { buildCampusWall } from './wall.js?build=premium-cat-race1';
-import { BLOCKY, STYLE, setStyle, mat, blockBox, Batch, mergeStatic, SPOTS, makeBlockPerson, OUTFITS, BB_GIRL, outfitFor, makeBlockNPC, NPC_FACES, makeRacket, makeShuttle, animatePerson, addBlockTree, makeClouds } from './blocks.js?build=premium-cat-race1';
+import { PanoViewer } from './pano.js?build=premium-roster-open1';
+import { furnishFloor, ROOM_EN } from './furniture.js?build=premium-roster-open1';
+import { poolWallMat, poolStripeMat, poolStripeGeo, poolDoor, poolSideDoor, POOL_SIDE_DOOR_H, poolWater, buildPool, buildPoolPlayground, buildElevator, makeCat, makeGlider, makeTurtle, makeHamster } from './extras.js?build=premium-roster-open1';
+import { buildField, buildStage, buildFacadeC, buildMuralBlock, buildCourtyard, buildParking, buildFrontYard, buildGuardHouse } from './field.js?build=premium-roster-open1';
+import { buildCampusWall } from './wall.js?build=premium-roster-open1';
+import { BLOCKY, STYLE, setStyle, mat, blockBox, Batch, mergeStatic, SPOTS, makeBlockPerson, OUTFITS, BB_GIRL, outfitFor, makeBlockNPC, NPC_FACES, makeRacket, makeShuttle, animatePerson, addBlockTree, makeClouds } from './blocks.js?build=premium-roster-open1';
 
 /* =========================================================
  * 溪口國小 3D 校園
@@ -8433,6 +8433,6 @@ if (window.KART_M0) {
   for (const f of floors) { f.labels.visible = false; if (f.stairSigns) f.stairSigns.visible = false; }
   for (const n of NPCS) n.g.visible = false;
   scene.fog = null;
-  const { initScene } = await import(window.KART_M1 ? '../../drive-scene.js?build=premium-cat-race1' : '../../m0-scene.js');
+  const { initScene } = await import(window.KART_M1 ? '../../drive-scene.js?build=premium-roster-open1' : '../../m0-scene.js');
   initScene({ THREE, scene, renderer, camera, orbit, floors, rooms, raised, wallRuns, BASE, mx, mz, groundAt });
 }

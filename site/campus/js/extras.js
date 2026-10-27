@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Batch, mat, SPOTS } from './blocks.js?build=premium-cat-race1';
+import { Batch, mat, SPOTS } from './blocks.js?build=premium-roster-open1';
 
 /* =========================================================
  * 戶外特別場景（依使用者提供的照片）

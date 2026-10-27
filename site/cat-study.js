@@ -1,6 +1,6 @@
 import * as T from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {buildKart} from './kart-model.js?build=premium-cat-race1';
+import {buildKart} from './kart-model.js?build=premium-roster-open1';
 const renderer=new T.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.setClearColor('#15282d');renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;document.body.prepend(renderer.domElement);
 const scene=new T.Scene(),camera=new T.PerspectiveCamera(35,innerWidth/innerHeight,.05,50),controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=false;controls.minDistance=.85;controls.maxDistance=9;controls.maxPolarAngle=Math.PI*.58;controls.target.set(0,1.52,0);camera.position.set(1.50,1.95,3.15);controls.update();
 scene.add(new T.HemisphereLight('#ffe8ce','#516f76',.85));
@@ -9,7 +9,7 @@ const fill=new T.DirectionalLight('#9adce1',.85);fill.position.set(4,2,2);scene.
 const studio=new T.Scene();studio.background=new T.Color('#52636a');for(const [x,y,z,w,h]of [[-3,3,2,3,5],[3,3,0,2,4],[0,5,-2,5,2]]){const panel=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({color:'#fff1d9',side:T.DoubleSide}));panel.position.set(x,y,z);panel.lookAt(0,1,0);studio.add(panel);}const pmrem=new T.PMREMGenerator(renderer),environment=pmrem.fromScene(studio,.08);scene.environment=environment.texture;pmrem.dispose();
 const floor=new T.Mesh(new T.CylinderGeometry(1.65,1.72,.10,96),new T.MeshStandardMaterial({color:'#28434a',roughness:.52,metalness:.25}));floor.position.y=-.07;floor.receiveShadow=true;scene.add(floor);
 const ring=new T.Mesh(new T.TorusGeometry(1.63,.008,8,120),new T.MeshBasicMaterial({color:'#d5a469'}));ring.rotation.x=Math.PI/2;ring.position.y=-.014;scene.add(ring);
-const high=buildKart(T,'cat',{faceStyle:'premium'}),low=buildKart(T,'cat');scene.add(high.car,low.car);low.car.visible=false;for(const model of [high,low])model.car.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
+const high=buildKart(T,'cat',{faceStyle:'premium'}),low=buildKart(T,'cat',{faceStyle:'toon'});scene.add(high.car,low.car);low.car.visible=false;for(const model of [high,low])model.car.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
 let selected=high,auto=false,last=0;
 function stats(){const objects={meshes:0,triangles:0};selected.car.traverse(o=>{if(o.isMesh){objects.meshes++;objects.triangles+=(o.geometry.index?.count??o.geometry.attributes.position.count)/3*(o.isInstancedMesh?o.count:1);}});document.querySelector('#status').textContent=`${selected===high?'高精細樣本':'目前遊戲造型'} · ${Math.round(objects.triangles).toLocaleString()} 三角面
 ${renderer.info.render.calls} 次繪製 · 拖曳查看細節`;document.body.dataset.ready='true';let report=document.querySelector('#sample-report');if(!report){report=document.createElement('script');report.type='application/json';report.id='sample-report';document.body.append(report);}report.textContent=JSON.stringify({...objects,style:selected.head.userData.faceStyle,calls:renderer.info.render.calls,auto});}

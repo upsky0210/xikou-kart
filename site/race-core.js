@@ -1,6 +1,6 @@
-import { ACTIVE_ROUTE } from './session-config.js?build=premium-cat-race1';
-import { ROUTES, world } from './track-config.js?build=premium-cat-race1';
-import { TRACK_ID } from './game-version.js?build=premium-cat-race1';
+import { ACTIVE_ROUTE } from './session-config.js?build=premium-roster-open1';
+import { ROUTES, world } from './track-config.js?build=premium-roster-open1';
+import { TRACK_ID } from './game-version.js?build=premium-roster-open1';
 
 export function makeGates(route=ACTIVE_ROUTE){
   return route.checkpoints.map((index,i)=>{

@@ -1,17 +1,17 @@
-import { RACERS } from './racer-catalog.js?build=premium-cat-race1';
-import { Opponent, fleetPosition } from './opponent-core.js?build=premium-cat-race1';
-import { ACTIVE_ROUTE, LAPS, ROUTE_ID } from './session-config.js?build=premium-cat-race1';
-import { buildKart } from './kart-model.js?build=premium-cat-race1';
-import { prepareStaticScene } from './scene-utils.js?build=premium-cat-race1';
-import { DRIVE, SPAWNS } from './drive-config.js?build=premium-cat-race1';
-import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=premium-cat-race1';
-import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=premium-cat-race1';
-import { RaceSession, makeGates } from './race-core.js?build=premium-cat-race1';
-import { buildRaceDecor } from './race-decor.js?build=premium-cat-race1';
-import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=premium-cat-race1';
-import { cancelDrift } from './effects-core.js?build=premium-cat-race1';
-import { courtyardHeightAt,COURTYARD_RAILS,nearestOnCourtyard } from './courtyard-route.js?build=premium-cat-race1';
-import { COURTYARD_DRIVE,ElevationGrid,wallHeight,addCourtyardRails } from './courtyard-world.js?build=premium-cat-race1';
+import { RACERS } from './racer-catalog.js?build=premium-roster-open1';
+import { Opponent, fleetPosition } from './opponent-core.js?build=premium-roster-open1';
+import { ACTIVE_ROUTE, LAPS, ROUTE_ID } from './session-config.js?build=premium-roster-open1';
+import { buildKart } from './kart-model.js?build=premium-roster-open1';
+import { prepareStaticScene } from './scene-utils.js?build=premium-roster-open1';
+import { DRIVE, SPAWNS } from './drive-config.js?build=premium-roster-open1';
+import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=premium-roster-open1';
+import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=premium-roster-open1';
+import { RaceSession, makeGates } from './race-core.js?build=premium-roster-open1';
+import { buildRaceDecor } from './race-decor.js?build=premium-roster-open1';
+import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=premium-roster-open1';
+import { cancelDrift } from './effects-core.js?build=premium-roster-open1';
+import { courtyardHeightAt,nearestOnCourtyard } from './courtyard-route.js?build=premium-roster-open1';
+import { COURTYARD_DRIVE,ElevationGrid,wallHeight,addCourtyardSurface } from './courtyard-world.js?build=premium-roster-open1';
 
 export function initScene(api){
   const {THREE:T,scene,renderer,camera,orbit,floors,rooms}=api;
@@ -30,7 +30,7 @@ export function initScene(api){
   for(const s of D.stairs)obstacles.push({...boxRect(s.rect),kind:'stairs'});
   for(const k of['stage','pool','pond'])if(D.outdoor[k])obstacles.push({...boxRect(D.outdoor[k]),kind:k});
   const walls=f1.segs.filter(s=>s.h>.15).map(s=>elevated?wallHeight(s):s);
-  if(elevated){walls.push(...COURTYARD_RAILS);addCourtyardRails(T,scene);}
+  if(elevated){addCourtyardSurface(T,scene);}
   const bounds={x1:api.mx(300)-13,z1:api.mz(40)-13,x2:api.mx(D.outdoor.wall.x2)+13,z2:api.mz(D.outdoor.wall.y2)+13};
   const staticCameraBoxes=f1.boxes.filter(b=>b.y2>.3&&b.y1<15).map(b=>new T.Box3(new T.Vector3(b.x1,b.y1,b.z1),new T.Vector3(b.x2,b.y2,b.z2)));
   for(const w of f1.walk)if(w.kind!=='outdoor'&&w.kind!=='stair'&&w.room?.type!=='garden')staticCameraBoxes.push(new T.Box3(new T.Vector3(w.m.x1,0,w.m.z1),new T.Vector3(w.m.x2,elevated?1.21:20,w.m.z2)));
@@ -148,7 +148,7 @@ export function initScene(api){
         }
       }
       state.x=gates[0].x-gates[0].fx*3;state.z=gates[0].z-gates[0].fz*3;state.yaw=Math.atan2(gates[0].fx,gates[0].fz);
-      if(qa){const module=await import('./qa-driver.js?build=premium-cat-race1');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
+      if(qa){const module=await import('./qa-driver.js?build=premium-roster-open1');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
     }
     playing=true;cameraSnap=true;setPause(false);send('started',{mode});
   }

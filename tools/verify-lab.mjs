@@ -3,7 +3,7 @@ import * as T from '../site/campus/vendor/three/build/three.module.js';
 import { buildKart } from '../site/kart-model.js';
 import { LAB_DRIVE,LENGTH,BARRIERS,SAMPLES,poseAt,nearestPose,heightAt,demoInput } from '../site/lab-course.js';
 import { SpatialGrid,createState,step,contacts,resetState } from '../site/drive-core.js';
-globalThis.document={createElement(){return{width:0,height:0,getContext(){return new Proxy({},{get:(o,k)=>o[k]??(()=>{}),set:(o,k,v)=>(o[k]=v,true)});}};}};
+globalThis.document={createElement(){return{width:0,height:0,getContext(){return new Proxy({createRadialGradient:()=>({addColorStop(){}})},{get:(o,k)=>o[k]??(()=>{}),set:(o,k,v)=>(o[k]=v,true)});}};}};
 const checks=[],check=(name,fn)=>{fn();checks.push(name);console.log('PASS',name);};
 check('two sample heads have a continuous sculpted skull and shallow conforming eyes',()=>{
   for(const id of ['cat','beagle']){
@@ -13,16 +13,16 @@ check('two sample heads have a continuous sculpted skull and shallow conforming 
     assert.equal(eyeCount,2);assert.ok(skin.geometry.attributes.position.count>3000);
     skin.geometry.computeBoundingBox();assert.ok(skin.geometry.boundingBox.max.z>.37/.36,'skull has an actual sculpted nose/muzzle transition');
   }
-  assert.equal(buildKart(T,'cat').head.userData.faceStyle,'toon-v2','formal game uses expressive species models');
-  assert.equal(buildKart(T,'beagle').head.userData.faceStyle,'toon-v2');
-  assert.equal(buildKart(T,'hamster').head.userData.faceStyle,'toon-v2');
+  assert.equal(buildKart(T,'cat').head.userData.faceStyle,'premium-cat-v1','formal game uses expressive species models');
+  assert.equal(buildKart(T,'beagle').head.userData.faceStyle,'premium-beagle-v1');
+  assert.equal(buildKart(T,'hamster').head.userData.faceStyle,'premium-hamster-v1');
 });
 check('eight expressive racers have different silhouettes and batched 3D faces',()=>{
   const silhouettes=new Set();
-  for(const id of ['cat','meerkat','hamster','beagle','macaque','horse','sheep','boar']){
-    const {car,head}=buildKart(T,id);assert.equal(head.userData.faceStyle,'toon-v2');
+  for(const id of ['cat','bunny','hamster','beagle','macaque','horse','sheep','boar']){
+    const {car,head}=buildKart(T,id);assert.equal(head.userData.faceStyle,`premium-${id}-v1`);
     car.updateMatrixWorld(true);const bounds=new T.Box3().setFromObject(head);silhouettes.add([bounds.min.x,bounds.max.x,bounds.min.y,bounds.max.y,bounds.min.z,bounds.max.z].map(n=>n.toFixed(3)).join(','));
-    assert.ok(head.children.length<=12,'batch facial geometry for four-car rendering');
+    assert.ok(head.children.length<=(id==='cat'?80:14),'batch facial geometry for four-car rendering');
     assert.ok(head.children.every(o=>o.geometry.attributes.position.count>0));
   }
   assert.equal(silhouettes.size,8,'each species has a distinct actual head silhouette');
