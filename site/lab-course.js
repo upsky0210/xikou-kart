@@ -1,5 +1,5 @@
-import { world } from './track-config.js?build=premium-roster-open1';
-import { DRIVE } from './drive-config.js?build=premium-roster-open1';
+import { world } from './track-config.js?build=grand-difficulty2';
+import { DRIVE } from './drive-config.js?build=grand-difficulty2';
 // A local greybox study of D's west corridor and the courtyard. Plan scale: 18 px/m.
 export const LAB_DRIVE=Object.freeze({...DRIVE,maxSpeed:4.5,acceleration:3,reverseSpeed:2,turnSpeed:2.8,turnDeceleration:6,driftMinSpeed:99});
 const controls=[[675,740],[1000,740],[1000,960],[675,960]];

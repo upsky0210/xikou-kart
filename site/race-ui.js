@@ -1,14 +1,15 @@
-import { installControlMode } from './control-mode.js?build=premium-roster-open1';
-import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=premium-roster-open1';
-import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE } from './session-config.js?build=premium-roster-open1';
-import { InputState, KEY_ACTION } from './drive-core.js?build=premium-roster-open1';
-import { DRIVE } from './drive-config.js?build=premium-roster-open1';
-import { cleanName, formatTime, makeGates } from './race-core.js?build=premium-roster-open1';
-import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=premium-roster-open1';
-import { drawMap } from './minimap.js?build=premium-roster-open1';
-import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=premium-roster-open1';
-import { GameSound } from './sound.js?build=premium-roster-open1';
-import { RULES_LABEL } from './game-version.js?build=premium-roster-open1';
+import { getDifficulty } from './difficulty-config.js?build=grand-difficulty2';
+import { installControlMode } from './control-mode.js?build=grand-difficulty2';
+import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=grand-difficulty2';
+import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE } from './session-config.js?build=grand-difficulty2';
+import { InputState, KEY_ACTION } from './drive-core.js?build=grand-difficulty2';
+import { DRIVE } from './drive-config.js?build=grand-difficulty2';
+import { cleanName, formatTime, makeGates } from './race-core.js?build=grand-difficulty2';
+import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=grand-difficulty2';
+import { drawMap } from './minimap.js?build=grand-difficulty2';
+import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=grand-difficulty2';
+import { GameSound } from './sound.js?build=grand-difficulty2';
+import { RULES_LABEL } from './game-version.js?build=grand-difficulty2';
 
 const $=s=>document.querySelector(s),frame=$('#world'),inputs=new InputState(),gates=makeGates();
 const QA=new URLSearchParams(location.search).get('qa')==='1';
@@ -22,6 +23,7 @@ sound.setMuted(muted);
 let board=readLeaderboard(storage,boardKey),ready=false,started=false,paused=false,helpOpen=false,boardOpen=false,finished=false;
 let selectedMode='duel',activeMode='race',activeDuel=false,lastState=null,toastTimer=0,result=null;
 const savedIds=new Set();
+let selectedDifficulty=getDifficulty(new URLSearchParams(location.search).get('difficulty')||storage?.getItem('xikou-kart.difficulty')).id;$('#difficultySelect').value=selectedDifficulty;$('#difficultySelect').onchange=()=>{selectedDifficulty=getDifficulty($('#difficultySelect').value).id;const u=new URL(location.href);u.searchParams.set('difficulty',selectedDifficulty);history.replaceState(null,'',u);try{storage?.setItem('xikou-kart.difficulty',selectedDifficulty);}catch{}};
 const send=(type,data={})=>frame.contentWindow.postMessage({source:'kart-controls',type,...data},location.origin);
 const inMenu=()=>!started||paused||helpOpen||boardOpen||finished;
 function flush(){inputs.clear();for(const b of document.querySelectorAll('[data-action]'))b.classList.remove('pressed');send('clear');}
@@ -40,13 +42,13 @@ function start(mode=selectedMode,qaSpeed=7.6){
   if(!ready)return;activeDuel=mode==='duel';mode=activeDuel?'race':mode;activeMode=mode;started=true;paused=false;helpOpen=false;boardOpen=false;finished=false;result=null;lastState=null;
   const name=cleanName($('#playerName').value);try{if(!QA)storage?.setItem('xikou-kart.playerName',name);}catch{}
   sound.unlock();lastCount=null;lastBoost=0;lastCollision=0;lastCharged=false;previewActive=false;$('#previewCampus').textContent='巡覽校園';
-  flush();send('start',{mode,duel:activeDuel,name,racer:selectedRacer,qa:QA&&mode==='race',qaSpeed,ghost:getPersonalGhost(name),ghostVisible:ghostEnabled});setMenu();
+  flush();send('start',{mode,difficulty:selectedDifficulty,duel:activeDuel,name,racer:selectedRacer,qa:QA&&mode==='race',qaSpeed,ghost:getPersonalGhost(name),ghostVisible:ghostEnabled});setMenu();
   if(QA)$('#qaStatus').textContent=mode==='race'?'自動驗證進行中，測試成績獨立儲存':'自由試駕';
 }
 function menu(){flush();send('menu');started=false;paused=false;finished=false;helpOpen=false;boardOpen=false;lastState=null;$('#countdown').hidden=true;setMenu();renderBoards();}
 function setMode(mode){
-  $('#raceOptions').hidden=false;$('#lapSelect').parentElement.hidden=mode==='practice';selectedMode=mode;document.querySelectorAll('[data-mode]').forEach(b=>{const on=b.dataset.mode===mode;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});
-  $('.name-field').hidden=mode==='practice';$('#modeDescription').textContent=mode!=='practice'?`${mode==='duel'?'與三台電腦車手同場起跑！':''}沿${ACTIVE_ROUTE.short}跑完 ${LAPS} 圈。依序通過光門，挑戰你的個人紀錄。`:ROUTE_ID==='courtyard'?'從操場開進原校園穿堂、走廊與中庭。走廊與坡道不限速，R 回到鄰近安全路面。':'自由探索操場、北側與東側通道。熟悉油門、煞車與每個轉彎。';
+  $('#raceOptions').hidden=false;$('#lapSelect').parentElement.hidden=mode==='practice';selectedMode=mode;$('#difficultyRow').hidden=mode!=='duel';document.querySelectorAll('[data-mode]').forEach(b=>{const on=b.dataset.mode===mode;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});
+  $('.name-field').hidden=mode==='practice';$('#modeDescription').textContent=mode!=='practice'?`${mode==='duel'?'與三台電腦車手同場起跑！':''}沿${ACTIVE_ROUTE.short}跑完 ${LAPS} 圈。依序通過光門，挑戰你的個人紀錄。`:['courtyard','grand'].includes(ROUTE_ID)?'從操場開進原校園穿堂、走廊與中庭。走廊與坡道不限速，R 回到鄰近安全路面。':'自由探索操場、北側與東側通道。熟悉油門、煞車與每個轉彎。';
   if(ready)$('#start').innerHTML=mode!=='practice'?`開始 ${LAPS} 圈${mode==='duel'?'四車競賽':'計時賽'} <span>→</span>`:'開始自由試駕 <span>→</span>';
 }
 function renderList(element,rows,currentId=''){
@@ -60,7 +62,7 @@ function renderList(element,rows,currentId=''){
     element.append(li);
   });
 }
-function renderBoards(){const edition=$('#boardEdition').value,legacy=edition==='legacy',oldCampus=edition==='campus-old',previous=edition==='previous',menuBoard=previous?readLeaderboard(storage,CURRENT_LEADERBOARD_KEY+`.${ROUTE_ID}.${ROUTE_ID==='courtyard'?'arcade-v2':'friendly-v1'}.laps${LAPS}`+(QA?'.qa':'')):legacy?readLeaderboard(storage,legacyBoardKey):oldCampus?readLeaderboard(storage,CURRENT_LEADERBOARD_KEY+`.campus.laps${LAPS}`+(QA?'.qa':'')):board;renderList($('#menuLeaderboard'),menuBoard.rows);renderList($('#resultLeaderboard'),board.rows,result?.id);$('#boardStatus').textContent=previous?'先前限速與操控版本的紀錄，另存保留。':oldCampus?'舊全校外圈路線紀錄，與新串聯路線分開。':legacy?'保留的 M2 舊版成績，與加速版分開比較。':QA?'自動驗證專用排行榜，與正式紀錄分開。':board.available?'只存在目前瀏覽器，清除網站資料後會消失。':'目前瀏覽器無法使用本機儲存；遊戲仍可進行。';}
+function renderBoards(){const edition=$('#boardEdition').value,legacy=edition==='legacy',oldCampus=edition==='campus-old',previous=edition==='previous',menuBoard=previous?readLeaderboard(storage,CURRENT_LEADERBOARD_KEY+`.${ROUTE_ID}.${['courtyard','grand'].includes(ROUTE_ID)?'arcade-v2':'friendly-v1'}.laps${LAPS}`+(QA?'.qa':'')):legacy?readLeaderboard(storage,legacyBoardKey):oldCampus?readLeaderboard(storage,CURRENT_LEADERBOARD_KEY+`.campus.laps${LAPS}`+(QA?'.qa':'')):board;renderList($('#menuLeaderboard'),menuBoard.rows);renderList($('#resultLeaderboard'),board.rows,result?.id);$('#boardStatus').textContent=previous?'先前限速與操控版本的紀錄，另存保留。':oldCampus?'舊全校外圈路線紀錄，與新串聯路線分開。':legacy?'保留的 M2 舊版成績，與加速版分開比較。':QA?'自動驗證專用排行榜，與正式紀錄分開。':board.available?'只存在目前瀏覽器，清除網站資料後會消失。':'目前瀏覽器無法使用本機儲存；遊戲仍可進行。';}
 function getPersonalGhost(name=cleanName($('#playerName').value)){return ghostMemory.get(name)||readGhost(storage,name,QA);}
 function ghostSummary(){const ghost=getPersonalGhost();$('#ghostSummary').textContent=ghost?`你的最佳 ${formatTime(ghost.totalMs/1000)} · 下一場挑戰幽靈車`:'完成本賽道與圈數的第一場，建立個人最佳幽靈車。';}
 function updateSettings(){sound.setMuted(muted);$('#mute').textContent=muted?'🔇':'🔊';$('#mute').setAttribute('aria-label',muted?'開啟音效':'靜音');$('#muteSetting').checked=muted;$('#ghostSetting').checked=ghostEnabled;}
@@ -95,8 +97,8 @@ function drawRace(race){
   $('#countdown small').textContent=counting?'準備出發':'挑戰開始';$('#countdown span').textContent=counting?'倒數結束後開始計時':'依序通過光門';
 }
 
-$('.layout-label').lastChild.textContent=ROUTE_ID==='courtyard'?'原校園・走廊中庭':ROUTE_ID==='campus'?'全校賽道配置':'v221 戶外配置';$('#trackSelect').value=ROUTE_ID;$('#lapSelect').value=String(LAPS);
-if(ROUTE_ID==='courtyard'){$('[data-spawn=north]').textContent='走廊試駕';$('[data-spawn=east]').textContent='中庭試駕';$('.start-note span').textContent='原校園走廊＋中庭＋操場 · 一圈／兩圈';}
+$('.layout-label').lastChild.textContent=ROUTE_ID==='grand'?'全校大巡迴':['courtyard','grand'].includes(ROUTE_ID)?'原校園・走廊中庭':ROUTE_ID==='campus'?'全校賽道配置':'v221 戶外配置';$('#trackSelect').value=ROUTE_ID;$('#lapSelect').value=String(LAPS);
+if(['courtyard','grand'].includes(ROUTE_ID)){$('[data-spawn=north]').textContent='走廊試駕';$('[data-spawn=east]').textContent='中庭試駕';$('.start-note span').textContent=ROUTE_ID==='grand'?'全校外圈＋完整操場＋走廊中庭 · 大巡迴':'原校園走廊＋中庭＋操場 · 一圈／兩圈';}
 for(const id of ['trackSelect','lapSelect'])$('#'+id).onchange=()=>{const u=new URL(location.href);u.searchParams.set('track',$('#trackSelect').value);u.searchParams.set('laps',$('#lapSelect').value);location.href=u.href;};
 $('.board-dialog>p').textContent=`${ACTIVE_ROUTE.short} · ${LAPS} 圈 · 依總時間排序`;
 try{$('#playerName').value=QA?'驗證車手':storage?.getItem('xikou-kart.playerName')||'';}catch{}
@@ -116,7 +118,7 @@ installControlMode({storage,onChange:flush});
 $('#help').onclick=()=>{helpOpen=true;if(started&&!finished){paused=true;flush();send('pause',{paused:true});}setMenu();};$('#closeHelp').onclick=()=>{helpOpen=false;setMenu();};
 $('#openBoard').onclick=()=>{const stored=readLeaderboard(storage,boardKey);board={rows:stored.available?stored.rows:board.rows,available:stored.available};boardOpen=true;renderBoards();setMenu();};$('#closeBoard').onclick=()=>{boardOpen=false;setMenu();};
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
-document.querySelectorAll('[data-spawn]').forEach(b=>b.onclick=()=>{if(activeMode!=='practice')return;flush();send('spawn',{id:b.dataset.spawn});document.querySelectorAll('[data-spawn]').forEach(el=>el.classList.toggle('active',el===b));toast(ROUTE_ID==='courtyard'?`${b.textContent} · R 回到鄰近安全路面`:b.dataset.spawn==='field'?'操場環線 · R 回到鄰近賽道':`${b.dataset.spawn==='north'?'北側':'東側'}探索 · v221 開放戶外配置`);});
+document.querySelectorAll('[data-spawn]').forEach(b=>b.onclick=()=>{if(activeMode!=='practice')return;flush();send('spawn',{id:b.dataset.spawn});document.querySelectorAll('[data-spawn]').forEach(el=>el.classList.toggle('active',el===b));toast(['courtyard','grand'].includes(ROUTE_ID)?`${b.textContent} · R 回到鄰近安全路面`:b.dataset.spawn==='field'?'操場環線 · R 回到鄰近賽道':`${b.dataset.spawn==='north'?'北側':'東側'}探索 · v221 開放戶外配置`);});
 addEventListener('keydown',e=>{
   if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)){if(e.code==='Enter'){e.preventDefault();start();}return;}
   if(inMenu()&&e.target.closest('button')&&['Space','Enter'].includes(e.code))return;
@@ -144,7 +146,7 @@ addEventListener('message',e=>{
   if(data.type==='started'){started=true;paused=false;finished=false;activeMode=data.mode||activeMode;setMenu();}
   if(data.type==='pause'){paused=data.paused;flush();setMenu();}
   if(data.type==='menu')menuStateOnly();
-  if(data.type==='reset'&&!data.initial){const spawn=ROUTE_ID==='courtyard'?({'北側通道':'走廊','東側通道':'中庭'}[data.spawn]||data.spawn):data.spawn;toast(activeMode==='race'?'已回到檢查點，計時繼續':`已重置 · ${spawn}`);}
+  if(data.type==='reset'&&!data.initial){const spawn=['courtyard','grand'].includes(ROUTE_ID)?({'北側通道':'走廊','東側通道':'中庭'}[data.spawn]||data.spawn):data.spawn;toast(activeMode==='race'?'已回到檢查點，計時繼續':`已重置 · ${spawn}`);}
   if(data.type==='finished')finish(data.result,data.race,data.recording,data.competition);
   if(data.type==='state'){
     const s=lastState=data.state;$('#positionLabel').hidden=!s.competition;$('#positionLabel').textContent=s.competition?`第 ${s.competition.position}／${s.competition.total} 名`:'';activeMode=s.mode||activeMode;
@@ -157,7 +159,7 @@ addEventListener('message',e=>{
     $('#speed').textContent=Math.round(Math.abs(s.speed)*3.6);$('#gear').textContent=s.speed<-.15?'R':s.speed>.15?'D':'N';$('#speedBar').style.width=`${Math.min(100,Math.abs(s.speed)/DRIVE.maxSpeed*100)}%`;
     $('#driveStatus').textContent=s.paused?'已暫停':s.race?.phase==='countdown'?'準備起跑':s.race?.phase==='finished'?'完賽':!s.playing?'準備出發':activeMode==='race'?activeDuel?'四車競賽':`${LAPS} 圈計時挑戰`:s.speed<-.15?'倒車中':'自由試駕';
     $('#collisionHint').textContent=s.collisionPulse>0?'碰撞減速 · 可倒車脫離':activeMode==='race'?(ROUTE_ID==='campus'&&s.x<-29?'西側窄道 · 請減速':'依序通過光門'):'自由試駕 · 尚未計時';
-    $('#area').textContent=ROUTE_ID==='courtyard'?(s.groundHeight>.9?'原校園走廊':s.groundHeight>.05?'坡道':s.z*18+700<1100?'中庭':ACTIVE_ROUTE.short):activeMode==='race'?ACTIVE_ROUTE.short:{field:'操場環線',north:'北側開放通道',east:'東側開放通道'}[s.spawn];$('#mapLabel').textContent=activeMode==='race'?'下一光門':s.spawn==='field'?'操場':'校園探索';
+    $('#area').textContent=ROUTE_ID==='grand'?ACTIVE_ROUTE.short:['courtyard','grand'].includes(ROUTE_ID)?(s.groundHeight>.9?'原校園走廊':s.groundHeight>.05?'坡道':s.z*18+700<1100?'中庭':ACTIVE_ROUTE.short):activeMode==='race'?ACTIVE_ROUTE.short:{field:'操場環線',north:'北側開放通道',east:'東側開放通道'}[s.spawn];$('#mapLabel').textContent=activeMode==='race'?'下一光門':s.spawn==='field'?'操場':'校園探索';
     drawMap(s,s.race&&s.race.phase!=='finished'?gates[s.race.nextGate]:null);drawRace(s.race);
     let pre=$('#game-state');if(!pre){pre=document.createElement('script');pre.id='game-state';pre.type='application/json';document.body.append(pre);}pre.textContent=JSON.stringify(s);
   }

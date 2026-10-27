@@ -1,5 +1,5 @@
 // Coordinates use the original campus plan pixels. 18 px = 1 metre.
-import { COURTYARD_ROUTE, courtyardWidthAt } from './courtyard-route.js?build=premium-roster-open1';
+import { COURTYARD_ROUTE, courtyardWidthAt } from './courtyard-route.js?build=grand-difficulty2';
 export const SCALE = 18;
 export const ORIGIN = [1100, 700];
 export const world = ([x, z]) => [(x - ORIGIN[0]) / SCALE, (z - ORIGIN[1]) / SCALE];
@@ -48,6 +48,16 @@ export const ROUTES = {
   },
 };
 
+// Insert the complete courtyard circuit into the campus loop at their shared
+// northbound west passage. Sequential gates disambiguate the shared stretches.
+function grandTour(){
+  const outer=ROUTES.campus.points,inner=COURTYARD_ROUTE.points.slice(0,-1),near=(points)=>points.reduce((best,p,i)=>Math.hypot(p[0]-393,p[1]-1370)<Math.hypot(points[best][0]-393,points[best][1]-1370)?i:best,0);
+  const a=near(outer),b=near(inner);
+  const points=[...outer.slice(0,a),...inner.slice(b),...inner.slice(0,b),...outer.slice(a)];
+  return{id:'grand',label:'D · 全校大巡迴',short:'全校＋操場＋走廊中庭',status:'可比賽',color:'#b49bdb',width:2.4,closed:true,points,checkpoints:Array.from({length:52},(_,i)=>Math.floor(i*(points.length-1)/52)),description:'全校外圈、操場、走廊與中庭連成一場完整賽事，依序通過光門。',notes:['全程約 860 公尺','西側通道串聯完整中庭與校園環線','部分路段會再次經過，請跟隨下一個光門']};
+}
+ROUTES.grand=grandTour();
+
 export const ISSUES = [
   { id: 'north', at: [465,95], name: '北側封閉通道', text: '北側通道約 6.1 m，但東西兩端有樹籬封閉。B 線必須處理兩端樹籬。', level: 'blocked' },
   { id: 'parking', at: [400,370], name: '教師停車場', text: 'B 線經過停車棚與車輛，不能把空白平面直接當成暢通路面。', level: 'blocked' },
@@ -61,6 +71,7 @@ export function lengthMetres(points) {
   return points.slice(1).reduce((n, p, i) => n + Math.hypot(p[0] - points[i][0], p[1] - points[i][1]) / SCALE, 0);
 }
 export function roadWidthAt(route,p){
+  if(route.id==='grand'){const x=(p[0]-1100)/18,z=(p[1]-700)/18;return Math.min(2.4,courtyardWidthAt(x,z));}
   if(route.id==='courtyard')return courtyardWidthAt((p[0]-1100)/18,(p[1]-700)/18);
   // Existing entrance flags and parking canopy leave a short 1.8 m chicane.
   return route.id==='campus'&&p[0]<460&&p[1]>900&&p[1]<1300?1.8:route.width;

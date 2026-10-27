@@ -1,21 +1,22 @@
-import { createState, FixedSimulation } from './drive-core.js?build=premium-roster-open1';
-import { RaceSession } from './race-core.js?build=premium-roster-open1';
-import { regressionInput } from './qa-driver.js?build=premium-roster-open1';
+import { createState, FixedSimulation } from './drive-core.js?build=grand-difficulty2';
+import { RaceSession } from './race-core.js?build=grand-difficulty2';
+import { createRouteDriver } from './route-driver.js?build=grand-difficulty2';
+import { getDifficulty } from './difficulty-config.js?build=grand-difficulty2';
 
 // A physical driver: walls, gates and countdown use the same rules as the player.
 // Cars do not collide with each other, so a narrow corridor cannot be blocked.
 export class Opponent {
-  constructor({gates,laps,grid,bounds,cfg,route,index=0}) {
+  constructor({gates,laps,grid,bounds,cfg,route,index=0,difficulty='normal'}) {
     const g=gates[0],offset=6+index*1.5;
     this.state=createState({x:g.x-g.fx*offset,z:g.z-g.fz*offset,yaw:Math.atan2(g.fx,g.fz)});
     this.race=new RaceSession({gates,laps,name:`電腦車手 ${index+1}`,id:`opponent-${index}`}).begin();
     this.simulation=new FixedSimulation(this.state,grid,bounds,cfg);
-    this.route=route;this.stuck=0;
+    this.route=route;this.stuck=0;this.difficulty=getDifficulty(difficulty).id;this.drive=createRouteDriver(route,this.difficulty);
   }
   advance(seconds) {
     if(this.race.phase==='finished')return;
     const span=this.race.advance(Math.max(0,seconds));
-    this.simulation.advance(span.driveSeconds,s=>regressionInput(s,7.6,this.route),(from,to,a,b)=>{
+    this.simulation.advance(span.driveSeconds,s=>this.drive(s,this.race),(from,to,a,b)=>{
       if(this.race.observeMove(from,to,span.fromTime+(span.toTime-span.fromTime)*a,span.fromTime+(span.toTime-span.fromTime)*b)){this.state.speed=0;return false;}
     });
     this.stuck=this.state.collisionPulse>0&&Math.abs(this.state.speed)<1?this.stuck+Math.min(seconds,.2):0;
