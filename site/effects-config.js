@@ -1,5 +1,5 @@
-import { world } from './track-config.js?build=20261031-daynight1';
-import { ROUTE_ID } from './session-config.js?build=20261031-daynight1';
+import { world } from './track-config.js?build=20261031-wildlife3';
+import { ROUTE_ID } from './session-config.js?build=20261031-wildlife3';
 export const BOOST_PADS=ROUTE_ID==='courtyard'?[
   {id:'courtyard-stadium-north',pixel:[1250,1335],...pose([1250,1335]),yaw:Math.PI/2,width:3.2,length:4},
   {id:'courtyard-stadium-south',pixel:[1250,1835],...pose([1250,1835]),yaw:-Math.PI/2,width:3.2,length:4},

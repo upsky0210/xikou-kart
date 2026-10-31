@@ -1,11 +1,13 @@
-import { buildSculptedRacer } from './sculpted-racers.js?build=20261031-daynight1';
-import { buildPremiumCat } from './premium-cat.js?build=20261031-daynight1';
-import { buildToonRacer } from './toon-racer.js?build=20261031-daynight1';
-import { makeAnimalFace } from './animal-face.js?build=20261031-daynight1';
-import { getRacer } from './racer-catalog.js?build=20261031-daynight1';
-import { addSculptedFace } from './sculpted-face.js?build=20261031-daynight1';
+import { buildSculptedRacer } from './sculpted-racers.js?build=20261031-wildlife3';
+import { buildWildlifeRacer, WILDLIFE_IDS } from './wildlife-racers.js?build=20261031-wildlife3';
+import { buildPremiumCat } from './premium-cat.js?build=20261031-wildlife3';
+import { buildToonRacer } from './toon-racer.js?build=20261031-wildlife3';
+import { makeAnimalFace } from './animal-face.js?build=20261031-wildlife3';
+import { getRacer } from './racer-catalog.js?build=20261031-wildlife3';
+import { addSculptedFace } from './sculpted-face.js?build=20261031-wildlife3';
 export function buildAnimal(T,id,options={}){
   const profile=getRacer(id);
+  if(WILDLIFE_IDS.includes(profile.id))return buildWildlifeRacer(T,profile);
   if(!options.faceStyle||options.faceStyle==='premium')return profile.id==='cat'?buildPremiumCat(T,profile):buildSculptedRacer(T,profile);
   if(options.faceStyle==='toon')return buildToonRacer(T,profile);
   const p=getRacer(id),driver=new T.Group(),head=new T.Group();driver.name=`racer-${p.id}`;head.name='animal-head';head.position.set(0,1.49,-.12);driver.add(head);driver.userData.racer=p.id;

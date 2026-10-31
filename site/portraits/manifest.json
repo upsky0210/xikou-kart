@@ -6,19 +6,21 @@
     "site/toon-racer.js": "be1a3a566154c35b66ea345cd199ec29765ed6cb6f9ac338ca6179124b122001",
     "site/portrait-export.js": "622b3fbb4a749ea32f4443a1aec7ad8599318cfd9e377d8f011295659f305329",
     "site/storybook-racers.js": "e63b77ba35b6a9e84e50c8e2d141b8031ca4d5eff087d3cf68a45a69eb4d41d6",
-    "site/animal-model.js": "9d81031ce09e7793d849bb687be19d7d252a147fb037c9ac7c0c8209f2cd2d1f",
+    "site/animal-model.js": "861ed8bf5ebd5503cf0a3960f7f01960dddc6714cc018b96b21e29bb3063cd9a",
     "site/kart-model.js": "d9e8cb81deca44dab863de116bdd2091cbaff6f1ecc85797fdc9bbb929a071f4",
-    "site/racer-catalog.js": "6417ec1c2f52944758ca43fd69dc05187a18019d76faf872f594a4c7ad16d7f6"
+    "site/racer-catalog.js": "6d79e9a1bbb43c4208db7aafdde56c0b2b4c898230054486da79ace1964dfe51",
+    "site/wildlife-racers.js": "6a096c4ff98172c26db55b82a2c6f9e3859008069b2c6c6bd15cd348f009f56f",
+    "site/racer-sculpt-kit.js": "1aa5335004fd024e0669b13bfe59f776b0eeff22be023671e593d1355a3cc654"
   },
   "ids": [
     "cat",
-    "bunny",
-    "hamster",
+    "giraffe",
+    "koala",
     "beagle",
-    "macaque",
+    "raccoon",
     "horse",
     "sheep",
     "boar"
   ],
-  "revision": "storybook-v3: bunny, sheep and hamster rendered from actual game models; other five portraits retained"
+  "revision": "wildlife-v1: koala raccoon giraffe captured from actual buildKart models"
 }

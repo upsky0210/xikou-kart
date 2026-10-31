@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Batch, mat, SPOTS } from './blocks.js?build=20261031-daynight1';
+import { Batch, mat, SPOTS } from './blocks.js?build=20261031-wildlife3';
 
 /* =========================================================
  * 教室裝潢 + 門口的班牌 / 教室牌
