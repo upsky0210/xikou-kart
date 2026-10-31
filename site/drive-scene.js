@@ -1,20 +1,20 @@
-import { createRouteDriver } from './route-driver.js?build=20261031-racing1';
-import { getDifficulty } from './difficulty-config.js?build=20261031-racing1';
-import { speedPresentation } from './speed-feedback.js?build=20261031-racing1';
-import { RACERS } from './racer-catalog.js?build=20261031-racing1';
-import { Opponent, fleetPosition } from './opponent-core.js?build=20261031-racing1';
-import { ACTIVE_ROUTE, LAPS, ROUTE_ID } from './session-config.js?build=20261031-racing1';
-import { buildKart } from './kart-model.js?build=20261031-racing1';
-import { prepareStaticScene } from './scene-utils.js?build=20261031-racing1';
-import { DRIVE, SPAWNS } from './drive-config.js?build=20261031-racing1';
-import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=20261031-racing1';
-import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=20261031-racing1';
-import { RaceSession, makeGates } from './race-core.js?build=20261031-racing1';
-import { buildRaceDecor } from './race-decor.js?build=20261031-racing1';
-import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=20261031-racing1';
-import { cancelDrift } from './effects-core.js?build=20261031-racing1';
-import { courtyardHeightAt,nearestOnCourtyard } from './courtyard-route.js?build=20261031-racing1';
-import { COURTYARD_DRIVE,ElevationGrid,wallHeight,addCourtyardSurface } from './courtyard-world.js?build=20261031-racing1';
+import { createRouteDriver } from './route-driver.js?build=20261031-storybook5';
+import { getDifficulty } from './difficulty-config.js?build=20261031-storybook5';
+import { speedPresentation } from './speed-feedback.js?build=20261031-storybook5';
+import { RACERS } from './racer-catalog.js?build=20261031-storybook5';
+import { Opponent, fleetPosition } from './opponent-core.js?build=20261031-storybook5';
+import { ACTIVE_ROUTE, LAPS, ROUTE_ID } from './session-config.js?build=20261031-storybook5';
+import { buildKart } from './kart-model.js?build=20261031-storybook5';
+import { prepareStaticScene } from './scene-utils.js?build=20261031-storybook5';
+import { DRIVE, SPAWNS } from './drive-config.js?build=20261031-storybook5';
+import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=20261031-storybook5';
+import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=20261031-storybook5';
+import { RaceSession, makeGates } from './race-core.js?build=20261031-storybook5';
+import { buildRaceDecor } from './race-decor.js?build=20261031-storybook5';
+import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=20261031-storybook5';
+import { cancelDrift } from './effects-core.js?build=20261031-storybook5';
+import { courtyardHeightAt,nearestOnCourtyard } from './courtyard-route.js?build=20261031-storybook5';
+import { COURTYARD_DRIVE,ElevationGrid,wallHeight,addCourtyardSurface } from './courtyard-world.js?build=20261031-storybook5';
 
 export function initScene(api){
   const {THREE:T,scene,renderer,camera,orbit,floors,rooms}=api;
@@ -153,7 +153,7 @@ export function initScene(api){
       }
       state.x=gates[0].x-gates[0].fx*3;state.z=gates[0].z-gates[0].fz*3;state.yaw=Math.atan2(gates[0].fx,gates[0].fz);
       if(qa&&ROUTE_ID==='grand'){const controller=createRouteDriver(route,difficulty);qaDriver=s=>controller(s,race);}
-      else if(qa){const module=await import('./qa-driver.js?build=20261031-racing1');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
+      else if(qa){const module=await import('./qa-driver.js?build=20261031-storybook5');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
     }
     playing=true;cameraSnap=true;setPause(false);send('started',{mode});
   }

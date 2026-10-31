@@ -1,7 +1,7 @@
-import { createState, FixedSimulation } from './drive-core.js?build=20261031-racing1';
-import { RaceSession } from './race-core.js?build=20261031-racing1';
-import { createRouteDriver } from './route-driver.js?build=20261031-racing1';
-import { getDifficulty } from './difficulty-config.js?build=20261031-racing1';
+import { createState, FixedSimulation } from './drive-core.js?build=20261031-storybook5';
+import { RaceSession } from './race-core.js?build=20261031-storybook5';
+import { createRouteDriver } from './route-driver.js?build=20261031-storybook5';
+import { getDifficulty } from './difficulty-config.js?build=20261031-storybook5';
 
 // A physical driver: walls, gates and countdown use the same rules as the player.
 // Cars do not collide with each other, so a narrow corridor cannot be blocked.

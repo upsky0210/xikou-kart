@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Batch, mat, SPOTS } from './blocks.js?build=20261031-racing1';
+import { Batch, mat, SPOTS } from './blocks.js?build=20261031-storybook5';
 
 /* =========================================================
  * 戶外特別場景（依使用者提供的照片）

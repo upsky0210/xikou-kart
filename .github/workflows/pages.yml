@@ -25,6 +25,8 @@ jobs:
         run: node tools/verify-lab.mjs
       - name: Check high-detail cat sample
         run: node tools/verify-premium.mjs
+      - name: Check reference-inspired bunny sheep and hamster
+        run: node tools/verify-storybook.mjs
       - name: Check real campus corridor race and ghost
         run: node tools/verify-courtyard.mjs
       - name: Check grand tour and AI difficulties

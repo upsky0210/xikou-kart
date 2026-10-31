@@ -1,4 +1,5 @@
-import {buildToonRacer} from './toon-racer.js?build=20261031-racing1';
+import {buildToonRacer} from './toon-racer.js?build=20261031-storybook5';
+import {buildStorybookRacer,STORYBOOK_SPECIES} from './storybook-racers.js?build=20261031-storybook5';
 
 // New anatomical surfaces, not denser copies of the previous sphere assembly.
 export const SCULPTS=Object.freeze({
@@ -11,6 +12,7 @@ export const SCULPTS=Object.freeze({
  boar:{w:.45,h:.365,d:.35,cheek:.12,muzzle:.195,mw:.245,mh:.16,my:-.115,ex:.19,ey:.105,iris:'#9f8244',nose:'#d39799',ears:'point'},
 });
 export function buildSculptedRacer(T,p){
+ if(STORYBOOK_SPECIES.includes(p.id))return buildStorybookRacer(T,p);
  const a=SCULPTS[p.id];if(!a)throw Error(`No sculpt for ${p.id}`);
  const base=buildToonRacer(T,p),{driver}=base,old=base.head;old.removeFromParent();old.traverse(o=>{if(o.isMesh)o.geometry.dispose();});
  const head=new T.Group();head.name=`sculpted-${p.id}-head`;head.position.set(0,1.41,-.12);driver.add(head);

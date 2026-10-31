@@ -15,12 +15,12 @@ check('two sample heads have a continuous sculpted skull and shallow conforming 
   }
   assert.equal(buildKart(T,'cat').head.userData.faceStyle,'premium-cat-v1','formal game uses expressive species models');
   assert.equal(buildKart(T,'beagle').head.userData.faceStyle,'premium-beagle-v2');
-  assert.equal(buildKart(T,'hamster').head.userData.faceStyle,'premium-hamster-v2');
+  assert.equal(buildKart(T,'hamster').head.userData.faceStyle,'premium-hamster-v3');
 });
 check('eight expressive racers have different silhouettes and batched 3D faces',()=>{
   const silhouettes=new Set();
   for(const id of ['cat','bunny','hamster','beagle','macaque','horse','sheep','boar']){
-    const {car,head}=buildKart(T,id);assert.equal(head.userData.faceStyle,`premium-${id}-${id==='cat'?'v1':'v2'}`);
+    const {car,head}=buildKart(T,id);assert.equal(head.userData.faceStyle,`premium-${id}-${id==='cat'?'v1':['bunny','hamster','sheep'].includes(id)?'v3':'v2'}`);
     car.updateMatrixWorld(true);const bounds=new T.Box3().setFromObject(head);silhouettes.add([bounds.min.x,bounds.max.x,bounds.min.y,bounds.max.y,bounds.min.z,bounds.max.z].map(n=>n.toFixed(3)).join(','));
     assert.ok(head.children.length<=80,'batch facial geometry for four-car rendering');
     assert.ok(head.children.every(o=>o.geometry.attributes.position.count>0));
