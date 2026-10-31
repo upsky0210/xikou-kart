@@ -1,7 +1,7 @@
 // Shared route-following driver for the computer rival and developer regression runs.
-import { ROUTES, world, pointAt, lengthMetres } from './track-config.js?build=20261031-storybook5';
+import { ROUTES, world, pointAt, lengthMetres } from './track-config.js?build=20261031-daynight1';
 const paths=new Map();
-import { courtyardSlowAt } from './courtyard-route.js?build=20261031-storybook5';
+import { courtyardSlowAt } from './courtyard-route.js?build=20261031-daynight1';
 function path(route){if(!paths.has(route.id)){const count=1800;paths.set(route.id,{count,length:lengthMetres(route.points),poses:Array.from({length:count},(_,i)=>world(pointAt(route.points,i/count)))});}return paths.get(route.id);}
 export function regressionInput(state,targetSpeed=7.6,route=ROUTES.field){
   const {poses,count,length}=path(route);

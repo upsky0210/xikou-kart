@@ -1,20 +1,20 @@
-import { createRouteDriver } from './route-driver.js?build=20261031-storybook5';
-import { getDifficulty } from './difficulty-config.js?build=20261031-storybook5';
-import { speedPresentation } from './speed-feedback.js?build=20261031-storybook5';
-import { RACERS } from './racer-catalog.js?build=20261031-storybook5';
-import { Opponent, fleetPosition } from './opponent-core.js?build=20261031-storybook5';
-import { ACTIVE_ROUTE, LAPS, ROUTE_ID } from './session-config.js?build=20261031-storybook5';
-import { buildKart } from './kart-model.js?build=20261031-storybook5';
-import { prepareStaticScene } from './scene-utils.js?build=20261031-storybook5';
-import { DRIVE, SPAWNS } from './drive-config.js?build=20261031-storybook5';
-import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=20261031-storybook5';
-import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=20261031-storybook5';
-import { RaceSession, makeGates } from './race-core.js?build=20261031-storybook5';
-import { buildRaceDecor } from './race-decor.js?build=20261031-storybook5';
-import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=20261031-storybook5';
-import { cancelDrift } from './effects-core.js?build=20261031-storybook5';
-import { courtyardHeightAt,nearestOnCourtyard } from './courtyard-route.js?build=20261031-storybook5';
-import { COURTYARD_DRIVE,ElevationGrid,wallHeight,addCourtyardSurface } from './courtyard-world.js?build=20261031-storybook5';
+import { createRouteDriver } from './route-driver.js?build=20261031-daynight1';
+import { getDifficulty } from './difficulty-config.js?build=20261031-daynight1';
+import { speedPresentation } from './speed-feedback.js?build=20261031-daynight1';
+import { RACERS } from './racer-catalog.js?build=20261031-daynight1';
+import { Opponent, fleetPosition } from './opponent-core.js?build=20261031-daynight1';
+import { ACTIVE_ROUTE, LAPS, ROUTE_ID } from './session-config.js?build=20261031-daynight1';
+import { buildKart } from './kart-model.js?build=20261031-daynight1';
+import { prepareStaticScene } from './scene-utils.js?build=20261031-daynight1';
+import { DRIVE, SPAWNS } from './drive-config.js?build=20261031-daynight1';
+import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=20261031-daynight1';
+import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=20261031-daynight1';
+import { RaceSession, makeGates } from './race-core.js?build=20261031-daynight1';
+import { buildRaceDecor } from './race-decor.js?build=20261031-daynight1';
+import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=20261031-daynight1';
+import { cancelDrift } from './effects-core.js?build=20261031-daynight1';
+import { courtyardHeightAt,nearestOnCourtyard } from './courtyard-route.js?build=20261031-daynight1';
+import { COURTYARD_DRIVE,ElevationGrid,wallHeight,addCourtyardSurface } from './courtyard-world.js?build=20261031-daynight1';
 
 export function initScene(api){
   const {THREE:T,scene,renderer,camera,orbit,floors,rooms}=api;
@@ -153,7 +153,7 @@ export function initScene(api){
       }
       state.x=gates[0].x-gates[0].fx*3;state.z=gates[0].z-gates[0].fz*3;state.yaw=Math.atan2(gates[0].fx,gates[0].fz);
       if(qa&&ROUTE_ID==='grand'){const controller=createRouteDriver(route,difficulty);qaDriver=s=>controller(s,race);}
-      else if(qa){const module=await import('./qa-driver.js?build=20261031-storybook5');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
+      else if(qa){const module=await import('./qa-driver.js?build=20261031-daynight1');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
     }
     playing=true;cameraSnap=true;setPause(false);send('started',{mode});
   }
@@ -246,6 +246,7 @@ export function initScene(api){
     for(const w of wheels){if(w.front)w.pivot.rotation.y=state.steering;w.tire.rotation.x+=state.speed*Math.min(elapsed,.1)/.27;w.hub.rotation.x=w.tire.rotation.x;}
     steeringWheel.rotation.z=-state.steering;driver.rotation.z=-state.steering*Math.min(1,Math.abs(state.speed)/8)*.12;head.rotation.y=!playing&&garage?Math.sin(now*.0014)*.045:0;
     if(playing)updateCamera(Math.min(elapsed,.1));else if(garage){car.rotation.y=(now-garageStart)*.00035;camera.position.set(state.x+3.1,floorY+2.2,state.z+3.5);camera.lookAt(state.x-.8,floorY+.85,state.z);shadow.rotation.z=-car.rotation.y;}else {if(previewOrbit){const a=now*.00009;camera.position.set(Math.cos(a)*85,62,35+Math.sin(a)*85);}else camera.position.set(-50,55,100);camera.lookAt(-.5,0,40);}
+    api.stepLighting?.(Math.min(elapsed,.1));
     renderer.render(scene,camera);
     // Reduce fill cost on slower devices without changing physics or input rate.
     qualityFrames++;qualityTime+=Math.min(elapsed,1);

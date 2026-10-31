@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { PanoViewer } from './pano.js?build=20261031-storybook5';
-import { furnishFloor, ROOM_EN } from './furniture.js?build=20261031-storybook5';
-import { poolWallMat, poolStripeMat, poolStripeGeo, poolDoor, poolSideDoor, POOL_SIDE_DOOR_H, poolWater, buildPool, buildPoolPlayground, buildElevator, makeCat, makeGlider, makeTurtle, makeHamster } from './extras.js?build=20261031-storybook5';
-import { buildField, buildStage, buildFacadeC, buildMuralBlock, buildCourtyard, buildParking, buildFrontYard, buildGuardHouse } from './field.js?build=20261031-storybook5';
-import { buildCampusWall } from './wall.js?build=20261031-storybook5';
-import { BLOCKY, STYLE, setStyle, mat, blockBox, Batch, mergeStatic, SPOTS, makeBlockPerson, OUTFITS, BB_GIRL, outfitFor, makeBlockNPC, NPC_FACES, makeRacket, makeShuttle, animatePerson, addBlockTree, makeClouds } from './blocks.js?build=20261031-storybook5';
+import { PanoViewer } from './pano.js?build=20261031-daynight1';
+import { furnishFloor, ROOM_EN } from './furniture.js?build=20261031-daynight1';
+import { poolWallMat, poolStripeMat, poolStripeGeo, poolDoor, poolSideDoor, POOL_SIDE_DOOR_H, poolWater, buildPool, buildPoolPlayground, buildElevator, makeCat, makeGlider, makeTurtle, makeHamster } from './extras.js?build=20261031-daynight1';
+import { buildField, buildStage, buildFacadeC, buildMuralBlock, buildCourtyard, buildParking, buildFrontYard, buildGuardHouse } from './field.js?build=20261031-daynight1';
+import { buildCampusWall } from './wall.js?build=20261031-daynight1';
+import { BLOCKY, STYLE, setStyle, mat, blockBox, Batch, mergeStatic, SPOTS, makeBlockPerson, OUTFITS, BB_GIRL, outfitFor, makeBlockNPC, NPC_FACES, makeRacket, makeShuttle, animatePerson, addBlockTree, makeClouds } from './blocks.js?build=20261031-daynight1';
 
 /* =========================================================
  * 溪口國小 3D 校園
@@ -931,7 +931,16 @@ function timeLabel() {
   timeBtn.querySelector('span').textContent = ' ' + T(p.zh, p.en);
   timeBtn.title = T('時間：', 'Time: ') + T(p.zh, p.en);
   for (const b of timeMenu.children) { const on = b.dataset.time === timeKey; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
+  announceKartLighting();
 }
+function announceKartLighting() {
+  if (window.KART_M1) parent.postMessage({source:'kart-drive',type:'lighting',time:timeKey},location.origin);
+}
+addEventListener('message',e=>{
+  if(!window.KART_M1||e.source!==parent||e.origin!==location.origin||e.data?.source!=='kart-controls')return;
+  if(e.data.type==='lightingQuery')announceKartLighting();
+  if(e.data.type==='lighting'&&['noon','night'].includes(e.data.time))setTime(e.data.time);
+});
 function showTimeMenu(on) { timeMenu.hidden = !on; timeBtn.setAttribute('aria-expanded', String(on)); }
 timeLabel();
 for (const el of [timeBtn, timeMenu]) el.addEventListener('pointerdown', (e) => e.stopPropagation());
@@ -8434,6 +8443,6 @@ if (window.KART_M0) {
   for (const f of floors) { f.labels.visible = false; if (f.stairSigns) f.stairSigns.visible = false; }
   for (const n of NPCS) n.g.visible = false;
   scene.fog = null;
-  const { initScene } = await import(window.KART_M1 ? '../../drive-scene.js?build=20261031-storybook5' : '../../m0-scene.js');
-  initScene({ THREE, scene, renderer, camera, orbit, floors, rooms, raised, wallRuns, BASE, mx, mz, groundAt });
+  const { initScene } = await import(window.KART_M1 ? '../../drive-scene.js?build=20261031-daynight1' : '../../m0-scene.js');
+  initScene({ THREE, scene, renderer, camera, orbit, floors, rooms, raised, wallRuns, BASE, mx, mz, groundAt, stepLighting:stepTime });
 }

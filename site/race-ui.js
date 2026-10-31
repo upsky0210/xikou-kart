@@ -1,16 +1,16 @@
-import { getDifficulty } from './difficulty-config.js?build=20261031-storybook5';
-import { installControlMode } from './control-mode.js?build=20261031-storybook5';
-import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=20261031-storybook5';
-import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE } from './session-config.js?build=20261031-storybook5';
-import { InputState, KEY_ACTION } from './drive-core.js?build=20261031-storybook5';
-import { DRIVE } from './drive-config.js?build=20261031-storybook5';
-import { cleanName, formatTime, makeGates } from './race-core.js?build=20261031-storybook5';
-import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=20261031-storybook5';
-import { drawMap } from './minimap.js?build=20261031-storybook5';
-import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=20261031-storybook5';
-import { SpeedFeedback } from './speed-feedback.js?build=20261031-storybook5';
-import { GameSound } from './sound.js?build=20261031-storybook5';
-import { RULES_LABEL } from './game-version.js?build=20261031-storybook5';
+import { getDifficulty } from './difficulty-config.js?build=20261031-daynight1';
+import { installControlMode } from './control-mode.js?build=20261031-daynight1';
+import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=20261031-daynight1';
+import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE } from './session-config.js?build=20261031-daynight1';
+import { InputState, KEY_ACTION } from './drive-core.js?build=20261031-daynight1';
+import { DRIVE } from './drive-config.js?build=20261031-daynight1';
+import { cleanName, formatTime, makeGates } from './race-core.js?build=20261031-daynight1';
+import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=20261031-daynight1';
+import { drawMap } from './minimap.js?build=20261031-daynight1';
+import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=20261031-daynight1';
+import { SpeedFeedback } from './speed-feedback.js?build=20261031-daynight1';
+import { GameSound } from './sound.js?build=20261031-daynight1';
+import { RULES_LABEL } from './game-version.js?build=20261031-daynight1';
 
 const $=s=>document.querySelector(s),frame=$('#world'),inputs=new InputState(),gates=makeGates();
 const QA=new URLSearchParams(location.search).get('qa')==='1';
@@ -26,6 +26,15 @@ let selectedMode='duel',activeMode='race',activeDuel=false,lastState=null,toastT
 const savedIds=new Set();
 let selectedDifficulty=getDifficulty(new URLSearchParams(location.search).get('difficulty')||storage?.getItem('xikou-kart.difficulty')).id;$('#difficultySelect').value=selectedDifficulty;$('#difficultySelect').onchange=()=>{selectedDifficulty=getDifficulty($('#difficultySelect').value).id;const u=new URL(location.href);u.searchParams.set('difficulty',selectedDifficulty);history.replaceState(null,'',u);try{storage?.setItem('xikou-kart.difficulty',selectedDifficulty);}catch{}};
 const send=(type,data={})=>frame.contentWindow.postMessage({source:'kart-controls',type,...data},location.origin);
+let lightingTime='noon';
+function updateLighting(time){
+  if(!['dawn','noon','dusk','night'].includes(time))return;
+  lightingTime=time;const night=time==='night',button=$('#dayNightToggle');
+  button.textContent=night?'🌙 夜晚':'☀️ 白天';button.setAttribute('aria-pressed',String(night));
+  button.setAttribute('aria-label',night?'目前夜晚，切換為白天':'目前白天，切換為夜晚');
+  button.title=night?'切換為白天':'切換為夜晚';button.disabled=!ready;
+}
+$('#dayNightToggle').onclick=()=>{if(!ready)return;const time=lightingTime==='night'?'noon':'night';updateLighting(time);send('lighting',{time});};
 const inMenu=()=>!started||paused||helpOpen||boardOpen||finished;
 function flush(){inputs.clear();for(const b of document.querySelectorAll('[data-action]'))b.classList.remove('pressed');send('clear');}
 function syncInput(){if(!inMenu())send('input',{input:inputs.value()});}
@@ -122,6 +131,7 @@ $('#openBoard').onclick=()=>{const stored=readLeaderboard(storage,boardKey);boar
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 document.querySelectorAll('[data-spawn]').forEach(b=>b.onclick=()=>{if(activeMode!=='practice')return;flush();send('spawn',{id:b.dataset.spawn});document.querySelectorAll('[data-spawn]').forEach(el=>el.classList.toggle('active',el===b));toast(['courtyard','grand'].includes(ROUTE_ID)?`${b.textContent} · R 回到鄰近安全路面`:b.dataset.spawn==='field'?'操場環線 · R 回到鄰近賽道':`${b.dataset.spawn==='north'?'北側':'東側'}探索 · v221 開放戶外配置`);});
 addEventListener('keydown',e=>{
+  if(e.target.closest('#dayNightToggle')&&['Space','Enter'].includes(e.code))return;
   if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)){if(e.code==='Enter'){e.preventDefault();start();}return;}
   if(inMenu()&&e.target.closest('button')&&['Space','Enter'].includes(e.code))return;
   if(boardOpen){if(e.code==='Escape'){$('#closeBoard').click();}return;}
@@ -141,10 +151,12 @@ for(const button of document.querySelectorAll('[data-action]')){
 addEventListener('message',e=>{
   if(e.source!==frame.contentWindow||e.origin!==location.origin||e.data?.source!=='kart-drive')return;const data=e.data;
   if(data.type==='ready'){
+    send('lightingQuery');
     ready=true;chooseRacer(selectedRacer,true);$('#start').disabled=false;setMode(selectedMode);$('#loadHint').textContent='WASD／方向鍵駕駛 · 平板可同時按油門與轉向';document.body.dataset.ready='true';
     const pre=document.createElement('script');pre.id='game-report';pre.type='application/json';pre.textContent=JSON.stringify(data);document.body.append(pre);
     if(QA)$('#qaRun').disabled=false;
   }
+  if(data.type==='lighting')updateLighting(data.time);
   if(data.type==='started'){started=true;paused=false;finished=false;activeMode=data.mode||activeMode;setMenu();}
   if(data.type==='pause'){paused=data.paused;flush();setMenu();}
   if(data.type==='menu')menuStateOnly();

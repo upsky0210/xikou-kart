@@ -1,6 +1,6 @@
 import * as T from 'three';
-import {buildKart} from './kart-model.js?build=20261031-storybook5';
-import {RACERS} from './racer-catalog.js?build=20261031-storybook5';
+import {buildKart} from './kart-model.js?build=20261031-daynight1';
+import {RACERS} from './racer-catalog.js?build=20261031-daynight1';
 const renderer=new T.WebGLRenderer({alpha:true,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setClearColor(0,0);renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;document.body.append(renderer.domElement);
 const notes=['尖耳・虎斑・翹尾','粉耳瓣・柔粉臉・小門牙','灰白毛・小門牙・握方向盤','垂耳・白鼻樑・白尾尖','大側耳・面罩・捲尾','長口鼻・鬃毛・直耳','黑色長臉・奶油捲羊毛','寬鼻盤・獠牙・鬃冠'];
 const refined=new URLSearchParams(location.search).get('crew')==='storybook';

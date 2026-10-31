@@ -1,4 +1,4 @@
-import { ROUTES } from './track-config.js?build=20261031-storybook5';
+import { ROUTES } from './track-config.js?build=20261031-daynight1';
 const query=new URLSearchParams(typeof location==='undefined'?'':location.search);
 export const ROUTE_ID=['campus','courtyard','grand'].includes(query.get('track'))?query.get('track'):'field';
 export const ACTIVE_ROUTE=ROUTES[ROUTE_ID];

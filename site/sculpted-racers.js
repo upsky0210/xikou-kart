@@ -1,5 +1,5 @@
-import {buildToonRacer} from './toon-racer.js?build=20261031-storybook5';
-import {buildStorybookRacer,STORYBOOK_SPECIES} from './storybook-racers.js?build=20261031-storybook5';
+import {buildToonRacer} from './toon-racer.js?build=20261031-daynight1';
+import {buildStorybookRacer,STORYBOOK_SPECIES} from './storybook-racers.js?build=20261031-daynight1';
 
 // New anatomical surfaces, not denser copies of the previous sphere assembly.
 export const SCULPTS=Object.freeze({

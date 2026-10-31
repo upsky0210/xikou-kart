@@ -1,5 +1,5 @@
 // Coordinates use the original campus plan pixels. 18 px = 1 metre.
-import { COURTYARD_ROUTE, courtyardWidthAt } from './courtyard-route.js?build=20261031-storybook5';
+import { COURTYARD_ROUTE, courtyardWidthAt } from './courtyard-route.js?build=20261031-daynight1';
 export const SCALE = 18;
 export const ORIGIN = [1100, 700];
 export const world = ([x, z]) => [(x - ORIGIN[0]) / SCALE, (z - ORIGIN[1]) / SCALE];
