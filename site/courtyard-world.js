@@ -1,6 +1,6 @@
-import { SpatialGrid } from './drive-core.js?build=sculpted-crew4';
-import { DRIVE } from './drive-config.js?build=sculpted-crew4';
-import { courtyardHeightAt,COURTYARD_SAMPLES,courtyardEdge } from './courtyard-route.js?build=sculpted-crew4';
+import { SpatialGrid } from './drive-core.js?build=20261031-racing1';
+import { DRIVE } from './drive-config.js?build=20261031-racing1';
+import { courtyardHeightAt,COURTYARD_SAMPLES,courtyardEdge } from './courtyard-route.js?build=20261031-racing1';
 export const COURTYARD_DRIVE={...DRIVE,carHeight:2.30};
 // The same driving rules apply outdoors, on ramps and inside corridors.
 export function courtyardConfigAt(){return COURTYARD_DRIVE;}

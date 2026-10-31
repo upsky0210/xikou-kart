@@ -1,9 +1,9 @@
-import { buildSculptedRacer } from './sculpted-racers.js?build=sculpted-crew4';
-import { buildPremiumCat } from './premium-cat.js?build=sculpted-crew4';
-import { buildToonRacer } from './toon-racer.js?build=sculpted-crew4';
-import { makeAnimalFace } from './animal-face.js?build=sculpted-crew4';
-import { getRacer } from './racer-catalog.js?build=sculpted-crew4';
-import { addSculptedFace } from './sculpted-face.js?build=sculpted-crew4';
+import { buildSculptedRacer } from './sculpted-racers.js?build=20261031-racing1';
+import { buildPremiumCat } from './premium-cat.js?build=20261031-racing1';
+import { buildToonRacer } from './toon-racer.js?build=20261031-racing1';
+import { makeAnimalFace } from './animal-face.js?build=20261031-racing1';
+import { getRacer } from './racer-catalog.js?build=20261031-racing1';
+import { addSculptedFace } from './sculpted-face.js?build=20261031-racing1';
 export function buildAnimal(T,id,options={}){
   const profile=getRacer(id);
   if(!options.faceStyle||options.faceStyle==='premium')return profile.id==='cat'?buildPremiumCat(T,profile):buildSculptedRacer(T,profile);

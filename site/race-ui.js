@@ -1,15 +1,16 @@
-import { getDifficulty } from './difficulty-config.js?build=sculpted-crew4';
-import { installControlMode } from './control-mode.js?build=sculpted-crew4';
-import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=sculpted-crew4';
-import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE } from './session-config.js?build=sculpted-crew4';
-import { InputState, KEY_ACTION } from './drive-core.js?build=sculpted-crew4';
-import { DRIVE } from './drive-config.js?build=sculpted-crew4';
-import { cleanName, formatTime, makeGates } from './race-core.js?build=sculpted-crew4';
-import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=sculpted-crew4';
-import { drawMap } from './minimap.js?build=sculpted-crew4';
-import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=sculpted-crew4';
-import { GameSound } from './sound.js?build=sculpted-crew4';
-import { RULES_LABEL } from './game-version.js?build=sculpted-crew4';
+import { getDifficulty } from './difficulty-config.js?build=20261031-racing1';
+import { installControlMode } from './control-mode.js?build=20261031-racing1';
+import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=20261031-racing1';
+import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE } from './session-config.js?build=20261031-racing1';
+import { InputState, KEY_ACTION } from './drive-core.js?build=20261031-racing1';
+import { DRIVE } from './drive-config.js?build=20261031-racing1';
+import { cleanName, formatTime, makeGates } from './race-core.js?build=20261031-racing1';
+import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=20261031-racing1';
+import { drawMap } from './minimap.js?build=20261031-racing1';
+import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=20261031-racing1';
+import { SpeedFeedback } from './speed-feedback.js?build=20261031-racing1';
+import { GameSound } from './sound.js?build=20261031-racing1';
+import { RULES_LABEL } from './game-version.js?build=20261031-racing1';
 
 const $=s=>document.querySelector(s),frame=$('#world'),inputs=new InputState(),gates=makeGates();
 const QA=new URLSearchParams(location.search).get('qa')==='1';
@@ -17,7 +18,7 @@ const storage=(()=>{try{return localStorage;}catch{return null;}})();
 const boardKey=CURRENT_LEADERBOARD_KEY+SESSION_SCOPE+(QA?'.qa':'');
 const legacyBoardKey=LEADERBOARD_KEY+(QA?'.qa':'');
 let selectedRacer='cat';try{selectedRacer=getRacer(storage?.getItem('xikou-kart.racer')).id;}catch{}
-const sound=new GameSound(),ghostMemory=new Map();let ghostEnabled=true,muted=false,previewActive=false,lastCount=null,lastBoost=0,lastCollision=0,lastCharged=false;
+const speedFeedback=new SpeedFeedback(),sound=new GameSound(),ghostMemory=new Map();let ghostEnabled=true,muted=false,previewActive=false,lastCount=null,lastBoost=0,lastCollision=0,lastCharged=false;
 try{muted=storage?.getItem('xikou-kart.muted')==='1';ghostEnabled=storage?.getItem('xikou-kart.showGhost')!=='0';}catch{}
 sound.setMuted(muted);
 let board=readLeaderboard(storage,boardKey),ready=false,started=false,paused=false,helpOpen=false,boardOpen=false,finished=false;
@@ -30,6 +31,7 @@ function flush(){inputs.clear();for(const b of document.querySelectorAll('[data-
 function syncInput(){if(!inMenu())send('input',{input:inputs.value()});}
 function toast(text){$('#toast').textContent=text;$('#toast').classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('on'),2400);}
 function setMenu(){
+  if(inMenu()){speedFeedback.stop();sound.updateDrive({});}
   document.body.classList.toggle('in-menu',inMenu());document.body.classList.toggle('in-race',started&&activeMode==='race');document.body.classList.toggle('finished',finished);
   $('#startScreen').hidden=started||helpOpen||boardOpen;$('#pauseScreen').hidden=!paused||helpOpen||boardOpen||finished||!started;
   $('#helpScreen').hidden=!helpOpen;$('#boardScreen').hidden=!boardOpen;$('#resultScreen').hidden=!finished||helpOpen||boardOpen;
@@ -149,7 +151,7 @@ addEventListener('message',e=>{
   if(data.type==='reset'&&!data.initial){const spawn=['courtyard','grand'].includes(ROUTE_ID)?({'北側通道':'走廊','東側通道':'中庭'}[data.spawn]||data.spawn):data.spawn;toast(activeMode==='race'?'已回到檢查點，計時繼續':`已重置 · ${spawn}`);}
   if(data.type==='finished')finish(data.result,data.race,data.recording,data.competition);
   if(data.type==='state'){
-    const s=lastState=data.state;$('#positionLabel').hidden=!s.competition;$('#positionLabel').textContent=s.competition?`第 ${s.competition.position}／${s.competition.total} 名`:'';activeMode=s.mode||activeMode;
+    const s=lastState=data.state;speedFeedback.update(s);sound.updateDrive(s);$('#positionLabel').hidden=!s.competition;$('#positionLabel').textContent=s.competition?`第 ${s.competition.position}／${s.competition.total} 名`:'';activeMode=s.mode||activeMode;
     $('#effectsHud').hidden=!s.playing||finished;const charge=Math.round((s.driftCharge||0)*100),boost=s.boostRemaining>0;
     $('#driftBar').style.width=`${charge}%`;$('#driftMeter').setAttribute('aria-valuenow',String(charge));$('#driftMeter').classList.toggle('charged',charge===100);
     $('.effects-title b').textContent='DRIFT / BOOST';$('#driftStatus').textContent=boost?`加速 ${s.boostRemaining.toFixed(1)} 秒`:charge===100?'集滿了！放開甩尾加速':s.drifting?`甩尾集氣 ${charge}%`:'油門＋轉彎＋甩尾，集滿後放開';document.body.classList.toggle('boosting',boost&&s.playing&&!s.paused&&!finished);

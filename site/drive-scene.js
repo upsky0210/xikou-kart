@@ -1,19 +1,20 @@
-import { createRouteDriver } from './route-driver.js?build=sculpted-crew4';
-import { getDifficulty } from './difficulty-config.js?build=sculpted-crew4';
-import { RACERS } from './racer-catalog.js?build=sculpted-crew4';
-import { Opponent, fleetPosition } from './opponent-core.js?build=sculpted-crew4';
-import { ACTIVE_ROUTE, LAPS, ROUTE_ID } from './session-config.js?build=sculpted-crew4';
-import { buildKart } from './kart-model.js?build=sculpted-crew4';
-import { prepareStaticScene } from './scene-utils.js?build=sculpted-crew4';
-import { DRIVE, SPAWNS } from './drive-config.js?build=sculpted-crew4';
-import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=sculpted-crew4';
-import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=sculpted-crew4';
-import { RaceSession, makeGates } from './race-core.js?build=sculpted-crew4';
-import { buildRaceDecor } from './race-decor.js?build=sculpted-crew4';
-import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=sculpted-crew4';
-import { cancelDrift } from './effects-core.js?build=sculpted-crew4';
-import { courtyardHeightAt,nearestOnCourtyard } from './courtyard-route.js?build=sculpted-crew4';
-import { COURTYARD_DRIVE,ElevationGrid,wallHeight,addCourtyardSurface } from './courtyard-world.js?build=sculpted-crew4';
+import { createRouteDriver } from './route-driver.js?build=20261031-racing1';
+import { getDifficulty } from './difficulty-config.js?build=20261031-racing1';
+import { speedPresentation } from './speed-feedback.js?build=20261031-racing1';
+import { RACERS } from './racer-catalog.js?build=20261031-racing1';
+import { Opponent, fleetPosition } from './opponent-core.js?build=20261031-racing1';
+import { ACTIVE_ROUTE, LAPS, ROUTE_ID } from './session-config.js?build=20261031-racing1';
+import { buildKart } from './kart-model.js?build=20261031-racing1';
+import { prepareStaticScene } from './scene-utils.js?build=20261031-racing1';
+import { DRIVE, SPAWNS } from './drive-config.js?build=20261031-racing1';
+import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=20261031-racing1';
+import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=20261031-racing1';
+import { RaceSession, makeGates } from './race-core.js?build=20261031-racing1';
+import { buildRaceDecor } from './race-decor.js?build=20261031-racing1';
+import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=20261031-racing1';
+import { cancelDrift } from './effects-core.js?build=20261031-racing1';
+import { courtyardHeightAt,nearestOnCourtyard } from './courtyard-route.js?build=20261031-racing1';
+import { COURTYARD_DRIVE,ElevationGrid,wallHeight,addCourtyardSurface } from './courtyard-world.js?build=20261031-racing1';
 
 export function initScene(api){
   const {THREE:T,scene,renderer,camera,orbit,floors,rooms}=api;
@@ -152,7 +153,7 @@ export function initScene(api){
       }
       state.x=gates[0].x-gates[0].fx*3;state.z=gates[0].z-gates[0].fz*3;state.yaw=Math.atan2(gates[0].fx,gates[0].fz);
       if(qa&&ROUTE_ID==='grand'){const controller=createRouteDriver(route,difficulty);qaDriver=s=>controller(s,race);}
-      else if(qa){const module=await import('./qa-driver.js?build=sculpted-crew4');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
+      else if(qa){const module=await import('./qa-driver.js?build=20261031-racing1');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
     }
     playing=true;cameraSnap=true;setPause(false);send('started',{mode});
   }
@@ -193,10 +194,10 @@ export function initScene(api){
   }
   function updateCamera(dt){
     const y=heightAt(state.x,state.z),covered=elevated&&(f1.ceilRects||[]).some(r=>state.x>=r.x1-.6&&state.x<=r.x2+.6&&state.z>=r.z1-.6&&state.z<=r.z2+.6);
-    const fx=Math.sin(state.yaw),fz=Math.cos(state.yaw),distance=covered?4:DRIVE.cameraDistance+Math.abs(state.speed)*.07;
-    const fov=covered?68:58;if(Math.abs(camera.fov-fov)>.1){camera.fov+=(fov-camera.fov)*Math.min(1,dt*7);camera.updateProjectionMatrix();}
+    const fx=Math.sin(state.yaw),fz=Math.cos(state.yaw),view=speedPresentation(state.speed,state.boostRemaining>0,covered),distance=view.distance;
+    const fov=view.fov;if(Math.abs(camera.fov-fov)>.1){camera.fov+=(fov-camera.fov)*Math.min(1,dt*4);camera.updateProjectionMatrix();}
     target.set(state.x,y+1.05,state.z);
-    desired.set(state.x-fx*distance,y+(covered?2.55:DRIVE.cameraHeight+Math.abs(state.speed)*.025),state.z-fz*distance);constrainCamera(desired);
+    desired.set(state.x-fx*distance,y+view.height,state.z-fz*distance);constrainCamera(desired);
     if(cameraSnap){camera.position.copy(desired);cameraSnap=false;}else camera.position.lerp(desired,1-Math.exp(-DRIVE.cameraSmoothing*dt));
     constrainCamera(camera.position);camera.lookAt(state.x+fx*(covered?1:2),y+1.0,state.z+fz*(covered?1:2));
   }
@@ -204,7 +205,8 @@ export function initScene(api){
   const data=document.createElement('script');data.type='application/json';data.id='drive-world';data.textContent=JSON.stringify(report);document.body.append(data);
   send('ready',{layout:D.layoutVersion,report});
   function advanceRace(seconds){
-    for(const opponent of opponents)opponent.advance(seconds);
+    const traffic=[{state:{...state},race},...opponents.map(o=>({state:{...o.state},race:o.race}))];
+    for(let i=0;i<opponents.length;i++)opponents[i].advance(seconds,traffic.filter((_,j)=>j!==i+1));
     const previousPhase=race.phase;
     const span=race.advance(seconds);
     if(previousPhase==='countdown'&&race.phase==='racing')recorder?.record(0,state,false,true);
@@ -250,7 +252,7 @@ export function initScene(api){
     if(qualityTime>=2){if(qualityFrames/qualityTime<28&&qualityRatio>.65){qualityRatio=Math.max(.65,qualityRatio-.25);renderer.setPixelRatio(qualityRatio);renderer.setSize(innerWidth,innerHeight);}qualityFrames=0;qualityTime=0;}
     if(elapsed>0)samples.push(elapsed);if(samples.length>180)samples.shift();
     if(now-lastSend>75){
-      const status={...state,difficulty,competition:opponents.length&&race?{position:fleetPosition(race,state,opponents),total:opponents.length+1,opponents:opponents.map((o,i)=>({x:o.state.x,z:o.state.z,phase:o.race.phase,racer:rivalModels[i].profile.id,color:rivalModels[i].profile.paint}))}:null,racer:profile.id,faceStyle:head.userData.faceStyle??'painted',track:ROUTE_ID,playing,paused,mode,race:race?.snapshot()??null,ghostAvailable:!!bestGhost,ghostVisible:!!ghost,ghostFinished:ghost?.finished??false,ghostBestMs:bestGhost?.totalMs??null,qa:!!qaDriver,input:input(),spawn:spawnId,layout:D.layoutVersion,contactCount:contacts(state,grid,cfg).filter(c=>c.depth>.005).length,camera:[camera.position.x,camera.position.y,camera.position.z]};
+      const status={...state,difficulty,competition:opponents.length&&race?{position:fleetPosition(race,state,opponents),total:opponents.length+1,opponents:opponents.map((o,i)=>({x:o.state.x,z:o.state.z,speed:o.state.speed,lane:o.state.aiLane??0,overtaking:o.state.aiOvertaking??false,phase:o.race.phase,racer:rivalModels[i].profile.id,color:rivalModels[i].profile.paint}))}:null,racer:profile.id,faceStyle:head.userData.faceStyle??'painted',track:ROUTE_ID,playing,paused,mode,race:race?.snapshot()??null,ghostAvailable:!!bestGhost,ghostVisible:!!ghost,ghostFinished:ghost?.finished??false,ghostBestMs:bestGhost?.totalMs??null,qa:!!qaDriver,input:input(),spawn:spawnId,layout:D.layoutVersion,contactCount:contacts(state,grid,cfg).filter(c=>c.depth>.005).length,lighting:document.getElementById('timeBtn')?.textContent?.trim(),cameraFov:camera.fov,camera:[camera.position.x,camera.position.y,camera.position.z]};
       send('state',{state:status});lastSend=now;
       let pre=document.getElementById('drive-state');if(!pre){pre=document.createElement('script');pre.id='drive-state';pre.type='application/json';document.body.append(pre);}pre.textContent=JSON.stringify(status);
     }

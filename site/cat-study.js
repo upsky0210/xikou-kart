@@ -1,6 +1,6 @@
 import * as T from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {buildKart} from './kart-model.js?build=sculpted-crew4';
+import {buildKart} from './kart-model.js?build=20261031-racing1';
 const renderer=new T.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.setClearColor('#15282d');renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;document.body.prepend(renderer.domElement);
 const scene=new T.Scene(),camera=new T.PerspectiveCamera(35,innerWidth/innerHeight,.05,50),controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=false;controls.minDistance=.85;controls.maxDistance=9;controls.maxPolarAngle=Math.PI*.58;controls.target.set(0,1.52,0);camera.position.set(1.50,1.95,3.15);controls.update();
 scene.add(new T.HemisphereLight('#ffe8ce','#516f76',.85));

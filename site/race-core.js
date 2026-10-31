@@ -1,6 +1,6 @@
-import { ACTIVE_ROUTE } from './session-config.js?build=sculpted-crew4';
-import { ROUTES, world } from './track-config.js?build=sculpted-crew4';
-import { TRACK_ID } from './game-version.js?build=sculpted-crew4';
+import { ACTIVE_ROUTE } from './session-config.js?build=20261031-racing1';
+import { ROUTES, world } from './track-config.js?build=20261031-racing1';
+import { TRACK_ID } from './game-version.js?build=20261031-racing1';
 
 export function makeGates(route=ACTIVE_ROUTE){
   return route.checkpoints.map((index,i)=>{

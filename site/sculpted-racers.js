@@ -1,4 +1,4 @@
-import {buildToonRacer} from './toon-racer.js?build=sculpted-crew4';
+import {buildToonRacer} from './toon-racer.js?build=20261031-racing1';
 
 // New anatomical surfaces, not denser copies of the previous sphere assembly.
 export const SCULPTS=Object.freeze({

@@ -29,6 +29,10 @@ jobs:
         run: node tools/verify-courtyard.mjs
       - name: Check grand tour and AI difficulties
         run: node tools/verify-grand.mjs
+      - name: Check AI passing and daylight speed feedback
+        run: |
+          node tools/verify-traffic.mjs
+          node tools/verify-racing-feedback.mjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload game

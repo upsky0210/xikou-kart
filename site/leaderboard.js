@@ -1,5 +1,5 @@
-import { cleanName } from './race-core.js?build=sculpted-crew4';
-import { TRACK_ID, LEGACY_TRACK_ID } from './game-version.js?build=sculpted-crew4';
+import { cleanName } from './race-core.js?build=20261031-racing1';
+import { TRACK_ID, LEGACY_TRACK_ID } from './game-version.js?build=20261031-racing1';
 export const LEADERBOARD_KEY='xikou-kart.leaderboard.v1';
 export const CURRENT_LEADERBOARD_KEY='xikou-kart.leaderboard.v2';
 export function validRecord(value){

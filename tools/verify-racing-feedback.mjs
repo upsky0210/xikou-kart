@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import {speedPresentation} from '../site/speed-feedback.js';
+import {GameSound} from '../site/sound.js';
+const app=fs.readFileSync(new URL('../site/campus/js/app.js',import.meta.url),'utf8');
+const key=app.match(/const TIME_KEY = ([^;]+);/)[1],initial=app.match(/let timeKey = ([^\n]+);/)[1];
+function savedTime(kart,entries,blocked=false){const context={window:{KART_M0:kart},TIMES:{noon:{},night:{},dawn:{},dusk:{}},localStorage:{getItem:k=>{if(blocked)throw Error('blocked');return entries[k];}}};vm.runInNewContext(`const TIME_KEY=${key};result=${initial}`,context);return context.result;}
+assert.equal(savedTime(true,{'campus-time':'night'}),'noon','campus night setting must not leak into Kart');
+assert.equal(savedTime(false,{'campus-time':'night'}),'night','campus tour keeps its existing setting');
+assert.equal(savedTime(true,{'xikou-kart.time':'dusk','campus-time':'night'}),'dusk','Kart remembers only its own lighting');
+assert.equal(savedTime(true,{},true),'noon','storage restrictions must still start in daylight');
+const still=speedPresentation(0),fast=speedPresentation(11),boost=speedPresentation(14,true),indoor=speedPresentation(11,true,true);
+assert.ok(fast.fov>still.fov&&fast.height<still.height&&fast.distance<still.distance);
+assert.ok(boost.fov>fast.fov&&boost.lines>fast.lines);assert.equal(speedPresentation(-3).lines,0);assert.ok(indoor.height<2.6&&indoor.fov<80);
+const gain=()=>({value:1,events:[],setTargetAtTime(v){this.events.push(v);}}),sound=new GameSound();
+sound.context={currentTime:0};sound.master={gain:gain()};sound.engine={oscillator:{frequency:gain()},gain:{gain:gain()},windGain:{gain:gain()}};
+sound.updateDrive({playing:true,speed:10,race:{phase:'racing'}});assert.ok(sound.engine.gain.gain.events.at(-1)>0);assert.ok(sound.engine.windGain.gain.events.at(-1)>0);
+sound.updateDrive({playing:true,paused:true,speed:10});assert.equal(sound.engine.gain.gain.events.at(-1),0);assert.equal(sound.engine.windGain.gain.events.at(-1),0);
+sound.updateDrive({playing:true,speed:10,race:{phase:'finished'}});assert.equal(sound.engine.gain.gain.events.at(-1),0);
+sound.setMuted(true);assert.equal(sound.master.gain.events.at(-1),0);sound.updateDrive({});
+console.log('PASS: daylight storage isolation, speed perspective, reverse/indoor limits, paused/finished/muted engine audio');

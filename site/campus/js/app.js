@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { PanoViewer } from './pano.js?build=sculpted-crew4';
-import { furnishFloor, ROOM_EN } from './furniture.js?build=sculpted-crew4';
-import { poolWallMat, poolStripeMat, poolStripeGeo, poolDoor, poolSideDoor, POOL_SIDE_DOOR_H, poolWater, buildPool, buildPoolPlayground, buildElevator, makeCat, makeGlider, makeTurtle, makeHamster } from './extras.js?build=sculpted-crew4';
-import { buildField, buildStage, buildFacadeC, buildMuralBlock, buildCourtyard, buildParking, buildFrontYard, buildGuardHouse } from './field.js?build=sculpted-crew4';
-import { buildCampusWall } from './wall.js?build=sculpted-crew4';
-import { BLOCKY, STYLE, setStyle, mat, blockBox, Batch, mergeStatic, SPOTS, makeBlockPerson, OUTFITS, BB_GIRL, outfitFor, makeBlockNPC, NPC_FACES, makeRacket, makeShuttle, animatePerson, addBlockTree, makeClouds } from './blocks.js?build=sculpted-crew4';
+import { PanoViewer } from './pano.js?build=20261031-racing1';
+import { furnishFloor, ROOM_EN } from './furniture.js?build=20261031-racing1';
+import { poolWallMat, poolStripeMat, poolStripeGeo, poolDoor, poolSideDoor, POOL_SIDE_DOOR_H, poolWater, buildPool, buildPoolPlayground, buildElevator, makeCat, makeGlider, makeTurtle, makeHamster } from './extras.js?build=20261031-racing1';
+import { buildField, buildStage, buildFacadeC, buildMuralBlock, buildCourtyard, buildParking, buildFrontYard, buildGuardHouse } from './field.js?build=20261031-racing1';
+import { buildCampusWall } from './wall.js?build=20261031-racing1';
+import { BLOCKY, STYLE, setStyle, mat, blockBox, Batch, mergeStatic, SPOTS, makeBlockPerson, OUTFITS, BB_GIRL, outfitFor, makeBlockNPC, NPC_FACES, makeRacket, makeShuttle, animatePerson, addBlockTree, makeClouds } from './blocks.js?build=20261031-racing1';
 
 /* =========================================================
  * 溪口國小 3D 校園
@@ -832,7 +832,8 @@ if (clouds) scene.add(clouds);
 // 時間：清晨、中午、傍晚、晚上（天空、霧、太陽／月光、天空光、雲的顏色）。換的時候約 1.5 秒慢慢轉過去；選擇記在瀏覽器
 // sun 的第三格是光照過來的方向（東＝+x、北＝-z），實際距離固定，影子範圍才不會跑掉
 // dark：天黑的程度（星星、月亮、窗戶亮燈）；room：走進房間時補多少暖色燈光（教室裡開著日光燈）
-const TIME_KEY = 'campus-time';
+// Kart is an independent copy: never inherit the campus tour's saved night mode.
+const TIME_KEY = window.KART_M0 ? 'xikou-kart.time' : 'campus-time';
 const TIMES = {
   dawn:  { zh: '清晨', en: 'Dawn',  icon: '🌅', sky: '#f3c7a9', fog: [90, 300],  hemi: ['#ffe0c6', '#b3a392', 1.1],  amb: ['#ffe8d6', 0.42], sun: ['#ffc287', 1.35, [80, 30, 12]],  cloud: ['#ffd8c4', 0.35], dark: 0.15, room: 0.2 },
   noon:  { zh: '中午', en: 'Noon',  icon: '☀️', sky: SKY,       fog: [130, 340], hemi: ['#ffffff', '#c9bfae', 1.35], amb: ['#ffffff', 0.45], sun: ['#fff6e0', 1.6, [-40, 80, 30]],  cloud: ['#ffffff', 0.4],  dark: 0,    room: 0 },
@@ -8433,6 +8434,6 @@ if (window.KART_M0) {
   for (const f of floors) { f.labels.visible = false; if (f.stairSigns) f.stairSigns.visible = false; }
   for (const n of NPCS) n.g.visible = false;
   scene.fog = null;
-  const { initScene } = await import(window.KART_M1 ? '../../drive-scene.js?build=sculpted-crew4' : '../../m0-scene.js');
+  const { initScene } = await import(window.KART_M1 ? '../../drive-scene.js?build=20261031-racing1' : '../../m0-scene.js');
   initScene({ THREE, scene, renderer, camera, orbit, floors, rooms, raised, wallRuns, BASE, mx, mz, groundAt });
 }

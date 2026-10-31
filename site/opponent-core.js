@@ -1,7 +1,7 @@
-import { createState, FixedSimulation } from './drive-core.js?build=sculpted-crew4';
-import { RaceSession } from './race-core.js?build=sculpted-crew4';
-import { createRouteDriver } from './route-driver.js?build=sculpted-crew4';
-import { getDifficulty } from './difficulty-config.js?build=sculpted-crew4';
+import { createState, FixedSimulation } from './drive-core.js?build=20261031-racing1';
+import { RaceSession } from './race-core.js?build=20261031-racing1';
+import { createRouteDriver } from './route-driver.js?build=20261031-racing1';
+import { getDifficulty } from './difficulty-config.js?build=20261031-racing1';
 
 // A physical driver: walls, gates and countdown use the same rules as the player.
 // Cars do not collide with each other, so a narrow corridor cannot be blocked.
@@ -10,10 +10,15 @@ export class Opponent {
     const g=gates[0],offset=6+index*1.5;
     this.state=createState({x:g.x-g.fx*offset,z:g.z-g.fz*offset,yaw:Math.atan2(g.fx,g.fz)});
     this.race=new RaceSession({gates,laps,name:`電腦車手 ${index+1}`,id:`opponent-${index}`}).begin();
-    this.simulation=new FixedSimulation(this.state,grid,bounds,cfg);
-    this.route=route;this.stuck=0;this.difficulty=getDifficulty(difficulty).id;this.drive=createRouteDriver(route,this.difficulty);
+    const level=getDifficulty(difficulty),aiCfg={...cfg,maxSpeed:Math.max(cfg.maxSpeed,level.speed),turnSpeed:Math.max(cfg.turnSpeed,8.2)};
+    // Keep the real height-aware collision envelope; tune only the AI's driving.
+    aiCfg.atState=()=>aiCfg;
+    this.simulation=new FixedSimulation(this.state,grid,bounds,aiCfg);
+    this.route=route;this.stuck=0;this.difficulty=level.id;this.index=index;
+    this.traffic=[];this.drive=createRouteDriver(route,this.difficulty,{index,grid,cfg:aiCfg,traffic:()=>this.traffic});
   }
-  advance(seconds) {
+  advance(seconds,traffic=[]) {
+    this.traffic=traffic;
     if(this.race.phase==='finished')return;
     const span=this.race.advance(Math.max(0,seconds));
     this.simulation.advance(span.driveSeconds,s=>this.drive(s,this.race),(from,to,a,b)=>{

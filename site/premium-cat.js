@@ -1,4 +1,4 @@
-import { buildToonRacer } from './toon-racer.js?build=sculpted-crew4';
+import { buildToonRacer } from './toon-racer.js?build=20261031-racing1';
 // High-detail studio sample. Opt-in only; race models stay at their existing cost.
 export function buildPremiumCat(T,p){
   const base=buildToonRacer(T,p),{driver}=base,old=base.head;old.removeFromParent();old.traverse(o=>{if(o.isMesh)o.geometry.dispose();});

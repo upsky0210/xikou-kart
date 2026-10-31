@@ -1,6 +1,6 @@
 import * as T from 'three';
-import {buildKart} from './kart-model.js?build=sculpted-crew4';
-import {RACERS} from './racer-catalog.js?build=sculpted-crew4';
+import {buildKart} from './kart-model.js?build=20261031-racing1';
+import {RACERS} from './racer-catalog.js?build=20261031-racing1';
 const renderer=new T.WebGLRenderer({alpha:true,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setClearColor(0,0);renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;document.body.append(renderer.domElement);
 const notes=['尖耳・虎斑・翹尾','長耳朵・粉耳內・門牙','圓頰・門牙・小圓耳','垂耳・白鼻樑・白尾尖','大側耳・面罩・捲尾','長口鼻・鬃毛・直耳','蓬鬆羊毛・蝴蝶結','寬鼻盤・獠牙・鬃冠'];
 const entries=RACERS.map((r,i)=>{const card=document.createElement('div');card.className='card';card.innerHTML=`<div class="view"></div><div class="caption">${r.name} · ${r.nickname}<small>${notes[i]}</small></div>`;document.querySelector('#grid').append(card);const scene=new T.Scene(),model=buildKart(T,r.id);scene.add(model.car);scene.add(new T.HemisphereLight('#fff5df','#718c93',1.3));const key=new T.DirectionalLight('#ffffff',2.7);key.position.set(-3,5,6);scene.add(key);const rim=new T.DirectionalLight('#b2dedc',1.5);rim.position.set(3,2,-4);scene.add(rim);return{scene,view:card.querySelector('.view'),model};});
