@@ -1,6 +1,6 @@
-import { SpatialGrid } from './drive-core.js?build=20261101-ai2';
-import { DRIVE } from './drive-config.js?build=20261101-ai2';
-import { courtyardHeightAt,COURTYARD_SAMPLES,courtyardEdge } from './courtyard-route.js?build=20261101-ai2';
+import { SpatialGrid } from './drive-core.js?build=20261101-items1';
+import { DRIVE } from './drive-config.js?build=20261101-items1';
+import { courtyardHeightAt,COURTYARD_SAMPLES,courtyardEdge } from './courtyard-route.js?build=20261101-items1';
 export const COURTYARD_DRIVE={...DRIVE,carHeight:2.30};
 // The same driving rules apply outdoors, on ramps and inside corridors.
 export function courtyardConfigAt(){return COURTYARD_DRIVE;}

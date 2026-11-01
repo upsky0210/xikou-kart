@@ -1,6 +1,7 @@
-import { world,pointAt,lengthMetres,roadWidthAt } from './track-config.js?build=20261101-ai2';
-import {contacts} from './drive-core.js?build=20261101-ai2';
-import {getDifficulty} from './difficulty-config.js?build=20261101-ai2';
+import { world,pointAt,lengthMetres,roadWidthAt } from './track-config.js?build=20261101-items1';
+import {contacts} from './drive-core.js?build=20261101-items1';
+import {getDifficulty} from './difficulty-config.js?build=20261101-items1';
+import {itemSpeedFactor} from './item-status.js?build=20261101-items1';
 const cache=new Map(),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 function path(route){if(cache.has(route.id))return cache.get(route.id);const length=lengthMetres(route.points),count=Math.ceil(length/.18),poses=Array.from({length:count},(_,i)=>world(pointAt(route.points,i/count))),cumulative=[0];for(let i=1;i<route.points.length;i++)cumulative.push(cumulative.at(-1)+Math.hypot(...route.points[i].map((x,j)=>(x-route.points[i-1][j])/18)));const data={length,count,poses,gateSamples:route.checkpoints.map(i=>Math.round(cumulative[i]/length*count)%count)};cache.set(route.id,data);return data;}
 export function createRouteDriver(route,difficulty='normal',trafficOptions=null){
@@ -11,7 +12,7 @@ export function createRouteDriver(route,difficulty='normal',trafficOptions=null)
     let best=cursor,error=Infinity;for(let n=-Math.ceil(5/metres);n<=Math.ceil(9/metres);n++){const i=cursor+n,p=at(i),d=(s.x-p[0])**2+(s.z-p[1])**2;if(d<error){error=d;best=i;}}cursor=((best%count)+count)%count;last={x:s.x,z:s.z};
     const index=trafficOptions?.index??0,clock=(race?.elapsed??0);
     const pace=trafficOptions?[.99,1.035,.965][index%3]+.025*Math.sin(clock*.19+index*2.1):1;
-    let target=cfg.speed*pace;
+    let target=cfg.speed*pace*itemSpeedFactor(s);
     const braking=3+Math.max(0,s.speed*s.speed)/(2*10);
     for(let d=0;d<=braking;d+=.7){const i=cursor+d/metres,a=at(i-1.0/metres),b=at(i),c=at(i+1.0/metres),u=Math.atan2(b[0]-a[0],b[1]-a[1]),v=Math.atan2(c[0]-b[0],c[1]-b[1]),bend=Math.abs(Math.atan2(Math.sin(v-u),Math.cos(v-u))),corner=clamp(cfg.bravery/(bend+.015),cfg.corner,cfg.speed);target=Math.min(target,Math.sqrt(corner*corner+2*8*Math.max(0,d-.7)));}
     const look=clamp(1.0+Math.max(0,s.speed)*.22,1.4,3.5),centre=at(cursor),p=[...at(cursor+look/metres)];

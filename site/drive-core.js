@@ -1,5 +1,6 @@
-import { DRIVE } from './drive-config.js?build=20261101-ai2';
-import { effectState, updateEffects, cancelDrift } from './effects-core.js?build=20261101-ai2';
+import { DRIVE } from './drive-config.js?build=20261101-items1';
+import {tickItemEffects,itemDriveConfig} from './item-status.js?build=20261101-items1';
+import { effectState, updateEffects, cancelDrift } from './effects-core.js?build=20261101-items1';
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const toward=(v,target,step)=>v<target?Math.min(target,v+step):Math.max(target,v-step);
@@ -53,6 +54,7 @@ export function createState(spawn){return{x:spawn.x,z:spawn.z,yaw:spawn.yaw,spee
 export function resetState(s,spawn){Object.assign(s,createState(spawn));}
 
 export function step(s,input,dt,grid,bounds,cfg=DRIVE){
+  tickItemEffects(s,dt);cfg=itemDriveConfig(s,cfg);
   const previous={x:s.x,z:s.z,yaw:s.yaw};
   const previousSpeed=s.speed;updateEffects(s,input,dt,cfg);
   const boosting=s.boostRemaining>0;

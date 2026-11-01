@@ -1,4 +1,4 @@
-import {speedPresentation} from './speed-feedback.js?build=20261101-ai2';
+import {speedPresentation} from './speed-feedback.js?build=20261101-items1';
 export class GameSound {
   constructor(){this.context=null;this.master=null;this.muted=false;this.last=new Map();this.available=true;}
   unlock(){
@@ -21,7 +21,7 @@ export class GameSound {
       this.engine={oscillator,gain,wind,windGain};
     }
     if(!this.engine)return;
-    const view=speedPresentation(Math.abs(s.speed||0),s.boostRemaining>0),t=c.currentTime;
+    const view=speedPresentation(Math.abs(s.speed||0),s.boostRemaining>0||s.itemEffects?.milk>0),t=c.currentTime;
     this.engine.oscillator.frequency.setTargetAtTime(view.pitch,t,.09);
     this.engine.gain.gain.setTargetAtTime(active?.12+Math.min(1,Math.abs(s.speed||0)/11)*.14:0,t,.08);
     this.engine.windGain.gain.setTargetAtTime(active?view.lines*.38:0,t,.12);
@@ -40,6 +40,11 @@ export class GameSound {
     else if(kind==='collision')this.tone(170,t,.13,'triangle',85);
     else if(kind==='boost')this.tone(500,t,.18,'sine',1100);
     else if(kind==='charged')this.tone(880,t,.08);
+    else if(kind==='itemPickup'){this.tone(740,t,.08);this.tone(1100,t+.09,.12);}
+    else if(kind==='itemUse')this.tone(500,t,.13,'sine',900);
+    else if(kind==='itemHit')this.tone(260,t,.14,'triangle',160);
+    else if(kind==='itemBlock'){this.tone(1100,t,.10);this.tone(1300,t+.08,.13);}
+    else if(kind==='itemBell')[1046,1318,1568].forEach((f,i)=>this.tone(f,t+i*.09,.2));
     else if(kind==='finish')[523,659,784,1046].forEach((f,i)=>this.tone(f,t+i*.13,.16));
   }
 }

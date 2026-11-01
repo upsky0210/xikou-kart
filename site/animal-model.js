@@ -1,10 +1,10 @@
-import { buildSculptedRacer } from './sculpted-racers.js?build=20261101-ai2';
-import { buildWildlifeRacer, WILDLIFE_IDS } from './wildlife-racers.js?build=20261101-ai2';
-import { buildPremiumCat } from './premium-cat.js?build=20261101-ai2';
-import { buildToonRacer } from './toon-racer.js?build=20261101-ai2';
-import { makeAnimalFace } from './animal-face.js?build=20261101-ai2';
-import { getRacer } from './racer-catalog.js?build=20261101-ai2';
-import { addSculptedFace } from './sculpted-face.js?build=20261101-ai2';
+import { buildSculptedRacer } from './sculpted-racers.js?build=20261101-items1';
+import { buildWildlifeRacer, WILDLIFE_IDS } from './wildlife-racers.js?build=20261101-items1';
+import { buildPremiumCat } from './premium-cat.js?build=20261101-items1';
+import { buildToonRacer } from './toon-racer.js?build=20261101-items1';
+import { makeAnimalFace } from './animal-face.js?build=20261101-items1';
+import { getRacer } from './racer-catalog.js?build=20261101-items1';
+import { addSculptedFace } from './sculpted-face.js?build=20261101-items1';
 export function buildAnimal(T,id,options={}){
   const profile=getRacer(id);
   if(WILDLIFE_IDS.includes(profile.id))return buildWildlifeRacer(T,profile);

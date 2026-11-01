@@ -37,6 +37,8 @@ jobs:
         run: |
           node tools/verify-traffic.mjs
           node tools/verify-racing-feedback.mjs
+      - name: Check school item races and isolation
+        run: node tools/verify-items.mjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload game
