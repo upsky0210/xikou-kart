@@ -1,6 +1,6 @@
-import { ACTIVE_ROUTE } from './session-config.js?build=20261031-wildlife3';
-import { ROUTES, world } from './track-config.js?build=20261031-wildlife3';
-import { TRACK_ID } from './game-version.js?build=20261031-wildlife3';
+import { ACTIVE_ROUTE } from './session-config.js?build=20261101-ai2';
+import { ROUTES, world } from './track-config.js?build=20261101-ai2';
+import { TRACK_ID } from './game-version.js?build=20261101-ai2';
 
 export function makeGates(route=ACTIVE_ROUTE){
   return route.checkpoints.map((index,i)=>{

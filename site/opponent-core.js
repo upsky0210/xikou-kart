@@ -1,7 +1,7 @@
-import { createState, FixedSimulation } from './drive-core.js?build=20261031-wildlife3';
-import { RaceSession } from './race-core.js?build=20261031-wildlife3';
-import { createRouteDriver } from './route-driver.js?build=20261031-wildlife3';
-import { getDifficulty } from './difficulty-config.js?build=20261031-wildlife3';
+import { createState, FixedSimulation } from './drive-core.js?build=20261101-ai2';
+import { RaceSession } from './race-core.js?build=20261101-ai2';
+import { createRouteDriver } from './route-driver.js?build=20261101-ai2';
+import { getDifficulty } from './difficulty-config.js?build=20261101-ai2';
 
 // A physical driver: walls, gates and countdown use the same rules as the player.
 // Cars do not collide with each other, so a narrow corridor cannot be blocked.
@@ -10,7 +10,7 @@ export class Opponent {
     const g=gates[0],offset=6+index*1.5;
     this.state=createState({x:g.x-g.fx*offset,z:g.z-g.fz*offset,yaw:Math.atan2(g.fx,g.fz)});
     this.race=new RaceSession({gates,laps,name:`電腦車手 ${index+1}`,id:`opponent-${index}`}).begin();
-    const level=getDifficulty(difficulty),aiCfg={...cfg,maxSpeed:Math.max(cfg.maxSpeed,level.speed),turnSpeed:Math.max(cfg.turnSpeed,8.2)};
+    const level=getDifficulty(difficulty),aiCfg={...cfg,maxSpeed:Math.max(cfg.maxSpeed,level.speed),acceleration:level.acceleration,turnSpeed:Math.max(cfg.turnSpeed,level.turnSpeed)};
     // Keep the real height-aware collision envelope; tune only the AI's driving.
     aiCfg.atState=()=>aiCfg;
     this.simulation=new FixedSimulation(this.state,grid,bounds,aiCfg);
