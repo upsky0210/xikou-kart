@@ -1,18 +1,19 @@
-import {ItemHud} from './item-hud.js?build=20261101-items1';
-import {ITEMS,itemIds} from './item-catalog.js?build=20261101-items1';
-import { getDifficulty } from './difficulty-config.js?build=20261101-items1';
-import { installControlMode } from './control-mode.js?build=20261101-items1';
-import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=20261101-items1';
-import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE, ITEMS_ENABLED, ITEM_COUNT } from './session-config.js?build=20261101-items1';
-import { InputState, KEY_ACTION } from './drive-core.js?build=20261101-items1';
-import { DRIVE } from './drive-config.js?build=20261101-items1';
-import { cleanName, formatTime, makeGates } from './race-core.js?build=20261101-items1';
-import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=20261101-items1';
-import { drawMap } from './minimap.js?build=20261101-items1';
-import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=20261101-items1';
-import { SpeedFeedback } from './speed-feedback.js?build=20261101-items1';
-import { GameSound } from './sound.js?build=20261101-items1';
-import { RULES_LABEL } from './game-version.js?build=20261101-items1';
+import {FINAL_LAP,ROCKET} from './race-features-config.js?build=20261102-features1';
+import {ItemHud} from './item-hud.js?build=20261102-features1';
+import {ITEMS,itemIds} from './item-catalog.js?build=20261102-features1';
+import { getDifficulty } from './difficulty-config.js?build=20261102-features1';
+import { installControlMode } from './control-mode.js?build=20261102-features1';
+import { RACERS, getRacer, racerPortrait } from './racer-catalog.js?build=20261102-features1';
+import { ACTIVE_ROUTE, ROUTE_ID, LAPS, SESSION_SCOPE, ITEMS_ENABLED, ITEM_COUNT } from './session-config.js?build=20261102-features1';
+import { InputState, KEY_ACTION } from './drive-core.js?build=20261102-features1';
+import { DRIVE } from './drive-config.js?build=20261102-features1';
+import { cleanName, formatTime, makeGates } from './race-core.js?build=20261102-features1';
+import { LEADERBOARD_KEY, CURRENT_LEADERBOARD_KEY, readLeaderboard, saveResult } from './leaderboard.js?build=20261102-features1';
+import { drawMap } from './minimap.js?build=20261102-features1';
+import { readGhost, saveGhost, ghostKey } from './ghost-core.js?build=20261102-features1';
+import { SpeedFeedback } from './speed-feedback.js?build=20261102-features1';
+import { GameSound } from './sound.js?build=20261102-features1';
+import { RULES_LABEL } from './game-version.js?build=20261102-features1';
 
 const $=s=>document.querySelector(s),frame=$('#world'),inputs=new InputState(),gates=makeGates();
 const QA=new URLSearchParams(location.search).get('qa')==='1';
@@ -26,6 +27,11 @@ sound.setMuted(muted);
 let board=readLeaderboard(storage,boardKey),ready=false,started=false,paused=false,helpOpen=false,boardOpen=false,finished=false;
 let selectedMode=ITEMS_ENABLED?'items':(['race','practice'].includes(new URLSearchParams(location.search).get('mode'))?new URLSearchParams(location.search).get('mode'):'duel'),activeMode='race',activeDuel=false,lastState=null,toastTimer=0,result=null;
 const savedIds=new Set();
+const finalBanner=document.createElement('div'),wrongBanner=document.createElement('div'),directionArrow=document.createElement('div');
+finalBanner.className='final-lap-banner';finalBanner.textContent='🏁 最後一圈！';wrongBanner.className='wrong-way-banner';wrongBanner.textContent='⚠️ 逆向！跟著箭頭走';directionArrow.className='direction-edge-arrow';directionArrow.textContent='➤';
+for(const el of [finalBanner,wrongBanner,directionArrow]){el.hidden=true;document.body.append(el);}
+let notifiedLap=0;
+
 const itemHud=new ItemHud({enabled:ITEMS_ENABLED,onUse:()=>{if(!inMenu())send('useItem');},onEvent:event=>{const info=ITEMS[event.item];if(event.type==='pickup'){sound.play('itemPickup');toast(`拿到${info.name} · ${info.note}`);}else if(event.type==='use'&&event.actor==='player')sound.play(event.item==='bell'?'itemBell':'itemUse');else if(event.type==='block'){sound.play('itemBlock');toast('透明尺擋住攻擊！');}else if(event.type==='hit'){sound.play('itemHit');toast(event.target==='player'?`${info.name}命中，短暫減速後有保護時間`:`${info.name}命中對手！`);}else if(event.type==='warning'&&event.target==='player'){sound.play('itemBell');toast('下課鈴要響了，快離開光圈！');}else if(event.type==='clean')toast('橡皮擦已清除水彩與減速');}});
 let selectedDifficulty=getDifficulty(new URLSearchParams(location.search).get('difficulty')||storage?.getItem('xikou-kart.difficulty')).id;$('#difficultySelect').value=selectedDifficulty;$('#difficultySelect').onchange=()=>{selectedDifficulty=getDifficulty($('#difficultySelect').value).id;const u=new URL(location.href);u.searchParams.set('difficulty',selectedDifficulty);history.replaceState(null,'',u);try{storage?.setItem('xikou-kart.difficulty',selectedDifficulty);}catch{}};
 const send=(type,data={})=>frame.contentWindow.postMessage({source:'kart-controls',type,...data},location.origin);
@@ -43,6 +49,7 @@ function flush(){inputs.clear();for(const b of document.querySelectorAll('[data-
 function syncInput(){if(!inMenu())send('input',{input:inputs.value()});}
 function toast(text){$('#toast').textContent=text;$('#toast').classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('on'),2400);}
 function setMenu(){
+  if(inMenu())for(const el of [finalBanner,wrongBanner,directionArrow])el.hidden=true;
   if(inMenu()){speedFeedback.stop();sound.updateDrive({});itemHud.stop();}
   document.body.classList.toggle('in-menu',inMenu());document.body.classList.toggle('in-race',started&&activeMode==='race');document.body.classList.toggle('finished',finished);
   $('#startScreen').hidden=started||helpOpen||boardOpen;$('#pauseScreen').hidden=!paused||helpOpen||boardOpen||finished||!started;
@@ -53,7 +60,7 @@ function setMenu(){
 }
 function setPause(value){if(!started||finished)return;if(!value)sound.unlock();paused=value;flush();send('pause',{paused});setMenu();}
 function start(mode=selectedMode,qaSpeed=7.6){
-  if(!ready)return;activeDuel=mode==='duel'||mode==='items';mode=activeDuel?'race':mode;activeMode=mode;started=true;paused=false;helpOpen=false;boardOpen=false;finished=false;result=null;lastState=null;
+  if(!ready)return;activeDuel=mode==='duel'||mode==='items';mode=activeDuel?'race':mode;activeMode=mode;started=true;paused=false;helpOpen=false;boardOpen=false;finished=false;result=null;lastState=null;notifiedLap=0;
   const name=cleanName($('#playerName').value);try{if(!QA)storage?.setItem('xikou-kart.playerName',name);}catch{}
   sound.unlock();lastCount=null;lastBoost=0;lastCollision=0;lastCharged=false;previewActive=false;$('#previewCampus').textContent='巡覽校園';
   itemHud.lastEvent=0;flush();send('start',{mode,items:ITEMS_ENABLED,difficulty:selectedDifficulty,duel:activeDuel,name,racer:selectedRacer,qa:QA&&mode==='race',qaSpeed,ghost:getPersonalGhost(name),ghostVisible:ghostEnabled});setMenu();
@@ -104,6 +111,13 @@ function finish(record,race,recording,competition){
 }
 function drawRace(race){
   if(!race||activeMode!=='race'){$('#countdown').hidden=true;return;}
+  const final=race.totalLaps>1&&race.lap===race.totalLaps;
+  $('#lapLabel').classList.toggle('final-lap',final);
+  if(final&&race.phase==='racing'&&notifiedLap!==race.lap){notifiedLap=race.lap;sound.play('finalLap');}
+  finalBanner.hidden=inMenu()||!final||race.phase!=='racing'||race.lapElapsed>FINAL_LAP.bannerSeconds;
+  const warn=lastState?.direction?.warning&&!inMenu()&&race.phase==='racing';
+  wrongBanner.hidden=directionArrow.hidden=!warn;
+  if(warn){const a=lastState.direction.bearing;directionArrow.style.left=`${50+44*Math.sin(a)}%`;directionArrow.style.top=`${50-40*Math.cos(a)}%`;directionArrow.style.transform=`translate(-50%,-50%) rotate(${a-Math.PI/2}rad)`;}
   $('#lapLabel').textContent=`第 ${race.lap}／${race.totalLaps} 圈`;
   $('#checkpointLabel').textContent=`檢查點 ${race.passed}／${race.gateCount}`;
   $('#raceTime').textContent=formatTime(race.elapsed);$('#lapTime').textContent=formatTime(race.lapElapsed);$('#bestLap').textContent=race.bestLap===null?'—':formatTime(race.bestLap);
@@ -112,7 +126,8 @@ function drawRace(race){
   const count=counting?Math.ceil(race.countdown):go?'GO':null;if(count!==null&&count!==lastCount){sound.play(count==='GO'?'go':'count');lastCount=count;}
   $('#countdown').hidden=!(counting||go)||finished;$('#countdown').classList.toggle('go',go);
   $('#countdownValue').textContent=counting?Math.max(1,Math.ceil(race.countdown)):'GO！';
-  $('#countdown small').textContent=counting?'準備出發':'挑戰開始';$('#countdown span').textContent=counting?'倒數結束後開始計時':'依序通過光門';
+  $('#countdown').classList.toggle('rocket-window',counting&&race.countdown<=ROCKET.beforeGo);
+  $('#countdown small').textContent=counting?'準備出發 · ◉ 油門':lastState?.rocketOutcome==='boost'?'火箭起跑！':lastState?.rocketOutcome==='burn'?'燒胎了！':'挑戰開始';$('#countdown span').textContent=counting?'倒數結束後開始計時':'依序通過光門';
 }
 
 $('.layout-label').lastChild.textContent=ROUTE_ID==='grand'?'全校大巡迴':['courtyard','grand'].includes(ROUTE_ID)?'原校園・走廊中庭':ROUTE_ID==='campus'?'全校賽道配置':'v221 戶外配置';$('#trackSelect').value=ROUTE_ID;$('#lapSelect').value=String(LAPS);
@@ -193,7 +208,7 @@ addEventListener('message',e=>{
 });
 function menuStateOnly(){started=false;paused=false;finished=false;lastState=null;setMenu();}
 if(QA){
-  const banner=document.createElement('div');banner.className='qa-banner';const label=document.createElement('b');label.textContent='自動驗證模式';const run=document.createElement('button');run.id='qaRun';run.disabled=true;run.textContent=`執行 ${LAPS} 圈自動驗證`;run.onclick=()=>start('race');const slow=document.createElement('button');slow.textContent='慢速追逐驗證';slow.onclick=()=>start('race',6.1);const status=document.createElement('span');status.id='qaStatus';status.textContent='使用獨立測試排行榜';banner.append(label,run,slow,status);if(ITEMS_ENABLED){const tools=document.createElement('div');tools.className='qa-item-tools';const select=document.createElement('select');select.id='qaItemChoice';for(const id of itemIds(ITEM_COUNT)){const o=document.createElement('option');o.value=id;o.textContent=ITEMS[id].name;select.append(o);}const give=document.createElement('button');give.id='qaGiveItem';give.textContent='領取測試道具';give.onclick=()=>send('itemTest',{action:'give',item:select.value});const water=document.createElement('button');water.id='qaWaterHit';water.textContent='測試水彩命中';water.onclick=()=>send('itemTest',{action:'water'});tools.append(select,give,water);banner.append(tools);}document.body.append(banner);
+  const banner=document.createElement('div');banner.className='qa-banner';const label=document.createElement('b');label.textContent='自動驗證模式';const run=document.createElement('button');run.id='qaRun';run.disabled=true;run.textContent=`執行 ${LAPS} 圈自動驗證`;run.onclick=()=>start('race');const slow=document.createElement('button');slow.textContent='慢速追逐驗證';slow.onclick=()=>start('race',6.1);const status=document.createElement('span');status.id='qaStatus';status.textContent='使用獨立測試排行榜';banner.append(label,run,slow,status);for(const reverse of [true,false]){const b=document.createElement('button');b.id=reverse?'qaReverse':'qaCorrect';b.textContent=reverse?'測試逆走':'回正方向';b.onclick=()=>send('directionTest',{reverse});banner.append(b);}if(ITEMS_ENABLED){const tools=document.createElement('div');tools.className='qa-item-tools';const select=document.createElement('select');select.id='qaItemChoice';for(const id of itemIds(ITEM_COUNT)){const o=document.createElement('option');o.value=id;o.textContent=ITEMS[id].name;select.append(o);}const give=document.createElement('button');give.id='qaGiveItem';give.textContent='領取測試道具';give.onclick=()=>send('itemTest',{action:'give',item:select.value});const water=document.createElement('button');water.id='qaWaterHit';water.textContent='測試水彩命中';water.onclick=()=>send('itemTest',{action:'water'});tools.append(select,give,water);banner.append(tools);}document.body.append(banner);
 }
 setTimeout(()=>{if(!ready)$('#loadHint').textContent='場景仍在載入，若長時間未完成請重新整理。';},25000);
 updateSettings();ghostSummary();renderBoards();setMenu();

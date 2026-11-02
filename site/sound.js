@@ -1,4 +1,4 @@
-import {speedPresentation} from './speed-feedback.js?build=20261101-items1';
+import {speedPresentation} from './speed-feedback.js?build=20261102-features1';
 export class GameSound {
   constructor(){this.context=null;this.master=null;this.muted=false;this.last=new Map();this.available=true;}
   unlock(){
@@ -45,6 +45,7 @@ export class GameSound {
     else if(kind==='itemHit')this.tone(260,t,.14,'triangle',160);
     else if(kind==='itemBlock'){this.tone(1100,t,.10);this.tone(1300,t+.08,.13);}
     else if(kind==='itemBell')[1046,1318,1568].forEach((f,i)=>this.tone(f,t+i*.09,.2));
+    else if(kind==='finalLap')[784,1046,1318].forEach((f,i)=>this.tone(f,t+i*.1,.12));
     else if(kind==='finish')[523,659,784,1046].forEach((f,i)=>this.tone(f,t+i*.13,.16));
   }
 }

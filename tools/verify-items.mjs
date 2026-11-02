@@ -1,3 +1,4 @@
+import {ITEM_WEIGHTS} from '../site/race-features-config.js';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 globalThis.location=new URL('http://local/play.html?track=field&laps=1&items=1');
@@ -23,6 +24,9 @@ check('one inventory slot, countdown lockout and independent eight-second box co
 check('six-item selection excludes plane and bell; deterministic draws favor catch-up boosts',()=>{
  const e=new ItemRace({actors:[actor('a')],count:6});for(let i=0;i<1000;i++)assert.ok(!['plane','bell'].includes(e.draw(1,4)));assert.equal(e.give('a','plane'),false);
  const first=new ItemRace({actors:[],seed:99}),last=new ItemRace({actors:[],seed:99});let m1=0,m4=0;for(let i=0;i<10000;i++){if(first.draw(1,4)==='milk')m1++;if(last.draw(4,4)==='milk')m4++;}assert.ok(m4>m1*2);
+});
+check('each rank matches configured weights across 100000 draws',()=>{
+ for(const rank of [1,2,3,4]){const e=new ItemRace({actors:[],seed:1234+rank}),w=ITEM_WEIGHTS[rank===1?'lead':rank===4?'last':'middle'],counts=Object.fromEntries(e.ids.map(id=>[id,0])),n=100000,sum=Object.values(w).reduce((a,b)=>a+b,0);for(let i=0;i<n;i++)counts[e.draw(rank,4)]++;for(const id of e.ids){const p=w[id]/sum;assert.ok(Math.abs(counts[id]/n-p)<Math.max(.003,6*Math.sqrt(p*(1-p)/n)),`${rank} ${id}`);if(!w[id])assert.equal(counts[id],0);}console.log('DISTRIBUTION',rank,counts);}
 });
 check('chalk sweeps through a target at speed; shield blocks once, immunity prevents chains, eraser clears',()=>{
  const a=actor('a'),b=actor('b',0,4),e=new ItemRace({actors:[a,b]});b.state.speed=10;e.give('a','chalk');e.use('a');advance(e,.15);assert.equal(a.stats.hits,1);assert.equal(b.state.itemEffects.factor,.65);assert.equal(e.hit('a','b','plane'),false);e.give('b','eraser');e.use('b');assert.equal(b.state.itemEffects.slow,0);advance(e,4);e.give('b','ruler');e.use('b');assert.equal(e.hit('a','b','chalk'),false);assert.equal(b.stats.blocks,1);assert.equal(b.state.itemEffects.shield,0);advance(e,.6);assert.equal(e.hit('a','b','water'),true);assert.ok(b.state.itemEffects.water>0);assert.equal(b.stats.received,2);

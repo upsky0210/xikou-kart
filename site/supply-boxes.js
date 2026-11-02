@@ -1,4 +1,4 @@
-import {world,pointAt,lengthMetres,roadWidthAt} from './track-config.js?build=20261101-items1';
+import {world,pointAt,lengthMetres,roadWidthAt} from './track-config.js?build=20261102-features1';
 export function makeSupplyBoxes(route,gates,{heightAt=()=>0,isClear=()=>true}={}){
   const length=lengthMetres(route.points),at=d=>world(pointAt(route.points,d/length)),candidates=[];
   const cumulative=[0];for(let i=1;i<route.points.length;i++)cumulative.push(cumulative.at(-1)+Math.hypot(route.points[i][0]-route.points[i-1][0],route.points[i][1]-route.points[i-1][1])/18);

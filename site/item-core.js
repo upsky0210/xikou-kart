@@ -1,9 +1,10 @@
-import {ITEMS,itemIds} from './item-catalog.js?build=20261101-items1';
-import {newItemEffects} from './item-status.js?build=20261101-items1';
-import {pointSegmentDistance} from './item-geometry.js?build=20261101-items1';
+import {ITEM_WEIGHTS} from './race-features-config.js?build=20261102-features1';
+import {ITEMS,itemIds} from './item-catalog.js?build=20261102-features1';
+import {newItemEffects} from './item-status.js?build=20261102-features1';
+import {pointSegmentDistance} from './item-geometry.js?build=20261102-features1';
 const angle=a=>Math.atan2(Math.sin(a),Math.cos(a)),distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const DAMAGE={chalk:{factor:.65,seconds:1.2},water:{factor:.9,seconds:.8,water:1.5},glue:{factor:.70,seconds:1},plane:{factor:.75,seconds:1},bell:{factor:.8,seconds:.8}};
-const WEIGHTS={lead:[10,18,15,25,12,15,3,2],middle:[20,18,10,14,8,10,12,8],last:[30,15,7,10,6,7,17,8]};
+
 export class ItemRace {
   constructor({actors,boxes=[],heightAt=()=>0,clearLine=()=>true,seed=7,count=8,autoPlayer=false}){
     this.time=0;this.running=true;this.actors=actors;this.boxes=boxes;this.heightAt=heightAt;this.clearLine=clearLine;this.seed=seed>>>0;this.ids=itemIds(count);this.autoPlayer=autoPlayer;
@@ -16,7 +17,7 @@ export class ItemRace {
   floor(a){return this.heightAt(a.state.x,a.state.z);}
   visible(a,b){return Math.abs(this.floor(a)-this.floor(b))<.45&&this.clearLine({x:a.state.x,z:a.state.z,y:this.floor(a)+.8},{x:b.state.x,z:b.state.z,y:this.floor(b)+.8});}
   emit(type,actor,item,target=null){this.events.push({seq:++this.sequence,time:this.time,type,actor,item,target});if(this.events.length>40)this.events.shift();}
-  draw(rank,total){const weights=rank===1&&total>1?WEIGHTS.lead:rank===total&&total>1?WEIGHTS.last:WEIGHTS.middle,sum=this.ids.reduce((n,id)=>n+weights[Object.keys(ITEMS).indexOf(id)],0);let r=this.random()*sum;for(const id of this.ids){r-=weights[Object.keys(ITEMS).indexOf(id)];if(r<0)return id;}return this.ids.at(-1);}
+  draw(rank,total){const weights=rank===1&&total>1?ITEM_WEIGHTS.lead:rank===total&&total>1?ITEM_WEIGHTS.last:ITEM_WEIGHTS.middle,sum=this.ids.reduce((n,id)=>n+weights[id],0);let r=this.random()*sum;for(const id of this.ids){r-=weights[id];if(r<0)return id;}return this.ids.at(-1);}
   rank(a){const live=this.actors,progress=b=>b.race?(b.race.lapTimes.length*b.race.gates.length+b.race.expected):0,p=progress(a);return 1+live.filter(b=>b!==a&&(progress(b)>p||(progress(b)===p&&b.state.distance>a.state.distance))).length;}
   give(id,item,replace=false){const a=this.actor(id);if(!this.active(a)||!this.ids.includes(item)||a.item&&!replace)return false;a.item=item;a.readyAt=this.time+.7+this.random()*.7;a.stats.pickups++;this.emit('pickup',id,item);return true;}
   hit(owner,id,item){

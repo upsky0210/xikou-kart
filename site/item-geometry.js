@@ -1,4 +1,4 @@
-import {SpatialGrid} from './drive-core.js?build=20261101-items1';
+import {SpatialGrid} from './drive-core.js?build=20261102-features1';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export function pointSegmentDistance(p,a,b){const dx=b.x-a.x,dz=b.z-a.z,l=dx*dx+dz*dz,t=l?clamp(((p.x-a.x)*dx+(p.z-a.z)*dz)/l,0,1):0;return Math.hypot(p.x-a.x-dx*t,p.z-a.z-dz*t);}
 function boxHit(a,b,o){let lo=0,hi=1;for(const [key,min,max]of [['x',o.x1-.06,o.x2+.06],['z',o.z1-.06,o.z2+.06]]){const delta=b[key]-a[key];if(Math.abs(delta)<1e-9){if(a[key]<min||a[key]>max)return false;}else{const p=(min-a[key])/delta,q=(max-a[key])/delta;lo=Math.max(lo,Math.min(p,q));hi=Math.min(hi,Math.max(p,q));if(lo>hi)return false;}}return true;}

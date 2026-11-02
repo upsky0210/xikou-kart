@@ -1,4 +1,4 @@
-import {ITEMS,itemIcon} from './item-catalog.js?build=20261101-items1';
+import {ITEMS,itemIcon} from './item-catalog.js?build=20261102-features1';
 export class ItemHud {
   constructor({enabled,onUse,onEvent}){
     this.enabled=enabled;this.lastEvent=0;this.held=undefined;this.onEvent=onEvent;

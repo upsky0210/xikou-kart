@@ -132,3 +132,9 @@ git push origin main
 部署設定依 [GitHub Pages 官方文件](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)。
 
 第三方程式與字型的授權資訊見 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+### Race assistance tuning (2026-11-02)
+
+Edit `site/race-features-config.js` for per-rank item weights, wrong-way angle/duration thresholds, final-lap banner duration, and rocket start windows/multipliers. Weights are relative and zero disables an item for that rank. Player and AI draw from the same table at pickup time. Rocket starts apply only to the player; AI retains its existing start behavior. Normal driving and record schemas remain unchanged.
+
+Run `node tools/verify-items.mjs` and `node tools/verify-race-features.mjs`. The latter checks real route simulation laps and two-second player physics curves. In `?qa=1`, use the reverse/correct direction buttons for visual verification. Browser proof images are in `tools/evidence/`.

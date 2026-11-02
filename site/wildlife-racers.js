@@ -1,4 +1,4 @@
-import {sculptKit} from './racer-sculpt-kit.js?build=20261101-items1';
+import {sculptKit} from './racer-sculpt-kit.js?build=20261102-features1';
 export const WILDLIFE_IDS=Object.freeze(['koala','raccoon','giraffe']);
 export function buildWildlifeRacer(T,p){return ({koala:buildKoala,raccoon:buildRaccoon,giraffe:buildGiraffe})[p.id](T,p);}
 

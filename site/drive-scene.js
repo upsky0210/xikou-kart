@@ -1,24 +1,26 @@
-import {ItemRace} from './item-core.js?build=20261101-items1';
-import {ItemWorld} from './item-world.js?build=20261101-items1';
-import {makeSupplyBoxes} from './supply-boxes.js?build=20261101-items1';
-import {itemBlocker} from './item-geometry.js?build=20261101-items1';
-import { createRouteDriver } from './route-driver.js?build=20261101-items1';
-import { getDifficulty } from './difficulty-config.js?build=20261101-items1';
-import { speedPresentation } from './speed-feedback.js?build=20261101-items1';
-import { RACERS } from './racer-catalog.js?build=20261101-items1';
-import { Opponent, fleetPosition } from './opponent-core.js?build=20261101-items1';
-import { ACTIVE_ROUTE, LAPS, ROUTE_ID, ITEMS_ENABLED, ITEM_COUNT } from './session-config.js?build=20261101-items1';
-import { buildKart } from './kart-model.js?build=20261101-items1';
-import { prepareStaticScene } from './scene-utils.js?build=20261101-items1';
-import { DRIVE, SPAWNS } from './drive-config.js?build=20261101-items1';
-import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=20261101-items1';
-import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=20261101-items1';
-import { RaceSession, makeGates } from './race-core.js?build=20261101-items1';
-import { buildRaceDecor } from './race-decor.js?build=20261101-items1';
-import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=20261101-items1';
-import { cancelDrift } from './effects-core.js?build=20261101-items1';
-import { courtyardHeightAt,nearestOnCourtyard } from './courtyard-route.js?build=20261101-items1';
-import { COURTYARD_DRIVE,ElevationGrid,wallHeight,addCourtyardSurface } from './courtyard-world.js?build=20261101-items1';
+import {DirectionMonitor,RocketStart} from './race-features.js?build=20261102-features1';
+import {ROCKET} from './race-features-config.js?build=20261102-features1';
+import {ItemRace} from './item-core.js?build=20261102-features1';
+import {ItemWorld} from './item-world.js?build=20261102-features1';
+import {makeSupplyBoxes} from './supply-boxes.js?build=20261102-features1';
+import {itemBlocker} from './item-geometry.js?build=20261102-features1';
+import { createRouteDriver } from './route-driver.js?build=20261102-features1';
+import { getDifficulty } from './difficulty-config.js?build=20261102-features1';
+import { speedPresentation } from './speed-feedback.js?build=20261102-features1';
+import { RACERS } from './racer-catalog.js?build=20261102-features1';
+import { Opponent, fleetPosition } from './opponent-core.js?build=20261102-features1';
+import { ACTIVE_ROUTE, LAPS, ROUTE_ID, ITEMS_ENABLED, ITEM_COUNT } from './session-config.js?build=20261102-features1';
+import { buildKart } from './kart-model.js?build=20261102-features1';
+import { prepareStaticScene } from './scene-utils.js?build=20261102-features1';
+import { DRIVE, SPAWNS } from './drive-config.js?build=20261102-features1';
+import { ROUTES, world, pointAt, lengthMetres, roadWidthAt } from './track-config.js?build=20261102-features1';
+import { InputState, KEY_ACTION, SpatialGrid, createState, resetState, contacts, FixedSimulation } from './drive-core.js?build=20261102-features1';
+import { RaceSession, makeGates } from './race-core.js?build=20261102-features1';
+import { buildRaceDecor } from './race-decor.js?build=20261102-features1';
+import { GhostRecorder, validGhost, ghostPose } from './ghost-core.js?build=20261102-features1';
+import { cancelDrift } from './effects-core.js?build=20261102-features1';
+import { courtyardHeightAt,nearestOnCourtyard } from './courtyard-route.js?build=20261102-features1';
+import { COURTYARD_DRIVE,ElevationGrid,wallHeight,addCourtyardSurface } from './courtyard-world.js?build=20261102-features1';
 
 export function initScene(api){
   const {THREE:T,scene,renderer,camera,orbit,floors,rooms}=api;
@@ -86,6 +88,7 @@ export function initScene(api){
   const itemWorld=ITEMS_ENABLED?new ItemWorld(T,scene):null,clearItemLine=itemBlocker(obstacles,walls);let itemRace=null;
   let spawnId='field',safe={...spawns.field},safeDistance=0,playing=false,paused=false,collisionUntil=0;
   let difficulty='normal',duel=false,opponents=[],rivalModels=[];
+  const directionMonitor=new DirectionMonitor(),rocketStart=new RocketStart();
   let mode='practice',race=null,finishSent=false,qaDriver=null,sessionName='訪客';
   let recorder=null,bestGhost=null,showGhost=true,previewOrbit=false,garage=false,garageStart=0;
   const gates=makeGates(),gateMarkers=gates.map(g=>{
@@ -139,6 +142,7 @@ export function initScene(api){
   function setSpawn(id){if(!spawns[id])return;spawnId=id;safe={...spawns[id]};safeDistance=0;reset(true);}
   async function startSession(nextMode='race',name=sessionName,qa=false,ghost=bestGhost,qaSpeed=7.6,withRival=false,nextDifficulty=difficulty){
     itemRace?.stop();itemRace=null;itemWorld?.attach(null);delete state.itemEffects;
+    directionMonitor.reset();rocketStart.reset();delete state.rocketRemaining;delete state.rocketOutcome;
     difficulty=getDifficulty(nextDifficulty).id;
     duel=!!withRival;opponents=[];for(const model of rivalModels)model.car.visible=false;
     mode=nextMode==='practice'?'practice':'race';sessionName=name;race=null;finishSent=false;qaDriver=null;recorder=null;bestGhost=ITEMS_ENABLED?null:validGhost(ghost,name);previewOrbit=false;garage=false;
@@ -160,7 +164,7 @@ export function initScene(api){
       }
       state.x=gates[0].x-gates[0].fx*3;state.z=gates[0].z-gates[0].fz*3;state.yaw=Math.atan2(gates[0].fx,gates[0].fz);
       if(qa&&ROUTE_ID==='grand'){const controller=createRouteDriver(route,difficulty);qaDriver=s=>controller(s,race);}
-      else if(qa){const module=await import('./qa-driver.js?build=20261101-items1');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
+      else if(qa){const module=await import('./qa-driver.js?build=20261102-features1');qaDriver=s=>module.regressionInput(s,Math.max(5.5,Math.min(7.6,qaSpeed)),route);}
     }
     if(ITEMS_ENABLED){
       const straight=s=>{const p={x:s.x+Math.sin(s.yaw)*10,z:s.z+Math.cos(s.yaw)*10};return clearItemLine({x:s.x,z:s.z,y:heightAt(s.x,s.z)+.8},{...p,y:heightAt(p.x,p.z)+.8})&&Math.abs(heightAt(p.x,p.z)-heightAt(s.x,s.z))<.1;};
@@ -188,6 +192,9 @@ export function initScene(api){
     if(m.type==='start'){selectRacer(m.racer||profile.id);showGhost=m.ghostVisible!==false;startSession(m.mode,m.name,!!m.qa,m.ghost,m.qaSpeed,m.duel,m.difficulty);}
     if(m.type==='useItem'&&playing&&!paused)itemRace?.use('player');
     if(m.type==='itemTest'&&new URLSearchParams(location.search).get('qa')==='1'&&playing&&!paused){if(m.action==='give')itemRace?.give('player',m.item,true);if(m.action==='water')itemRace?.hit(null,'player','water');}
+    if(m.type==='directionTest'&&new URLSearchParams(location.search).get('qa')==='1'&&race?.phase==='racing'){
+      qaDriver=null;const g=gates[race.expected%gates.length];state.yaw=Math.atan2(g.x-state.x,g.z-state.z)+(m.reverse?Math.PI:0);remote={throttle:true};directionMonitor.reset();
+    }
     if(m.type==='pause')setPause(!!m.paused);
     if(m.type==='reset')reset();
     if(m.type==='spawn'&&mode==='practice')setSpawn(m.id);
@@ -224,12 +231,15 @@ export function initScene(api){
     for(let i=0;i<opponents.length;i++)opponents[i].advance(seconds,traffic.filter((_,j)=>j!==i+1));
     const previousPhase=race.phase;
     const span=race.advance(seconds);
+    const outcome=rocketStart.update(!qaDriver&&input().throttle,race.phase==='countdown'?-race.countdown:race.elapsed);
+    if(outcome!=='pending'&&!state.rocketOutcome){state.rocketOutcome=outcome;state.rocketRemaining=outcome==='boost'?ROCKET.boostSeconds:outcome==='burn'?ROCKET.burnSeconds:0;}
     if(previousPhase==='countdown'&&race.phase==='racing')recorder?.record(0,state,false,true);
     simulation.advance(span.driveSeconds,qaDriver&&race.phase==='racing'?qaDriver:input(),(from,to,a,b)=>{
       const finished=race.observeMove(from,to,span.fromTime+(span.toTime-span.fromTime)*a,span.fromTime+(span.toTime-span.fromTime)*b);
       recorder?.record(finished?race.elapsed:span.fromTime+(span.toTime-span.fromTime)*b,state,false,finished);
       if(finished){state.speed=0;clearInputs();return false;}
     });
+    if(span.driveSeconds>0)directionMonitor.update(state,race,span.driveSeconds);
     itemRace?.update(span.driveSeconds);
   }
   function advanceRace(seconds){
@@ -275,7 +285,7 @@ export function initScene(api){
     if(qualityTime>=2){if(qualityFrames/qualityTime<28&&qualityRatio>.65){qualityRatio=Math.max(.65,qualityRatio-.25);renderer.setPixelRatio(qualityRatio);renderer.setSize(innerWidth,innerHeight);}qualityFrames=0;qualityTime=0;}
     if(elapsed>0)samples.push(elapsed);if(samples.length>180)samples.shift();
     if(now-lastSend>75){
-      const status={...state,items:itemRace?.snapshot('player')??null,difficulty,competition:opponents.length&&race?{position:fleetPosition(race,state,opponents),total:opponents.length+1,opponents:opponents.map((o,i)=>({x:o.state.x,z:o.state.z,speed:o.state.speed,item:itemRace?.actor(`rival-${i}`)?.item,itemStats:itemRace?.actor(`rival-${i}`)?.stats,lane:o.state.aiLane??0,overtaking:o.state.aiOvertaking??false,phase:o.race.phase,racer:rivalModels[i].profile.id,color:rivalModels[i].profile.paint}))}:null,racer:profile.id,faceStyle:head.userData.faceStyle??'painted',track:ROUTE_ID,playing,paused,mode,race:race?.snapshot()??null,ghostAvailable:!!bestGhost,ghostVisible:!!ghost,ghostFinished:ghost?.finished??false,ghostBestMs:bestGhost?.totalMs??null,qa:!!qaDriver,input:input(),spawn:spawnId,layout:D.layoutVersion,contactCount:contacts(state,grid,cfg).filter(c=>c.depth>.005).length,lighting:document.getElementById('timeBtn')?.textContent?.trim(),cameraFov:camera.fov,camera:[camera.position.x,camera.position.y,camera.position.z]};
+      const status={...state,direction:directionMonitor.snapshot(),items:itemRace?.snapshot('player')??null,difficulty,competition:opponents.length&&race?{position:fleetPosition(race,state,opponents),total:opponents.length+1,opponents:opponents.map((o,i)=>({x:o.state.x,z:o.state.z,speed:o.state.speed,item:itemRace?.actor(`rival-${i}`)?.item,itemStats:itemRace?.actor(`rival-${i}`)?.stats,lane:o.state.aiLane??0,overtaking:o.state.aiOvertaking??false,phase:o.race.phase,racer:rivalModels[i].profile.id,color:rivalModels[i].profile.paint}))}:null,racer:profile.id,faceStyle:head.userData.faceStyle??'painted',track:ROUTE_ID,playing,paused,mode,race:race?.snapshot()??null,ghostAvailable:!!bestGhost,ghostVisible:!!ghost,ghostFinished:ghost?.finished??false,ghostBestMs:bestGhost?.totalMs??null,qa:!!qaDriver,input:input(),spawn:spawnId,layout:D.layoutVersion,contactCount:contacts(state,grid,cfg).filter(c=>c.depth>.005).length,lighting:document.getElementById('timeBtn')?.textContent?.trim(),cameraFov:camera.fov,camera:[camera.position.x,camera.position.y,camera.position.z]};
       send('state',{state:status});lastSend=now;
       let pre=document.getElementById('drive-state');if(!pre){pre=document.createElement('script');pre.id='drive-state';pre.type='application/json';document.body.append(pre);}pre.textContent=JSON.stringify(status);
     }

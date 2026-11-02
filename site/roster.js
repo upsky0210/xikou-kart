@@ -1,6 +1,6 @@
 import * as T from 'three';
-import {buildKart} from './kart-model.js?build=20261101-items1';
-import {RACERS} from './racer-catalog.js?build=20261101-items1';
+import {buildKart} from './kart-model.js?build=20261102-features1';
+import {RACERS} from './racer-catalog.js?build=20261102-features1';
 const renderer=new T.WebGLRenderer({alpha:true,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setClearColor(0,0);renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;document.body.append(renderer.domElement);
 const notes=['尖耳・虎斑・翹尾','長脖子・不規則斑紋・雙小角','蓬鬆粉耳・絨鼻・腳掌肉墊','垂耳・白鼻樑・白尾尖','白眉眼罩・環紋尾・長手指','長口鼻・鬃毛・直耳','黑色長臉・奶油捲羊毛','寬鼻盤・獠牙・鬃冠'];
 const showWildlife=['wildlife','storybook'].includes(new URLSearchParams(location.search).get('crew'));

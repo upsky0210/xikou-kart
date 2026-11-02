@@ -1,7 +1,7 @@
-import { world,pointAt,lengthMetres,roadWidthAt } from './track-config.js?build=20261101-items1';
-import {contacts} from './drive-core.js?build=20261101-items1';
-import {getDifficulty} from './difficulty-config.js?build=20261101-items1';
-import {itemSpeedFactor} from './item-status.js?build=20261101-items1';
+import { world,pointAt,lengthMetres,roadWidthAt } from './track-config.js?build=20261102-features1';
+import {contacts} from './drive-core.js?build=20261102-features1';
+import {getDifficulty} from './difficulty-config.js?build=20261102-features1';
+import {itemSpeedFactor} from './item-status.js?build=20261102-features1';
 const cache=new Map(),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 function path(route){if(cache.has(route.id))return cache.get(route.id);const length=lengthMetres(route.points),count=Math.ceil(length/.18),poses=Array.from({length:count},(_,i)=>world(pointAt(route.points,i/count))),cumulative=[0];for(let i=1;i<route.points.length;i++)cumulative.push(cumulative.at(-1)+Math.hypot(...route.points[i].map((x,j)=>(x-route.points[i-1][j])/18)));const data={length,count,poses,gateSamples:route.checkpoints.map(i=>Math.round(cumulative[i]/length*count)%count)};cache.set(route.id,data);return data;}
 export function createRouteDriver(route,difficulty='normal',trafficOptions=null){
